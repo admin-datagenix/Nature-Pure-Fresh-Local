@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FEF9E7"/>
+      <stop offset="100%" stop-color="#FCF3CF"/>
+    </radialGradient>
+    <radialGradient id="pin" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#F9E79F"/>
+      <stop offset="100%" stop-color="#F5B041"/>
+    </radialGradient>
+  </defs>
+  <rect width="400" height="500" fill="url(#bg)"/>
+  <ellipse cx="200" cy="430" rx="120" ry="18" fill="#000" opacity="0.07"/>
+  <!-- pineapple body -->
+  <ellipse cx="200" cy="290" rx="80" ry="100" fill="url(#pin)"/>
+  <path d="M155 230 Q200 200 245 230" stroke="#E67E22" stroke-width="2" fill="none" opacity="0.3"/>
+  <path d="M160 270 Q200 250 240 270 M158 310 Q200 290 242 310 M160 350 Q200 330 240 350" stroke="#E67E22" stroke-width="1.5" fill="none" opacity="0.25"/>
+  <!-- crown -->
+  <path d="M170 175 L185 130 L200 165 L215 125 L230 175 Z" fill="#27AE60"/>
+  <path d="M185 130 L200 100 L215 125" fill="#2ECC71"/>
+  <ellipse cx="140" cy="370" rx="32" ry="12" fill="#F5B041" opacity="0.8" transform="rotate(-15 140 370)"/>
+</svg>
