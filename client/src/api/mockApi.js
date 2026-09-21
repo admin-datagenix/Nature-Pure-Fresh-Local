@@ -2,17 +2,25 @@ import {
   MOCK_CATEGORIES,
   MOCK_REVIEWS,
   MOCK_PRODUCTS,
+  PROMO_CODES,
   filterProducts,
   getBestsellers,
   getProductBySlug,
 } from './mockData.js';
 
 const CART_KEY = 'fresh_nature_mock_cart';
+const ORDERS_KEY = 'fresh_nature_orders';
 const NEWSLETTER_KEY = 'fresh_nature_newsletter';
 const USERS_KEY = 'fresh_nature_users';
 const SESSION_KEY = 'fresh_nature_session';
 const OTP_PENDING_KEY = 'fresh_nature_registration_otp';
 const LOGIN_OTP_KEY = 'fresh_nature_login_otp';
+const RESET_OTP_KEY = 'fresh_nature_reset_otp';
+const AUTH_ATTEMPTS_KEY = 'fresh_nature_auth_attempts';
+
+const OTP_EXPIRY_MS = 5 * 60 * 1000;
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000;
 
 const DEMO_USER = {
   id: 'demo-1',
@@ -138,6 +146,90 @@ function clearLoginOtp() {
   localStorage.removeItem(LOGIN_OTP_KEY);
 }
 
+function loadResetOtp() {
+  try {
+    const raw = localStorage.getItem(RESET_OTP_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveResetOtp(data) {
+  localStorage.setItem(RESET_OTP_KEY, JSON.stringify(data));
+}
+
+function clearResetOtp() {
+  localStorage.removeItem(RESET_OTP_KEY);
+}
+
+function loadAttempts() {
+  try {
+    return JSON.parse(localStorage.getItem(AUTH_ATTEMPTS_KEY) || '{}');
+  } catch {
+    return {};
+  }
+}
+
+function saveAttempts(data) {
+  localStorage.setItem(AUTH_ATTEMPTS_KEY, JSON.stringify(data));
+}
+
+function getAttemptKey(scope, identifier) {
+  return `${scope}:${String(identifier || '').toLowerCase()}`;
+}
+
+function assertNotRateLimited(scope, identifier) {
+  const key = getAttemptKey(scope, identifier);
+  const attempts = loadAttempts();
+  const entry = attempts[key];
+  if (entry?.lockedUntil && Date.now() < entry.lockedUntil) {
+    const mins = Math.ceil((entry.lockedUntil - Date.now()) / 60000);
+    throw new Error(`Too many failed attempts. Please try again in ${mins} minute(s).`);
+  }
+}
+
+function recordFailedAttempt(scope, identifier) {
+  const key = getAttemptKey(scope, identifier);
+  const attempts = loadAttempts();
+  const entry = attempts[key] || { count: 0 };
+  entry.count += 1;
+  if (entry.count >= MAX_FAILED_ATTEMPTS) {
+    entry.lockedUntil = Date.now() + LOCKOUT_MS;
+    entry.count = 0;
+  }
+  attempts[key] = entry;
+  saveAttempts(attempts);
+}
+
+function clearFailedAttempts(scope, identifier) {
+  const key = getAttemptKey(scope, identifier);
+  const attempts = loadAttempts();
+  delete attempts[key];
+  saveAttempts(attempts);
+}
+
+function otpExpiryPayload(expiresAt) {
+  return {
+    expiresAt,
+    expiresIn: Math.max(0, Math.ceil((expiresAt - Date.now()) / 1000)),
+  };
+}
+
+function verifyOtpCode(pending, code, scope, identifier) {
+  if (!pending) {
+    throw new Error('Please request an OTP first.');
+  }
+  if (Date.now() > pending.expiresAt) {
+    throw new Error('OTP expired. Please request a new one.');
+  }
+  if (pending.otp !== code) {
+    recordFailedAttempt(scope, identifier);
+    assertNotRateLimited(scope, identifier);
+    throw new Error('Invalid OTP. Please try again.');
+  }
+}
+
 function validateRegistrationPayload({ name, email, password, mobile, address }) {
   const trimmedName = (name || '').trim();
   const trimmedAddress = (address || '').trim();
@@ -209,11 +301,14 @@ function buildCartResponse(cartMap) {
     const product = MOCK_PRODUCTS.find((p) => p.id === productId);
     if (!product) return null;
     return {
+      id: productId,
       product_id: productId,
       quantity,
       name: product.name,
       slug: product.slug,
       price: product.price,
+      image: product.image?.replace?.('/catalog/snacks/', '/products/snacks/') ?? product.image,
+      category_name: product.category_name,
       weight_grams: product.weight_grams,
       line_total: product.price * quantity,
     };
@@ -256,6 +351,11 @@ export const mockApi = {
       sort: params.sort || 'bestseller',
       page,
       limit,
+      minPrice: params.minPrice,
+      maxPrice: params.maxPrice,
+      minRating: params.rating,
+      stock: params.stock,
+      format: params.format,
     });
     return { success: true, products, pagination };
   },
@@ -334,11 +434,16 @@ export const mockApi = {
       throw new Error('Please enter email and password');
     }
 
+    assertNotRateLimited('login', trimmedEmail);
+
     const user = findUserByEmail(trimmedEmail);
     if (!user || user.password !== password) {
+      recordFailedAttempt('login', trimmedEmail);
+      assertNotRateLimited('login', trimmedEmail);
       throw new Error('Invalid email or password');
     }
 
+    clearFailedAttempts('login', trimmedEmail);
     const safeUser = createSession(user);
     return { success: true, data: safeUser, message: 'Welcome back!' };
   },
@@ -352,12 +457,15 @@ export const mockApi = {
       throw new Error('No account found with this mobile number. Please sign up first.');
     }
 
+    assertNotRateLimited('login-otp', normalizedPhone);
+
     const otp = generateOtp();
+    const expiresAt = Date.now() + OTP_EXPIRY_MS;
     saveLoginOtp({
       mobile: normalizedPhone,
       userId: user.id,
       otp,
-      expiresAt: Date.now() + 5 * 60 * 1000,
+      expiresAt,
     });
 
     return {
@@ -365,8 +473,8 @@ export const mockApi = {
       message: `OTP sent to ${formatPhoneDisplay(normalizedPhone)}`,
       data: {
         mobile: normalizedPhone,
-        expiresIn: 300,
         demoOtp: otp,
+        ...otpExpiryPayload(expiresAt),
       },
     };
   },
@@ -391,11 +499,12 @@ export const mockApi = {
     }
 
     const otp = generateOtp();
+    const expiresAt = Date.now() + OTP_EXPIRY_MS;
     saveLoginOtp({
       mobile: normalizedPhone,
       userId: user.id,
       otp,
-      expiresAt: Date.now() + 5 * 60 * 1000,
+      expiresAt,
     });
 
     return {
@@ -403,8 +512,8 @@ export const mockApi = {
       message: `New OTP sent to ${formatPhoneDisplay(normalizedPhone)}`,
       data: {
         mobile: normalizedPhone,
-        expiresIn: 300,
         demoOtp: otp,
+        ...otpExpiryPayload(expiresAt),
       },
     };
   },
@@ -418,6 +527,8 @@ export const mockApi = {
       throw new Error('Please enter the 6-digit OTP');
     }
 
+    assertNotRateLimited('login-otp', normalizedPhone);
+
     const pending = loadLoginOtp();
     if (!pending || pending.mobile !== normalizedPhone) {
       throw new Error('Please request an OTP first.');
@@ -426,9 +537,8 @@ export const mockApi = {
       clearLoginOtp();
       throw new Error('OTP expired. Please request a new one.');
     }
-    if (pending.otp !== code) {
-      throw new Error('Invalid OTP. Please try again.');
-    }
+
+    verifyOtpCode(pending, code, 'login-otp', normalizedPhone);
 
     const user = loadUsers().find((u) => u.id === pending.userId);
     if (!user) {
@@ -437,6 +547,7 @@ export const mockApi = {
     }
 
     clearLoginOtp();
+    clearFailedAttempts('login-otp', normalizedPhone);
     const safeUser = createSession(user);
     return { success: true, data: safeUser, message: 'Signed in successfully' };
   },
@@ -452,10 +563,11 @@ export const mockApi = {
     });
 
     const otp = generateOtp();
+    const expiresAt = Date.now() + OTP_EXPIRY_MS;
     const pending = {
       mobile: normalizedPhone,
       otp,
-      expiresAt: Date.now() + 5 * 60 * 1000,
+      expiresAt,
       payload: {
         name: trimmedName,
         email: trimmedEmail,
@@ -472,8 +584,8 @@ export const mockApi = {
       message: `OTP sent to ${formatPhoneDisplay(normalizedPhone)}`,
       data: {
         mobile: normalizedPhone,
-        expiresIn: 300,
         demoOtp: otp,
+        ...otpExpiryPayload(expiresAt),
       },
     };
   },
@@ -492,10 +604,11 @@ export const mockApi = {
     }
 
     const otp = generateOtp();
+    const expiresAt = Date.now() + OTP_EXPIRY_MS;
     savePendingOtp({
       ...pending,
       otp,
-      expiresAt: Date.now() + 5 * 60 * 1000,
+      expiresAt,
     });
 
     return {
@@ -503,8 +616,8 @@ export const mockApi = {
       message: `New OTP sent to ${formatPhoneDisplay(normalizedPhone)}`,
       data: {
         mobile: normalizedPhone,
-        expiresIn: 300,
         demoOtp: otp,
+        ...otpExpiryPayload(expiresAt),
       },
     };
   },
@@ -518,6 +631,8 @@ export const mockApi = {
       throw new Error('Please enter the 6-digit OTP');
     }
 
+    assertNotRateLimited('register-otp', normalizedPhone);
+
     const pending = loadPendingOtp();
     if (!pending || pending.mobile !== normalizedPhone) {
       throw new Error('No pending verification found. Please start registration again.');
@@ -526,9 +641,8 @@ export const mockApi = {
       clearPendingOtp();
       throw new Error('OTP expired. Please request a new one.');
     }
-    if (pending.otp !== code) {
-      throw new Error('Invalid OTP. Please try again.');
-    }
+
+    verifyOtpCode(pending, code, 'register-otp', normalizedPhone);
 
     const users = loadUsers();
     if (users.some((u) => u.email === pending.payload.email)) {
@@ -554,9 +668,102 @@ export const mockApi = {
     users.push(user);
     saveUsers(users);
     clearPendingOtp();
+    clearFailedAttempts('register-otp', normalizedPhone);
 
     const safeUser = createSession(user);
-    return { success: true, data: safeUser, message: 'Account created successfully' };
+    return {
+      success: true,
+      data: safeUser,
+      message: 'Account created successfully',
+      token: loadSession()?.token,
+    };
+  },
+
+  async sendPasswordReset({ email, mobile }) {
+    await delay(250);
+    const trimmedEmail = (email || '').trim().toLowerCase();
+    const normalizedPhone = mobile ? normalizePhone(mobile) : null;
+
+    let user = null;
+    if (trimmedEmail) {
+      user = findUserByEmail(trimmedEmail);
+      if (!user) throw new Error('No account found with this email address.');
+    } else if (normalizedPhone) {
+      if (!isValidIndianMobile(normalizedPhone)) {
+        throw new Error('Please enter a valid 10-digit mobile number');
+      }
+      user = findUserByPhone(normalizedPhone);
+      if (!user) throw new Error('No account found with this mobile number.');
+    } else {
+      throw new Error('Please enter your email or mobile number');
+    }
+
+    const identifier = trimmedEmail || normalizedPhone;
+    assertNotRateLimited('reset', identifier);
+
+    const otp = generateOtp();
+    const expiresAt = Date.now() + OTP_EXPIRY_MS;
+    saveResetOtp({
+      userId: user.id,
+      email: user.email,
+      mobile: user.phone,
+      otp,
+      expiresAt,
+    });
+
+    return {
+      success: true,
+      message: trimmedEmail
+        ? `Reset OTP sent to ${user.email}`
+        : `Reset OTP sent to ${formatPhoneDisplay(user.phone)}`,
+      data: {
+        email: user.email,
+        mobile: user.phone,
+        demoOtp: otp,
+        ...otpExpiryPayload(expiresAt),
+      },
+    };
+  },
+
+  async resetPassword({ email, mobile, otp, password }) {
+    await delay(250);
+    const trimmedEmail = (email || '').trim().toLowerCase();
+    const normalizedPhone = mobile ? normalizePhone(mobile) : null;
+    const code = String(otp || '').trim();
+
+    if (!/^\d{6}$/.test(code)) {
+      throw new Error('Please enter the 6-digit OTP');
+    }
+    if (!password || password.length < 6) {
+      throw new Error('Password must be at least 6 characters');
+    }
+
+    const pending = loadResetOtp();
+    if (!pending) {
+      throw new Error('Please request a password reset first.');
+    }
+    if (Date.now() > pending.expiresAt) {
+      clearResetOtp();
+      throw new Error('OTP expired. Please request a new one.');
+    }
+
+    const identifier = trimmedEmail || normalizedPhone || pending.email;
+    assertNotRateLimited('reset', identifier);
+    verifyOtpCode(pending, code, 'reset', identifier);
+
+    const users = loadUsers();
+    const idx = users.findIndex((u) => u.id === pending.userId);
+    if (idx === -1) {
+      clearResetOtp();
+      throw new Error('Account not found.');
+    }
+
+    users[idx] = { ...users[idx], password };
+    saveUsers(users);
+    clearResetOtp();
+    clearFailedAttempts('reset', identifier);
+
+    return { success: true, message: 'Password updated. You can sign in now.' };
   },
 
   async logout() {
@@ -577,5 +784,115 @@ export const mockApi = {
     }
 
     return { success: true, data: sanitizeUser(user) };
+  },
+
+  async validatePromoCode(code, subtotal) {
+    await delay(150);
+    const promo = PROMO_CODES[String(code || '').toUpperCase()];
+    if (!promo) throw new Error('Invalid promo code');
+    if (subtotal < promo.minOrder) {
+      throw new Error(`Minimum order of ₹${promo.minOrder} required for this code`);
+    }
+    const discount =
+      promo.type === 'percent'
+        ? Math.round(subtotal * (promo.discount / 100))
+        : promo.discount;
+    return {
+      success: true,
+      data: { code: code.toUpperCase(), discount, type: promo.type },
+    };
+  },
+
+  async createOrder({ shipping, payment, promoCode, discount = 0, productIds }) {
+    await delay(400);
+    const cart = loadCart();
+    let cartMap = cart;
+    if (Array.isArray(productIds) && productIds.length > 0) {
+      const allowed = new Set(productIds);
+      cartMap = Object.fromEntries(Object.entries(cart).filter(([id]) => allowed.has(id)));
+    }
+    const cartData = buildCartResponse(cartMap);
+    if (cartData.items.length === 0) throw new Error('No items selected for checkout');
+
+    const shippingCost = cartData.subtotal >= 999 ? 0 : 49;
+    const total = Math.max(0, cartData.subtotal + shippingCost - discount);
+
+    const session = loadSession();
+
+    const order = {
+      id: `FN-${Date.now().toString(36).toUpperCase()}`,
+      user_id: session?.userId || null,
+      items: cartData.items,
+      subtotal: cartData.subtotal,
+      shipping: shippingCost,
+      discount,
+      promoCode: promoCode || null,
+      total,
+      shipping_address: shipping,
+      payment_method: payment.method,
+      payment_status: payment.method === 'cod' ? 'pending' : 'paid',
+      status: 'confirmed',
+      created_at: new Date().toISOString(),
+      estimated_delivery: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
+    };
+
+    const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+    orders.unshift(order);
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+
+    const remaining = { ...cart };
+    for (const item of cartData.items) {
+      delete remaining[item.product_id];
+    }
+    saveCart(remaining);
+
+    return { success: true, data: order };
+  },
+
+  async getOrder(orderId) {
+    await delay(100);
+    const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) throw new Error('Order not found');
+    return { success: true, data: order };
+  },
+
+  async getOrders() {
+    await delay(100);
+    const session = loadSession();
+    const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+    if (!session?.userId) return { success: true, data: [] };
+    const user = loadUsers().find((u) => u.id === session.userId);
+    const email = user?.email?.toLowerCase();
+    const mine = orders.filter((o) => {
+      if (o.user_id === session.userId) return true;
+      if (!o.user_id && email && o.shipping_address?.email?.toLowerCase() === email) return true;
+      return false;
+    });
+    return { success: true, data: mine };
+  },
+
+  async updateProfile({ name, address }) {
+    await delay(120);
+    const session = loadSession();
+    if (!session?.userId) throw new Error('Please sign in to update your profile');
+
+    const trimmedName = (name || '').trim();
+    const trimmedAddress = (address || '').trim();
+    if (trimmedName.length < 2) throw new Error('Please enter your full name');
+    if (trimmedAddress.length < 5) throw new Error('Please enter a complete delivery address');
+
+    const users = loadUsers();
+    const idx = users.findIndex((u) => u.id === session.userId);
+    if (idx === -1) throw new Error('Account not found');
+
+    users[idx] = {
+      ...users[idx],
+      name: trimmedName,
+      address: trimmedAddress,
+    };
+    saveUsers(users);
+
+    return { success: true, data: sanitizeUser(users[idx]), message: 'Profile updated' };
   },
 };

@@ -4,12 +4,12 @@ import Reveal from '../ui/Reveal';
 export default function ProcessTimeline() {
   return (
     <section className="py-20" id="process">
-      <div className="mx-auto max-w-6xl px-4 md:px-6">
+      <div className="site-container">
         <Reveal className="mb-12 text-center">
           <h2 className="font-heading text-3xl font-semibold tracking-tight text-primary md:text-4xl">
             Curious What You&apos;re Actually Eating?
           </h2>
-          <p className="mx-auto mt-3 max-w-lg text-[#6b6b6b]">
+          <p className="mx-auto mt-3 max-w-lg text-muted">
             Just real fruit. Nothing else. Here&apos;s exactly how it goes from orchard to your hands.
           </p>
         </Reveal>
@@ -21,7 +21,7 @@ export default function ProcessTimeline() {
                 {step.step}
               </div>
               <h3 className="font-heading text-base text-primary">{step.title}</h3>
-              <p className="mt-1.5 text-xs leading-relaxed text-[#6b6b6b]">{step.desc}</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-muted">{step.desc}</p>
             </Reveal>
           ))}
         </div>

@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useOtpCountdown } from '../hooks/useOtpCountdown';
+import { OTP_RESEND_COOLDOWN_SECONDS } from '../utils/authConfig';
 import {
-  AuthShell,
-  AuthField,
-  AuthError,
-  AuthSubmitButton,
+  AuthSplitLayout,
+  AuthPageHeader,
   AuthModeTabs,
-  PhoneField,
-  OtpInput,
+  ClayAuthField,
+  ClayPhoneField,
+  ClayOtpInput,
+  ClaySubmitButton,
   PasswordToggle,
-  formatIndianPhone,
-} from '../components/auth/AuthForm';
+  AuthError,
+  AuthHint,
+  AuthOtpStatus,
+  AuthFooter,
+} from '../components/auth/AuthSplitLayout';
+import { authFormStack } from '../components/auth/authTheme';
+import { formatIndianPhone } from '../components/auth/AuthForm';
 
 export default function LoginPage() {
   const {
@@ -33,9 +40,12 @@ export default function LoginPage() {
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [pendingMobile, setPendingMobile] = useState('');
-  const [demoOtp, setDemoOtp] = useState('');
+  const [expiresAt, setExpiresAt] = useState(null);
   const [resendIn, setResendIn] = useState(0);
+  const [demoOtp, setDemoOtp] = useState('');
   const [error, setError] = useState('');
+
+  const { otpExpiresIn, otpExpired } = useOtpCountdown({ expiresAt, resendIn, active: otpSent });
 
   const redirectTo = location.state?.from?.pathname || '/account';
 
@@ -52,6 +62,7 @@ export default function LoginPage() {
   const resetOtpState = () => {
     setOtpSent(false);
     setPendingMobile('');
+    setExpiresAt(null);
     setDemoOtp('');
     setOtp('');
     setResendIn(0);
@@ -61,9 +72,8 @@ export default function LoginPage() {
     setMode(nextMode);
     setError('');
     resetOtpState();
-    if (nextMode === 'email') {
-      setMobile('');
-    } else {
+    if (nextMode === 'email') setMobile('');
+    else {
       setEmail('');
       setPassword('');
       setShowPassword(false);
@@ -87,9 +97,10 @@ export default function LoginPage() {
       const res = await sendLoginOtp(mobile);
       setOtpSent(true);
       setPendingMobile(res.data.mobile);
+      setExpiresAt(res.data.expiresAt || Date.now() + 5 * 60 * 1000);
       setDemoOtp(res.data.demoOtp || '');
       setOtp('');
-      setResendIn(60);
+      setResendIn(OTP_RESEND_COOLDOWN_SECONDS);
     } catch (err) {
       setError(err.message || 'Could not send OTP');
     }
@@ -100,8 +111,9 @@ export default function LoginPage() {
     setError('');
     try {
       const res = await resendLoginOtp(pendingMobile);
+      setExpiresAt(res.data.expiresAt || Date.now() + 5 * 60 * 1000);
       setDemoOtp(res.data.demoOtp || '');
-      setResendIn(60);
+      setResendIn(OTP_RESEND_COOLDOWN_SECONDS);
     } catch (err) {
       setError(err.message || 'Could not resend OTP');
     }
@@ -110,12 +122,14 @@ export default function LoginPage() {
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
     if (!otpSent) {
       await handleSendOtp();
       return;
     }
-
+    if (otpExpired) {
+      setError('OTP expired. Please request a new one.');
+      return;
+    }
     try {
       await verifyLoginOtp(pendingMobile, otp);
       navigate(redirectTo, { replace: true });
@@ -125,57 +139,56 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthShell
-      title="Welcome Back"
-      subtitle="Sign in to continue shopping"
-      footer={
-        <>
-          Don&apos;t have an account?{' '}
-          <Link to="/register" className="font-semibold text-primary hover:underline">
-            Sign up
-          </Link>
-        </>
-      }
-    >
+    <AuthSplitLayout>
+      <AuthPageHeader title="Welcome Back!" subtitle="Sign in with password or mobile OTP" />
+
       <AuthModeTabs mode={mode} onChange={handleModeChange} />
       <AuthError message={error} />
 
       {mode === 'email' ? (
-        <form onSubmit={handlePasswordSubmit} className="mt-4 space-y-4">
-          <AuthField
+        <form onSubmit={handlePasswordSubmit} className={authFormStack}>
+          <ClayAuthField
             id="email"
-            label="Email"
             type="email"
+            icon="mail"
+            placeholder="Email address"
+            label="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
             autoComplete="email"
           />
 
-          <AuthField
+          <ClayAuthField
             id="password"
-            label="Password"
             type={showPassword ? 'text' : 'password'}
+            icon="lock"
+            placeholder="Password"
+            label="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Your password"
             autoComplete="current-password"
             rightSlot={
               <PasswordToggle visible={showPassword} onToggle={() => setShowPassword((v) => !v)} />
             }
           />
 
-          <AuthSubmitButton loading={authLoading}>Sign In</AuthSubmitButton>
+          <div className="-mt-1 text-right">
+            <Link
+              to="/forgot-password"
+              className="text-sm font-medium text-[#7C8A80] transition hover:text-[#294633] hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
-          <p className="rounded-xl bg-cream px-4 py-3 text-center text-xs leading-relaxed text-[#6b6b6b]">
-            Demo: <strong className="text-primary">demo@freshnature.in</strong> / <strong className="text-primary">demo123</strong>
-          </p>
+          <AuthHint>After 5 failed attempts, login is temporarily locked for 15 minutes.</AuthHint>
+
+          <ClaySubmitButton loading={authLoading}>Login</ClaySubmitButton>
         </form>
       ) : (
-        <form onSubmit={handleOtpSubmit} className="mt-4 space-y-4">
-          <PhoneField
+        <form onSubmit={handleOtpSubmit} className={authFormStack}>
+          <ClayPhoneField
             id="mobile"
-            label="Mobile Number"
             value={mobile}
             onChange={(value) => {
               setMobile(value);
@@ -183,41 +196,41 @@ export default function LoginPage() {
             }}
           />
 
-          <div className="flex items-center justify-between gap-3 text-xs text-[#6b6b6b]">
-            <span>
-              {otpSent
-                ? `OTP sent to ${formatIndianPhone(pendingMobile)}`
-                : 'Enter your registered mobile number'}
-            </span>
-            {otpSent && (
-              <button
-                type="button"
-                onClick={handleResendOtp}
-                disabled={resendIn > 0 || authLoading}
-                className="shrink-0 font-medium text-primary hover:underline disabled:opacity-50"
-              >
-                {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend OTP'}
-              </button>
-            )}
-          </div>
-
-          {otpSent && <OtpInput value={otp} onChange={setOtp} />}
-
-          {demoOtp && (
-            <p className="rounded-xl bg-cream px-4 py-3 text-center text-xs leading-relaxed text-[#6b6b6b]">
-              Mock SMS OTP (demo): <strong className="text-primary">{demoOtp}</strong>
+          {otpSent && (
+            <p className="px-1 text-xs text-[#7C8A80]">
+              OTP sent to {formatIndianPhone(pendingMobile)}
             </p>
           )}
 
-          <AuthSubmitButton loading={authLoading}>
-            {otpSent ? 'Sign In with OTP' : 'Send OTP'}
-          </AuthSubmitButton>
+          <AuthOtpStatus
+            otpSent={otpSent}
+            otpExpiresIn={otpExpiresIn}
+            otpExpired={otpExpired}
+            resendIn={resendIn}
+            onResend={handleResendOtp}
+            resendDisabled={authLoading}
+          />
 
-          <p className="text-center text-xs text-[#6b6b6b]">
-            Demo mobile: <strong className="text-primary">9876543210</strong>
-          </p>
+          {otpSent && <ClayOtpInput value={otp} onChange={setOtp} />}
+
+          {demoOtp && (
+            <AuthHint>
+              Mock OTP: <strong className="text-[#294633]">{demoOtp}</strong>
+            </AuthHint>
+          )}
+
+          <ClaySubmitButton loading={authLoading}>
+            {otpSent ? 'Sign In with OTP' : 'Send OTP'}
+          </ClaySubmitButton>
         </form>
       )}
-    </AuthShell>
+
+      <AuthFooter>
+        Don&apos;t have an account?{' '}
+        <Link to="/register" className="font-bold text-[#294633] hover:underline">
+          Sign Up
+        </Link>
+      </AuthFooter>
+    </AuthSplitLayout>
   );
 }

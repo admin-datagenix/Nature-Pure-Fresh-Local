@@ -15,7 +15,9 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     setLoading(true);
+    setQty(1);
     api.getProduct(slug)
       .then((res) => setProduct(res.data))
       .catch(() => setProduct(null))
@@ -25,7 +27,7 @@ export default function ProductPage() {
   if (loading) return <LoadingSpinner />;
   if (!product) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-20 md:px-6">
+      <div className="site-container py-20">
         <BackToShopLink />
         <p className="mt-8">Product not found.</p>
       </div>
@@ -34,12 +36,14 @@ export default function ProductPage() {
 
   return (
     <div className="pb-16 pt-8 md:pt-10">
-      <div className="mx-auto max-w-6xl px-4 md:px-6">
+      <div className="site-container">
         <BackToShopLink />
 
         <div className="mt-8 grid gap-12 md:grid-cols-2 md:gap-16">
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-cream-dark">
-          <ProductVisual product={product} />
+        <div className="rounded-[1.75rem] bg-white p-2.5 shadow-[0_12px_32px_rgba(41,70,51,0.07)]">
+          <div className="relative aspect-square overflow-hidden rounded-[1.35rem] border border-sage/60">
+            <ProductVisual product={product} hoverZoom />
+          </div>
         </div>
 
         <div>
@@ -52,7 +56,7 @@ export default function ProductPage() {
           <h1 className="font-heading text-3xl font-semibold text-primary">{product.name}</h1>
 
           {product.rating > 0 && (
-            <div className="mt-3 flex items-center gap-2 text-sm text-[#6b6b6b]">
+            <div className="mt-3 flex items-center gap-2 text-sm text-muted">
               <span className="text-mango">{renderStars(product.rating)}</span>
               <span>{product.rating} ({product.review_count} reviews)</span>
             </div>
@@ -61,12 +65,12 @@ export default function ProductPage() {
           <div className="mt-5 flex items-baseline gap-3">
             <span className="text-3xl font-bold text-primary">{formatPrice(product.price)}</span>
             {product.compare_at_price && (
-              <span className="text-lg text-[#9a9a9a] line-through">{formatPrice(product.compare_at_price)}</span>
+              <span className="text-lg text-muted line-through">{formatPrice(product.compare_at_price)}</span>
             )}
-            <span className="text-sm text-[#6b6b6b]">{product.weight_grams}g pack</span>
+            <span className="text-sm text-muted">{product.weight_grams}g pack</span>
           </div>
 
-          <p className="mt-5 leading-relaxed text-[#6b6b6b]">{product.short_description}</p>
+          <p className="mt-5 leading-relaxed text-muted">{product.short_description}</p>
 
           <div className="mt-4 flex flex-wrap gap-2">
             {(product.tags || []).map((tag) => (
@@ -77,7 +81,7 @@ export default function ProductPage() {
           </div>
 
           <div className="mt-6 flex gap-3">
-            <div className="flex overflow-hidden rounded-lg border border-[#e8e4df]">
+            <div className="neo-qty">
               <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-10 text-lg text-primary hover:bg-cream" aria-label="Decrease">−</button>
               <span className="flex w-10 items-center justify-center font-semibold">{qty}</span>
               <button onClick={() => setQty(Math.min(99, qty + 1))} className="w-10 text-lg text-primary hover:bg-cream" aria-label="Increase">+</button>
@@ -85,30 +89,37 @@ export default function ProductPage() {
             <button
               onClick={() => addItem(product.id, qty)}
               disabled={cartLoading}
-              className="flex-1 rounded-full bg-primary py-3 font-medium text-white transition hover:bg-primary-light disabled:opacity-60"
+              className="neo-btn flex-1 py-3 font-medium disabled:opacity-60"
             >
               Add to Cart
             </button>
           </div>
 
-          <div className="mt-6 space-y-1.5 text-sm text-[#6b6b6b]">
+          <div className="mt-6 space-y-1.5 text-sm text-muted">
             <p>✓ In stock ({product.stock} available)</p>
             <p>✓ Free shipping above ₹999</p>
             <p>✓ Made in India</p>
           </div>
         </div>
         </div>
+
+        {product.description && (
+          <div className="mt-14 border-t border-sage/40 pt-10 md:mt-16">
+            <h2 className="font-heading text-2xl font-semibold text-primary">Product Description</h2>
+            <p className="mt-4 max-w-3xl leading-relaxed text-muted">{product.description}</p>
+          </div>
+        )}
       </div>
 
       {product.reviews?.length > 0 && (
-        <div className="mx-auto max-w-6xl px-4 py-20 md:px-6">
+        <div className="site-container py-20">
           <h2 className="mb-6 font-heading text-2xl text-primary">Customer Reviews</h2>
           <div className="flex flex-col gap-5">
             {product.reviews.map((r) => (
-              <div key={r.id} className="rounded-xl bg-white p-5">
+              <div key={r.id} className="neo-card p-5">
                 <div className="text-sm text-mango">{renderStars(r.rating)}</div>
                 <p className="my-2 italic">&ldquo;{r.comment}&rdquo;</p>
-                <span className="text-xs text-[#6b6b6b]">— {r.user_name}{r.is_verified ? ' (Verified)' : ''}</span>
+                <span className="text-xs text-muted">— {r.user_name}{r.is_verified ? ' (Verified)' : ''}</span>
               </div>
             ))}
           </div>

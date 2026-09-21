@@ -1,113 +1,295 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
-import { BRAND_NAME } from '../../api/client';
+import BrandLogo from '../ui/BrandLogo';
+import { POPULAR_CATEGORIES } from '../../utils/helpers';
+import { cn } from '../../lib/cn';
 
-const NAV_LINKS = [
-  { to: '/shop', label: 'Shop' },
-  { to: '/shop/combos', label: 'Collections' },
-  { to: '/about', label: 'About' },
-  { to: '/about#process', label: 'Ingredients' },
+const NAV_LINKS_AFTER_SHOP = [
+  { to: '/about', label: 'About Us' },
+  { to: '/about#contact', label: 'Contact Us' },
 ];
+
+function SearchIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3-3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function UserIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M5 20c0-4 3.5-7 7-7s7 3 7 7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CartIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+      <path d="M3 3h2l1.5 9.5a2 2 0 002 1.7h9.8a2 2 0 001.95-1.6L21 6H6" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="10" cy="19" r="1.2" fill="currentColor" />
+      <circle cx="17" cy="19" r="1.2" fill="currentColor" />
+    </svg>
+  );
+}
+
+function HeartIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+      <path
+        d="M12 21s-7-4.5-7-10a4 4 0 117 0 4 4 0 117 0c0 5.5-7 10-7 10z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+const navLinkClass = ({ isActive }) =>
+  cn(
+    'relative px-1 py-2 text-base font-medium transition-colors',
+    isActive ? 'text-primary' : 'text-primary/70 hover:text-primary',
+    isActive && 'after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-secondary'
+  );
 
 export default function Header() {
   const { cart } = useCart();
-  const { user, isAuthenticated, logout, authLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const shopRef = useRef(null);
 
-  const handleLogout = async () => {
-    await logout();
-    navigate('/');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [shopOpen, setShopOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (shopRef.current && !shopRef.current.contains(e.target)) {
+        setShopOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    navigate(q ? `/shop?q=${encodeURIComponent(q)}` : '/shop');
+    setMobileOpen(false);
   };
 
-  const firstName = user?.name?.split(' ')[0];
+  const accountPath = isAuthenticated ? '/account' : '/login';
+  const accountLabel = isAuthenticated ? 'Account' : 'Login';
 
   return (
-    <>
-      <div className="flex h-10 items-center bg-primary text-xs text-white">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-3 px-4">
-          <span>Free shipping on orders above ₹999</span>
-          <span className="hidden opacity-50 sm:inline">·</span>
-          <span className="hidden sm:inline">100% Real Fruit</span>
-          <span className="hidden opacity-50 md:inline">·</span>
-          <span className="hidden md:inline">No Added Sugar</span>
+    <header className="sticky top-0 z-50 w-full max-w-full border-b border-sage/50 bg-white shadow-[0_4px_20px_rgba(41,70,51,0.05)]">
+      <div className="site-container flex items-center gap-3 py-3 md:gap-5 lg:py-3.5">
+        <BrandLogo logoOnly className="shrink-0" />
+
+        <nav className="hidden items-center gap-6 lg:ml-10 lg:flex xl:ml-14 xl:gap-8" aria-label="Main navigation">
+          <NavLink to="/" end className={navLinkClass}>
+            Home
+          </NavLink>
+
+          <div ref={shopRef} className="relative">
+            <div className="flex items-center">
+              <NavLink
+                to="/shop"
+                className={({ isActive }) =>
+                  cn(
+                    'px-1 py-2 text-base font-medium transition-colors',
+                    isActive ? 'text-primary' : 'text-primary/70 hover:text-primary'
+                  )
+                }
+              >
+                Shop
+              </NavLink>
+              <button
+                type="button"
+                onClick={() => setShopOpen((o) => !o)}
+                className={cn(
+                  'rounded-md p-1 transition-colors',
+                  shopOpen ? 'text-primary' : 'text-primary/70 hover:text-primary'
+                )}
+                aria-expanded={shopOpen}
+                aria-haspopup="true"
+                aria-label="Shop categories"
+              >
+                <ChevronIcon className={cn('h-4 w-4 transition', shopOpen && 'rotate-180')} />
+              </button>
+            </div>
+
+            {shopOpen && (
+              <div className="absolute left-1/2 top-full z-50 mt-2 w-52 -translate-x-1/2 rounded-2xl border border-sage/60 bg-white p-2 shadow-[0_16px_40px_rgba(41,70,51,0.12)]">
+                <Link
+                  to="/shop"
+                  onClick={() => setShopOpen(false)}
+                  className="mb-1 block rounded-xl px-3 py-2 text-sm font-semibold text-primary transition hover:bg-cream"
+                >
+                  All Products
+                </Link>
+                {POPULAR_CATEGORIES.map((cat) => (
+                  <Link
+                    key={cat.slug}
+                    to={`/shop/${cat.slug}`}
+                    onClick={() => setShopOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-primary/80 transition hover:bg-cream hover:text-primary"
+                  >
+                    <span>{cat.emoji}</span>
+                    {cat.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {NAV_LINKS_AFTER_SHOP.map((link) => (
+            <NavLink key={link.to} to={link.to} className={navLinkClass}>
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <form onSubmit={handleSearch} className="hidden md:block">
+            <div className="flex w-[180px] items-center gap-2 rounded-full border border-sage/50 bg-cream px-4 py-2.5 lg:w-[240px] xl:w-[280px]">
+              <SearchIcon className="h-4 w-4 shrink-0 text-muted" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products…"
+                className="w-full bg-transparent text-sm text-primary outline-none placeholder:text-muted"
+              />
+            </div>
+          </form>
+
+          <Link
+            to="/cart"
+            className="relative rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
+            aria-label="Shopping cart"
+          >
+            <CartIcon className="h-5 w-5" />
+            <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white">
+              {cart.itemCount}
+            </span>
+          </Link>
+
+          <Link
+            to={accountPath}
+            className="rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
+            aria-label={accountLabel}
+          >
+            <UserIcon className="h-5 w-5" />
+          </Link>
+
+          <Link
+            to="/shop"
+            className="rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
+            aria-label="Wishlist"
+          >
+            <HeartIcon className="h-5 w-5" />
+          </Link>
+
+          <button
+            type="button"
+            onClick={() => setMobileOpen((o) => !o)}
+            className="rounded-full p-2 text-xl text-primary lg:hidden"
+            aria-label="Open menu"
+            aria-expanded={mobileOpen}
+          >
+            ☰
+          </button>
         </div>
       </div>
 
-      <header className="sticky top-0 z-50 border-b border-[#e8e4df] bg-cream/90 backdrop-blur-md">
-        <div className="mx-auto flex h-[72px] max-w-6xl items-center justify-between gap-4 px-4 md:gap-6 md:px-6">
-          <Link to="/" className="flex shrink-0 items-center gap-2 font-heading text-xl font-semibold text-primary">
-            <span className="text-2xl">🍃</span>
-            {BRAND_NAME}
+      <div
+        className={cn(
+          'overflow-hidden border-t border-sage/50 bg-white transition-all duration-300 lg:hidden',
+          mobileOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
+        )}
+      >
+        <div className="space-y-1 px-4 py-4">
+          <form onSubmit={handleSearch} className="mb-4">
+            <div className="flex items-center gap-2 rounded-full bg-cream px-4 py-2.5">
+              <SearchIcon className="h-4 w-4 text-muted" />
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products…"
+                className="w-full bg-transparent text-sm text-primary outline-none"
+              />
+            </div>
+          </form>
+
+          <NavLink
+            to="/"
+            end
+            onClick={() => setMobileOpen(false)}
+            className={({ isActive }) =>
+              cn(
+                'block rounded-xl px-3 py-2.5 text-base font-medium',
+                isActive ? 'bg-cream text-primary' : 'text-primary/75'
+              )
+            }
+          >
+            Home
+          </NavLink>
+
+          <Link
+            to="/shop"
+            onClick={() => setMobileOpen(false)}
+            className="block rounded-xl px-3 py-2.5 text-base font-medium text-primary/75 hover:bg-cream"
+          >
+            Shop
           </Link>
 
-          <nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
-            {NAV_LINKS.map((link) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="text-sm font-medium text-[#3a3a3a] transition hover:text-primary"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          {NAV_LINKS_AFTER_SHOP.map((link) => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              onClick={() => setMobileOpen(false)}
+              className={({ isActive }) =>
+                cn(
+                  'block rounded-xl px-3 py-2.5 text-base font-medium',
+                  isActive ? 'bg-cream text-primary' : 'text-primary/75'
+                )
+              }
+            >
+              {link.label}
+            </NavLink>
+          ))}
 
-          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-            {isAuthenticated ? (
-              <>
-                <Link
-                  to="/account"
-                  className="hidden text-sm font-medium text-[#3a3a3a] transition hover:text-primary sm:inline"
-                >
-                  Hi, {firstName}
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  disabled={authLoading}
-                  className="hidden text-sm font-medium text-[#6b6b6b] transition hover:text-primary sm:inline disabled:opacity-50"
-                >
-                  Logout
-                </button>
-                <Link
-                  to="/account"
-                  className="rounded-full p-1.5 text-lg sm:hidden"
-                  aria-label="My account"
-                >
-                  👤
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  className="text-sm font-medium text-[#3a3a3a] transition hover:text-primary"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="hidden rounded-full bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-light sm:inline-flex"
-                >
-                  Sign Up
-                </Link>
-              </>
-            )}
-
-            <Link to="/shop" className="p-1 text-xl" aria-label="Search products">🔍</Link>
-            <Link to="/cart" className="relative p-1 text-xl" aria-label="Shopping cart">
-              🛒
-              {cart.itemCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-[18px] w-[18px] items-center justify-center rounded-full bg-strawberry text-[0.65rem] font-bold text-white">
-                  {cart.itemCount}
-                </span>
-              )}
+          <p className="px-3 pt-2 text-xs font-semibold uppercase tracking-wider text-muted">Categories</p>
+          {POPULAR_CATEGORIES.map((cat) => (
+            <Link
+              key={cat.slug}
+              to={`/shop/${cat.slug}`}
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-primary/75 hover:bg-cream"
+            >
+              <span>{cat.emoji}</span>
+              {cat.label}
             </Link>
-            <button className="text-2xl text-primary lg:hidden" aria-label="Open menu">☰</button>
-          </div>
+          ))}
         </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }

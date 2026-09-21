@@ -199,6 +199,9 @@ export function getFruitKey(name = '') {
   if (lower.includes('grape')) return 'grapes';
   if (lower.includes('berry') || lower.includes('straw')) return 'strawberry';
   if (lower.includes('pineapple')) return 'pineapple';
+  if (lower.includes('kiwi')) return 'pineapple';
+  if (lower.includes('guava')) return 'strawberry';
+  if (lower.includes('custard')) return 'banana';
   return 'mango';
 }
 

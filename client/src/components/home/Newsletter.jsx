@@ -19,7 +19,7 @@ export default function Newsletter() {
 
   return (
     <section className="bg-primary py-14">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 px-4 md:flex-row md:px-6">
+      <div className="site-container flex flex-col items-center justify-between gap-6 md:flex-row">
         <div className="text-center md:text-left">
           <h2 className="font-heading text-2xl text-white">Get 10% Off Your First Order</h2>
           <p className="mt-1 text-sm text-white/70">Join our snack community for exclusive offers and healthy recipes.</p>
@@ -33,12 +33,12 @@ export default function Newsletter() {
             onChange={(e) => setEmail(e.target.value)}
             required
             aria-label="Email address"
-            className="flex-1 rounded-full border-0 px-5 py-3.5 text-sm outline-none focus:ring-2 focus:ring-mango"
+            className="neo-input flex-1 px-5 py-3.5 text-sm"
           />
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="rounded-full bg-mango px-7 py-3.5 text-sm font-medium text-white transition hover:bg-[#E09520] disabled:opacity-60"
+            className="rounded-full bg-cream px-7 py-3.5 text-sm font-semibold text-primary shadow-[0_8px_20px_rgba(41,70,51,0.12)] transition hover:bg-white disabled:opacity-60"
           >
             {status === 'loading' ? 'Subscribing...' : 'Subscribe'}
           </button>
