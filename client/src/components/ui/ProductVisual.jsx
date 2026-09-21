@@ -1,5 +1,8 @@
 import { cn } from '../../lib/cn';
+import { getProductImage, isProductImageUrl } from '../../data/productImages';
+import { getProductCardTone } from '../../utils/productLayout';
 import { getFruitKey, getProductFruit } from './FruitArt';
+import ProductHoverZoom from './ProductHoverZoom';
 
 const TYPE_LABELS = {
   powder: 'Powder',
@@ -14,25 +17,38 @@ function getProductType(product) {
   return 'chunks';
 }
 
-function isExternalImage(src) {
-  return src && (/^https?:\/\//.test(src) || /\.(png|jpe?g|webp|avif)(\?|$)/i.test(src));
+function ProductToneBackdrop() {
+  return (
+    <div className="pointer-events-none absolute inset-[18%] rounded-full bg-white/35 blur-2xl" aria-hidden="true" />
+  );
 }
 
-export default function ProductVisual({ product, className, plain = false, hideBadge = false }) {
+export default function ProductVisual({ product, className, plain = false, hideBadge = false, hoverZoom = false }) {
   const type = getProductType(product);
-  const usePhoto = isExternalImage(product?.image);
+  const imageSrc = getProductImage(product);
+  const usePhoto = isProductImageUrl(imageSrc);
+  const tone = getProductCardTone(product);
 
   if (usePhoto) {
     return (
-      <div className={cn('relative h-full w-full overflow-hidden', !plain && 'bg-cream-dark', className)}>
-        <img
-          src={product.image}
-          alt={product.name}
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-contain p-2 transition duration-700 ease-out group-hover:scale-105"
-        />
-        {!plain && <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/15 via-transparent to-transparent" />}
+      <div
+        className={cn('relative h-full w-full overflow-hidden', className)}
+        style={!plain ? { backgroundColor: tone } : undefined}
+      >
+        {!plain && <ProductToneBackdrop />}
+        {hoverZoom ? (
+          <ProductHoverZoom src={imageSrc} alt={product.name} className="relative z-[1] h-full w-full" />
+        ) : (
+          <div className="relative z-[1] flex h-full w-full items-center justify-center p-3 sm:p-4">
+            <img
+              src={imageSrc}
+              alt={product.name}
+              loading="lazy"
+              decoding="async"
+              className="max-h-full max-w-full object-contain transition duration-500 ease-out group-hover:scale-[1.06]"
+            />
+          </div>
+        )}
         {!hideBadge && <TypeBadge type={type} />}
       </div>
     );
@@ -43,28 +59,19 @@ export default function ProductVisual({ product, className, plain = false, hideB
 
   return (
     <div
-      className={cn(
-        'relative h-full w-full overflow-hidden',
-        !plain && 'bg-gradient-to-br from-white via-cream to-cream-dark',
-        className
-      )}
+      className={cn('relative h-full w-full overflow-hidden', className)}
+      style={!plain ? { backgroundColor: tone } : undefined}
     >
-      {!plain && (
-        <>
-          <div className="pointer-events-none absolute -left-8 top-8 h-32 w-32 rounded-full bg-secondary/10 blur-2xl" />
-          <div className="pointer-events-none absolute -right-6 bottom-6 h-28 w-28 rounded-full bg-mango/10 blur-2xl" />
-        </>
-      )}
+      {!plain && <ProductToneBackdrop />}
 
-      <div className={cn('relative flex h-full items-center justify-center', plain ? 'p-2' : 'p-4 sm:p-5')}>
+      <div className={cn('relative z-[1] flex h-full items-center justify-center', plain ? 'p-2' : 'p-4 sm:p-5')}>
         {isCluster ? (
-          <FruitVisual className="relative h-full w-full max-h-[88%] max-w-[88%]" />
+          <FruitVisual className="relative h-full w-full max-h-[88%] max-w-[88%] transition duration-500 ease-out group-hover:scale-[1.06]" />
         ) : (
           <FruitVisual className="h-full w-full max-h-[86%] max-w-[86%] drop-shadow-xl transition duration-500 ease-out group-hover:scale-[1.06]" />
         )}
       </div>
 
-      {!plain && <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/5 via-transparent to-transparent" />}
       {!hideBadge && <TypeBadge type={type} />}
     </div>
   );
@@ -72,18 +79,12 @@ export default function ProductVisual({ product, className, plain = false, hideB
 
 function TypeBadge({ type }) {
   return (
-    <span className="absolute bottom-3 left-3 rounded-full bg-white/92 px-2.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-wider text-primary/75 backdrop-blur-sm">
+    <span className="pointer-events-none absolute bottom-3 left-3 z-10 rounded-full bg-white/92 px-2.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-wider text-primary/75 backdrop-blur-sm">
       {TYPE_LABELS[type]}
     </span>
   );
 }
 
 export function getProductVisualColors(product) {
-  const type = getProductType(product);
-  const map = {
-    powder: { light: '#FFD93D' },
-    combo: { light: '#A9DFBF' },
-    chunks: { light: '#EDE4D3' },
-  };
-  return map[type] || map.chunks;
+  return { light: getProductCardTone(product) };
 }

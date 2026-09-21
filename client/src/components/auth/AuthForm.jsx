@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BRAND_NAME } from '../../api/client';
+import BrandLogo from '../ui/BrandLogo';
 import { cn } from '../../lib/cn';
 
 export function AuthField({
@@ -30,7 +30,7 @@ export function AuthField({
           inputMode={inputMode}
           maxLength={maxLength}
           className={cn(
-            'w-full rounded-xl border border-[#e8e4df] bg-white px-4 py-3 text-sm text-[#3a3a3a] outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10',
+            'neo-input px-4 py-3 text-sm',
             rightSlot && 'pr-12'
           )}
         />
@@ -63,7 +63,7 @@ export function AuthTextArea({
         autoComplete={autoComplete}
         required={required}
         rows={rows}
-        className="w-full resize-none rounded-xl border border-[#e8e4df] bg-white px-4 py-3 text-sm text-[#3a3a3a] outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+        className="neo-input neo-textarea px-4 py-3 text-sm"
       />
     </label>
   );
@@ -74,7 +74,7 @@ export function PasswordToggle({ visible, onToggle }) {
     <button
       type="button"
       onClick={onToggle}
-      className="rounded-lg p-1.5 text-[#6b6b6b] transition hover:bg-cream hover:text-primary"
+      className="rounded-lg p-1.5 text-muted transition hover:bg-cream hover:text-primary"
       aria-label={visible ? 'Hide password' : 'Show password'}
     >
       {visible ? (
@@ -103,10 +103,10 @@ export function AuthModeTabs({ mode, onChange }) {
           type="button"
           onClick={() => onChange(tab.id)}
           className={cn(
-            'rounded-xl py-2.5 text-sm font-semibold transition',
+            'rounded-full py-2.5 text-sm font-semibold transition',
             mode === tab.id
-              ? 'bg-primary text-white'
-              : 'border border-[#e8e4df] bg-white text-[#6b6b6b] hover:border-primary hover:text-primary'
+              ? 'bg-primary text-white shadow-[0_8px_20px_rgba(41,70,51,0.16)]'
+              : 'bg-cream-dark text-muted hover:text-primary'
           )}
         >
           {tab.label}
@@ -120,19 +120,16 @@ export function AuthShell({ title, subtitle, children, footer }) {
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-4 py-12 md:px-6">
       <div className="mb-8 text-center">
-        <Link to="/" className="inline-flex items-center gap-2 font-heading text-xl font-semibold text-primary">
-          <span className="text-2xl">🍃</span>
-          {BRAND_NAME}
-        </Link>
+        <BrandLogo logoOnly className="justify-center" imageClassName="max-w-[250px]" />
         <h1 className="mt-6 font-heading text-3xl font-semibold text-primary">{title}</h1>
-        {subtitle && <p className="mt-2 text-sm text-[#6b6b6b]">{subtitle}</p>}
+        {subtitle && <p className="mt-2 text-sm text-muted">{subtitle}</p>}
       </div>
 
-      <div className="rounded-2xl border border-[#e8e4df] bg-white p-6 shadow-[0_8px_30px_rgba(45,62,46,0.06)] md:p-8">
+      <div className="neo-card p-6 md:p-8">
         {children}
       </div>
 
-      {footer && <div className="mt-6 text-center text-sm text-[#6b6b6b]">{footer}</div>}
+      {footer && <div className="mt-6 text-center text-sm text-muted">{footer}</div>}
     </div>
   );
 }
@@ -152,7 +149,7 @@ export function AuthSubmitButton({ loading, children, className }) {
       type="submit"
       disabled={loading}
       className={cn(
-        'w-full rounded-xl bg-primary py-3 text-sm font-semibold text-white transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-60',
+        'neo-btn w-full py-3.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60',
         className
       )}
     >
@@ -165,8 +162,8 @@ export function PhoneField({ id, label, value, onChange }) {
   return (
     <label htmlFor={id} className="block">
       <span className="mb-1.5 block text-sm font-medium text-primary">{label}</span>
-      <div className="flex overflow-hidden rounded-xl border border-[#e8e4df] bg-white transition focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/10">
-        <span className="flex items-center border-r border-[#e8e4df] bg-cream px-3 text-sm font-medium text-primary">
+      <div className="neo-input flex overflow-hidden p-0">
+        <span className="flex items-center px-4 text-sm font-medium text-primary">
           +91
         </span>
         <input
@@ -178,7 +175,7 @@ export function PhoneField({ id, label, value, onChange }) {
           placeholder="9876543210"
           autoComplete="tel"
           required
-          className="w-full px-4 py-3 text-sm text-[#3a3a3a] outline-none"
+          className="w-full bg-transparent px-2 py-3 text-sm text-primary outline-none placeholder:text-muted"
         />
       </div>
     </label>
@@ -199,7 +196,7 @@ export function OtpInput({ value, onChange }) {
         placeholder="• • • • • •"
         autoComplete="one-time-code"
         required
-        className="w-full rounded-xl border border-[#e8e4df] bg-white px-4 py-3 text-center text-2xl tracking-[0.45em] text-primary outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+        className="neo-input px-4 py-3 text-center text-2xl tracking-[0.45em]"
       />
     </label>
   );

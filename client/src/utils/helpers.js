@@ -1,7 +1,13 @@
-export const BRAND_NAME = 'Fresh Nature';
-export const BRAND_TAGLINE = 'Real Fruit. Real Crunch. Nothing Added.';
-export const BRAND_EMAIL = 'hello@freshnature.in';
-export const BRAND_PHONE = '+91 98765 43210';
+export {
+  BRAND_NAME,
+  BRAND_TAGLINE,
+  BRAND_SHORT_TAGLINE,
+  BRAND_EMAIL,
+  BRAND_PHONE,
+  COMPANY_NAME,
+  BRAND_WEBSITE,
+  BRAND_ADDRESS_FULL,
+} from '../data/brand';
 
 export function formatPrice(amount) {
   return `₹${Number(amount).toLocaleString('en-IN')}`;
@@ -38,6 +44,25 @@ export const TRUST_BADGES = [
   'No Added Sugar', 'Zero Preservatives', 'Made in India', 'High Fibre',
 ];
 
+export const TRUST_BADGE_FEATURES = [
+  { emoji: '🥝', title: 'Vegan', desc: 'Pure plant-based freeze-dried fruit snacks' },
+  { emoji: '🍇', title: 'Gluten Free', desc: 'Naturally gluten-free for everyday snacking' },
+  { emoji: '🍎', title: 'Non-Fried', desc: 'Freeze-dried only — never fried in oil' },
+  { emoji: '🍓', title: 'Real Fruit', desc: 'Single ingredient whole fruit slices' },
+  { emoji: '🍌', title: 'No Added Sugar', desc: 'Sweetness comes from real fruit alone' },
+  { emoji: '🍍', title: 'Zero Preservatives', desc: 'No artificial preservatives or sulphites' },
+  { emoji: '🥭', title: 'Made in India', desc: 'Crafted in Miraj, Maharashtra' },
+  { emoji: '🫐', title: 'High Fibre', desc: 'Natural fibre preserved in every bite' },
+];
+
+export const MARQUEE_OFFERS = [
+  'Special Offers',
+  'Free Shipping on ₹999+',
+  'Zero Preservatives',
+  '100% Real Fruit',
+  'Made in Miraj, Maharashtra',
+];
+
 export const HERO_STATS = [
   { value: '6+', label: 'Fruit Flavours' },
   { value: '0g', label: 'Added Sugar' },
@@ -61,28 +86,28 @@ export const SHOP_GOALS = [
     title: 'Daily Snacking',
     description: 'Light, crunchy fruit for everyday guilt-free munching',
     emoji: '🍓',
-    bg: '#D4E2D4',
+    bg: '#DDE7DC',
   },
   {
     slug: 'tropical-mix',
     title: 'Tropical Energy',
     description: 'Mango, pineapple & sun-kissed orchard flavours',
     emoji: '🥭',
-    bg: '#E8DFD0',
+    bg: '#F0E8DC',
   },
   {
     slug: 'berry-boost',
     title: 'Berry Boost',
     description: 'Antioxidant-rich berries for a healthy pick-me-up',
     emoji: '🫐',
-    bg: '#E8D5D0',
+    bg: '#EDE6E2',
   },
   {
     slug: 'combos',
     title: 'Variety Packs',
     description: 'Curated combos to try every flavour at great value',
     emoji: '🎁',
-    bg: '#E0E8E0',
+    bg: '#EEF2EA',
   },
 ];
 
@@ -104,10 +129,34 @@ export const PROCESS_STEPS = [
 ];
 
 export const TRUST_FEATURES = [
-  { icon: 'flask', title: '100% Natural', desc: 'Single ingredient, whole fruit slices — nothing added.' },
-  { icon: 'drop', title: 'Premium Ingredients', desc: 'Handpicked fruit at peak ripeness from Indian orchards.' },
-  { icon: 'leaf', title: 'Sustainable Sourcing', desc: 'Ethically sourced for a better you and planet.' },
-  { icon: 'expert', title: 'Expert Crafted', desc: 'Quality checked by food experts before every pack.' },
+  {
+    icon: 'natural',
+    title: '100% Natural',
+    desc: 'Single ingredient, whole fruit slices — nothing added.',
+    bg: '#EEF2EA',
+    ring: '#3D604933',
+  },
+  {
+    icon: 'premium',
+    title: 'Premium Ingredients',
+    desc: 'Handpicked fruit at peak ripeness from Indian orchards.',
+    bg: '#EEF2EA',
+    ring: '#3D604933',
+  },
+  {
+    icon: 'sustainable',
+    title: 'Sustainable Sourcing',
+    desc: 'Ethically sourced for a better you and planet.',
+    bg: '#EEF2EA',
+    ring: '#3D604933',
+  },
+  {
+    icon: 'expert',
+    title: 'Expert Crafted',
+    desc: 'Quality checked by food experts before every pack.',
+    bg: '#EEF2EA',
+    ring: '#3D604933',
+  },
 ];
 
 export const FEATURES = [

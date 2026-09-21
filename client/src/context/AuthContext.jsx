@@ -100,6 +100,24 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const sendPasswordReset = useCallback(async (payload) => {
+    setAuthLoading(true);
+    try {
+      return await api.sendPasswordReset(payload);
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (payload) => {
+    setAuthLoading(true);
+    try {
+      return await api.resetPassword(payload);
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
+
   return (
     <AuthContext.Provider
       value={{
@@ -114,6 +132,8 @@ export function AuthProvider({ children }) {
         sendRegistrationOtp,
         resendRegistrationOtp,
         verifyRegistrationOtp,
+        sendPasswordReset,
+        resetPassword,
         logout,
         refreshUser,
       }}

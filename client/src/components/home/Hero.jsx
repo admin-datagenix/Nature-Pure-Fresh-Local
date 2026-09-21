@@ -1,127 +1,87 @@
 import { Link } from 'react-router-dom';
-import { Mango, Banana, Jamun, Grapes } from '../ui/FruitArt';
-import AnimatedFruit from '../ui/AnimatedFruit';
-import { BRAND_NAME } from '../../api/client';
-import { HERO_STATS } from '../../utils/helpers';
-import { cn } from '../../lib/cn';
-
-const ORBIT_FRUITS = [
-  { Fruit: Mango, orbit: 'animate-orbit', size: 'h-16 w-16 md:h-20 md:w-20' },
-  { Fruit: Grapes, orbit: 'animate-orbit-reverse', size: 'h-14 w-14 md:h-[4.5rem] md:w-[4.5rem]', style: { animationDelay: '-7s' } },
-  { Fruit: Jamun, orbit: 'animate-orbit', size: 'h-14 w-14', style: { animationDelay: '-14s' } },
-  { Fruit: Banana, orbit: 'animate-orbit-reverse', size: 'h-16 w-16', style: { animationDelay: '-10s' } },
-];
-
-const CORNER_FRUITS = [
-  { Fruit: Mango, className: 'left-[2%] top-[8%] w-14 animate-drift', delay: '0s' },
-  { Fruit: Grapes, className: 'right-[0%] top-[14%] w-12 animate-float', delay: '0.5s' },
-  { Fruit: Jamun, className: 'bottom-[20%] left-[0%] w-12 animate-float-slow', delay: '1s' },
-  { Fruit: Banana, className: 'bottom-[10%] right-[2%] w-14 animate-drift', delay: '0.3s' },
-];
+import { BRAND_NAME, BRAND_TAGLINE, COMPANY_NAME } from '../../data/brand';
+import HeroBanner from './HeroBanner';
+import HeroCustomerAvatars from './HeroCustomerAvatars';
+import TrustCard from './TrustCard';
+import Reveal from '../ui/Reveal';
 
 export default function Hero() {
   return (
-    <section className="relative bg-cream pb-20 pt-8 md:pb-28 md:pt-12">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-20 top-20 h-64 w-64 animate-pulse-soft rounded-full bg-secondary/10 blur-3xl" />
-        <div className="absolute -right-16 bottom-10 h-72 w-72 animate-pulse-soft rounded-full bg-mango/10 blur-3xl" style={{ animationDelay: '1s' }} />
-      </div>
+    <section className="relative w-full overflow-x-hidden bg-cream pb-6 pt-8 md:pb-8 md:pt-10">
+      <div className="site-container">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#eef6f0] via-white to-[#e8f0f8] pb-16 shadow-[0_20px_50px_rgba(41,70,51,0.08)] md:pb-20 lg:pb-24">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -left-16 top-0 h-48 w-48 rounded-full bg-secondary/10 blur-3xl" />
+            <div className="absolute right-0 top-8 h-56 w-56 rounded-full bg-sky-100/70 blur-3xl" />
+          </div>
 
-      <div className="relative mx-auto max-w-6xl px-4 md:px-6">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-          <div className="text-center lg:text-left">
-            <p
-              className="mb-4 animate-fade-up text-xs font-semibold tracking-[0.2em] text-secondary"
-              style={{ animationDelay: '0.1s' }}
-            >
-              100% REAL FRUIT · NO ADDITIVES · MADE IN INDIA
-            </p>
+          <div className="relative grid items-center gap-8 p-6 md:p-10 lg:grid-cols-[1fr_1.28fr] lg:gap-10 lg:p-12 lg:pb-10 xl:grid-cols-[0.92fr_1.35fr]">
+            <div className="text-center lg:text-left">
+              <span className="inline-flex animate-fade-up rounded-full border border-secondary/30 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
+                Premium Freeze-Dried
+              </span>
 
-            <h1
-              className="animate-fade-up font-heading text-4xl font-semibold leading-[1.08] tracking-tight text-primary md:text-5xl lg:text-[3.5rem]"
+              <p
+                className="animate-fade-up mt-4 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-muted sm:text-xs"
+                style={{ animationDelay: '0.05s' }}
+              >
+                {COMPANY_NAME}
+              </p>
+
+              <h1
+                className="animate-fade-up font-heading text-4xl font-semibold leading-[1.08] tracking-tight text-primary md:text-5xl lg:text-[3rem]"
+                style={{ animationDelay: '0.15s' }}
+              >
+                {BRAND_TAGLINE.split(',')[0]}
+                <span className="block text-secondary">{BRAND_TAGLINE.split(',')[1]?.trim() || 'Naturally!'}</span>
+              </h1>
+
+              <p
+                className="mx-auto mt-4 max-w-lg animate-fade-up text-base leading-relaxed text-muted md:text-lg lg:mx-0"
+                style={{ animationDelay: '0.25s' }}
+              >
+                Premium freeze-dried fruit snacks &amp; powders from {BRAND_NAME}. 100% real fruit,
+                zero added sugar, no preservatives — crafted in Miraj, Maharashtra.
+              </p>
+
+              <div
+                className="mt-7 flex animate-fade-up flex-wrap justify-center gap-3 lg:justify-start"
+                style={{ animationDelay: '0.35s' }}
+              >
+                <Link
+                  to="/shop"
+                  className="neo-btn group inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
+                >
+                  Shop Collection
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 transition group-hover:translate-x-0.5">
+                    →
+                  </span>
+                </Link>
+                <Link
+                  to="/about#contact"
+                  className="neo-btn-ghost inline-flex items-center rounded-full px-7 py-3.5 text-base font-semibold"
+                >
+                  Contact Us
+                </Link>
+              </div>
+
+              <HeroCustomerAvatars />
+            </div>
+
+            <div
+              className="animate-fade-up flex min-h-[300px] min-w-0 items-center justify-center overflow-hidden sm:min-h-[360px] lg:min-h-[440px] xl:min-h-[520px]"
               style={{ animationDelay: '0.2s' }}
             >
-              Snack Better with
-              <span className="block text-secondary">Real Fruit.</span>
-            </h1>
-
-            <p
-              className="mx-auto mt-5 max-w-lg animate-fade-up text-base leading-relaxed text-[#6b6b6b] md:text-lg lg:mx-0"
-              style={{ animationDelay: '0.35s' }}
-            >
-              Freeze-dried to perfection. No sugar, no oil, no preservatives —
-              mango, jamun, banana & grapes in every crunchy bite.
-            </p>
-
-            <div
-              className="mt-8 flex animate-fade-up flex-wrap justify-center gap-4 lg:justify-start"
-              style={{ animationDelay: '0.45s' }}
-            >
-              {HERO_STATS.map((s) => (
-                <div
-                  key={s.label}
-                  className="rounded-2xl border border-[#e8e4df] bg-white/80 px-5 py-3 text-center shadow-sm backdrop-blur-sm"
-                >
-                  <span className="block font-heading text-2xl font-bold text-primary">{s.value}</span>
-                  <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-[#6b6b6b]">{s.label}</span>
-                </div>
-              ))}
+              <div className="animate-drift w-full max-w-full">
+                <HeroBanner />
+              </div>
             </div>
-
-            <div
-              className="mt-8 flex animate-fade-up flex-wrap justify-center gap-3 lg:justify-start"
-              style={{ animationDelay: '0.55s' }}
-            >
-              <Link
-                to="/shop"
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-primary-light"
-              >
-                Shop Collection
-              </Link>
-              <Link
-                to="/about"
-                className="inline-flex items-center rounded-lg border-2 border-primary/25 bg-white px-8 py-3.5 text-sm font-semibold text-primary transition hover:border-primary"
-              >
-                Learn More
-              </Link>
-            </div>
-
-            <p className="mt-6 animate-fade-up text-sm text-[#9a9a9a]" style={{ animationDelay: '0.65s' }}>
-              ★ Loved by <strong className="text-primary">50,000+</strong> happy customers
-            </p>
-          </div>
-
-          <div className="relative mx-auto flex aspect-square w-full max-w-[440px] items-center justify-center">
-            <div className="absolute inset-[5%] rounded-full border border-dashed border-secondary/20 animate-pulse-soft" />
-            <div className="absolute inset-[15%] rounded-full bg-gradient-to-br from-white/90 to-cream/80 shadow-[inset_0_0_40px_rgba(107,143,113,0.08)]" />
-
-            <div className="absolute inset-0 flex items-center justify-center">
-              {ORBIT_FRUITS.map(({ Fruit, orbit, size, style }) => (
-                <div key={Fruit.name} className={cn('absolute origin-center', orbit)} style={style}>
-                  <Fruit className={cn(size, 'drop-shadow-lg')} />
-                </div>
-              ))}
-            </div>
-
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <span className="mb-2 text-3xl">🍃</span>
-              <p className="font-heading text-xl font-bold text-primary md:text-2xl">{BRAND_NAME}</p>
-              <p className="mt-1 max-w-[140px] text-[0.65rem] font-semibold uppercase tracking-widest text-secondary">
-                Freeze · Dried · Natural
-              </p>
-            </div>
-
-            {CORNER_FRUITS.map(({ Fruit, className, delay }) => (
-              <AnimatedFruit
-                key={`corner-${Fruit.name}`}
-                Fruit={Fruit}
-                className={cn('absolute opacity-80', className)}
-                delay={delay}
-                duration="5s"
-              />
-            ))}
           </div>
         </div>
+
+        <Reveal variant="scale" delay={280} className="site-container relative z-10 -mt-14 md:-mt-20 lg:-mt-24">
+          <TrustCard overlap />
+        </Reveal>
       </div>
     </section>
   );

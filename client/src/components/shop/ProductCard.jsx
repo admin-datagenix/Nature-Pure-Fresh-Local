@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatPrice, getDiscountPercent } from '../../utils/helpers';
+import { formatPrice, getDiscountPercent, getBadgeClass } from '../../utils/helpers';
 import { getProductCardTone, PRODUCT_CARD_WIDTH } from '../../utils/productLayout';
+import { getProductImage } from '../../data/productImages';
 import { useCart } from '../../context/CartContext';
 import { cn } from '../../lib/cn';
-import ProductVisual from '../ui/ProductVisual';
 
 function CartIcon({ className }) {
   return (
@@ -16,7 +16,15 @@ function CartIcon({ className }) {
   );
 }
 
-export default function ProductCard({ product, className, compact = false }) {
+function CheckIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M5 10.5l3.2 3.2L15 6.8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export default function ProductCard({ product, className, compact = false, selected = false, onSelect }) {
   const { addItem, loading } = useCart();
   const [added, setAdded] = useState(false);
 
@@ -30,62 +38,115 @@ export default function ProductCard({ product, className, compact = false }) {
 
   const shortName = product.name.replace(/^Freeze Dried /i, '');
   const discount = getDiscountPercent(product);
-  const badge = discount > 0 ? `${discount}% off` : product.badge;
-  const meta = [product.category_name, product.weight_grams ? `${product.weight_grams}g` : null]
-    .filter(Boolean)
-    .join(', ')
-    .toLowerCase();
+  const imageSrc = getProductImage(product);
 
   return (
     <article
       className={cn(
-        'group flex h-full flex-col overflow-hidden rounded-[1.75rem] border border-[#e8e4df] bg-cream',
-        'shadow-[0_8px_24px_rgba(45,62,46,0.06)]',
-        'transition duration-300 hover:-translate-y-0.5 hover:border-secondary/40 hover:shadow-[0_14px_32px_rgba(45,62,46,0.12)]',
+        'group flex h-full min-w-0 flex-col overflow-hidden rounded-[24px]',
+        'border border-sage/55 bg-cream',
+        'shadow-[0_6px_20px_rgba(41,70,51,0.05)]',
+        'transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(41,70,51,0.08)]',
+        selected && 'border-primary/35 ring-1 ring-primary/15',
         compact && PRODUCT_CARD_WIDTH,
         className
       )}
+      onClick={() => onSelect?.(product.id)}
     >
-      <Link to={`/product/${product.slug}`} className="flex min-h-0 flex-1 flex-col">
+      <Link to={`/product/${product.slug}`} className="block p-2.5 pb-0" onClick={(e) => e.stopPropagation()}>
         <div
           className={cn(
-            'relative mx-3 mt-3 overflow-hidden rounded-[1.35rem]',
-            compact ? 'h-[180px] sm:h-[200px] md:h-[220px]' : 'aspect-[4/3]'
+            'relative aspect-square overflow-hidden rounded-[20px] border border-sage/40 transition duration-300',
+            selected
+              ? 'border-primary/50'
+              : 'group-hover:border-secondary/70'
           )}
           style={{ backgroundColor: getProductCardTone(product) }}
         >
-          {badge && (
-            <span className="absolute left-2.5 top-2.5 z-10 rounded-full bg-cream px-2 py-0.5 text-[0.6rem] font-semibold text-primary shadow-sm">
-              {badge}
+          <div className="pointer-events-none absolute inset-[18%] rounded-full bg-white/30 blur-2xl" />
+
+          {product.badge && (
+            <span
+              className={cn(
+                'absolute left-2.5 top-2.5 z-10 rounded-full px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-wide shadow-sm',
+                getBadgeClass(product.badge)
+              )}
+            >
+              {product.badge}
             </span>
           )}
-          <ProductVisual product={product} plain hideBadge />
-        </div>
+          {discount > 0 && (
+            <span className="absolute right-2.5 top-2.5 z-10 rounded-full bg-white/95 px-2 py-1 text-[0.58rem] font-bold text-strawberry shadow-sm">
+              −{discount}%
+            </span>
+          )}
 
-        <div className="px-4 pt-3">
-          <h3 className="line-clamp-2 font-heading text-base font-semibold leading-snug text-primary sm:text-[1.05rem]">
-            {shortName}
-          </h3>
-          <p className="mt-1 line-clamp-1 text-xs text-[#6b6b6b]">{meta}</p>
+          <div className="relative flex h-full w-full items-center justify-center p-3 sm:p-4">
+            <img
+              src={imageSrc}
+              alt={product.name}
+              loading="lazy"
+              decoding="async"
+              className={cn(
+                'max-h-full max-w-full object-contain transition duration-500 ease-out',
+                selected ? 'scale-[1.06]' : 'group-hover:scale-[1.06]'
+              )}
+            />
+          </div>
         </div>
       </Link>
 
-      <div className="mt-auto flex items-center justify-between px-4 pb-4 pt-3">
-        <span className="text-lg font-bold text-primary">{formatPrice(product.price)}</span>
-        <button
-          type="button"
-          onClick={handleAdd}
-          disabled={loading}
-          aria-label={`Add ${shortName} to cart`}
-          className={cn(
-            'flex h-10 w-10 items-center justify-center rounded-full border border-primary text-primary transition',
-            added
-              ? 'border-success bg-success text-white'
-              : 'bg-cream hover:bg-primary hover:text-white'
+      <div className="flex flex-1 flex-col rounded-[20px] bg-cream-dark/90 p-3 sm:p-3.5 m-2.5 mt-2">
+        <Link to={`/product/${product.slug}`} className="block min-w-0 flex-1" onClick={(e) => e.stopPropagation()}>
+          <h3 className="line-clamp-2 font-heading text-[0.95rem] font-semibold leading-snug text-primary transition group-hover:text-secondary sm:text-base">
+            {shortName}
+          </h3>
+
+          {product.short_description && (
+            <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted">
+              {product.short_description}
+            </p>
           )}
-        >
-          {added ? <span className="text-sm font-bold">✓</span> : <CartIcon className="h-5 w-5" />}
-        </button>
+
+          <div className="mt-2 flex items-center gap-2">
+            {product.rating > 0 && (
+              <p className="flex items-center gap-1 text-[0.7rem] text-muted">
+                <span className="tracking-tight text-mango">★ {product.rating}</span>
+                {product.review_count > 0 && (
+                  <span>({product.review_count})</span>
+                )}
+              </p>
+            )}
+            {product.weight_grams && (
+              <span className="ml-auto rounded-full border border-sage/45 bg-cream px-2 py-0.5 text-[0.65rem] font-medium text-muted">
+                {product.weight_grams}g
+              </span>
+            )}
+          </div>
+        </Link>
+
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-heading text-lg font-bold text-primary">{formatPrice(product.price)}</span>
+            {discount > 0 && (
+              <span className="text-xs text-muted line-through">{formatPrice(product.compare_at_price)}</span>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleAdd}
+            disabled={loading}
+            aria-label={`Add ${shortName} to cart`}
+            className={cn(
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition duration-200',
+              added
+                ? 'bg-success text-white shadow-[0_6px_14px_rgba(74,124,89,0.22)]'
+                : 'border border-sage/50 bg-cream text-primary hover:border-primary hover:bg-primary hover:text-white'
+            )}
+          >
+            {added ? <CheckIcon className="h-5 w-5" /> : <CartIcon className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
     </article>
   );
@@ -95,18 +156,18 @@ export function ProductCardSkeleton({ className, compact = false }) {
   return (
     <div
       className={cn(
-        'animate-pulse overflow-hidden rounded-[1.75rem] border border-[#e8e4df] bg-cream shadow-sm',
+        'animate-pulse overflow-hidden rounded-[24px] border border-sage/55 bg-cream shadow-[0_6px_20px_rgba(41,70,51,0.04)]',
         compact && PRODUCT_CARD_WIDTH,
         className
       )}
     >
-      <div className="mx-3 mt-3 h-[180px] rounded-[1.35rem] bg-cream-dark sm:h-[200px] md:h-[220px]" />
-      <div className="space-y-2 px-4 py-4">
-        <div className="h-4 w-4/5 rounded bg-cream-dark" />
-        <div className="h-3 w-1/2 rounded bg-cream-dark" />
+      <div className="m-2.5 mb-0 aspect-square rounded-[20px] border border-sage/40 bg-cream-dark" />
+      <div className="m-2.5 mt-2 space-y-2 rounded-[20px] bg-cream-dark/90 p-3">
+        <div className="h-4 w-4/5 rounded-full bg-sage/40" />
+        <div className="h-3 w-1/2 rounded-full bg-sage/35" />
         <div className="flex items-center justify-between pt-2">
-          <div className="h-4 w-12 rounded bg-cream-dark" />
-          <div className="h-9 w-9 rounded-full bg-cream-dark" />
+          <div className="h-5 w-14 rounded-full bg-sage/40" />
+          <div className="h-10 w-10 rounded-full bg-sage/35" />
         </div>
       </div>
     </div>

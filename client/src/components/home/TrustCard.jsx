@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/client';
 import { TRUST_FEATURES } from '../../utils/helpers';
+import { cn } from '../../lib/cn';
+import Reveal from '../ui/Reveal';
+import TrustFeatureIcon from '../ui/TrustFeatureIcon';
 
 const DEFAULT_STATS = [
   { value: '50K+', label: 'Happy Customers' },
@@ -8,43 +11,33 @@ const DEFAULT_STATS = [
   { value: '98%', label: 'Customer Satisfaction' },
 ];
 
-function TrustIcon({ type }) {
-  const cls = 'h-5 w-5 text-[#6b6b6b]';
-  switch (type) {
-    case 'flask':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M9 3h6v7l4 9a2 2 0 01-2 2H7a2 2 0 01-2-2l4-9V3z" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M9 3h6" strokeLinecap="round" />
-        </svg>
-      );
-    case 'drop':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M12 3c3 5 7 8.5 7 12a7 7 0 11-14 0c0-3.5 4-7 7-12z" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      );
-    case 'leaf':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="11" cy="11" r="7" />
-          <path d="M11 8c-2 3-2 6 0 9M11 8c2 3 2 6 0 9M8 11h6" strokeLinecap="round" />
-        </svg>
-      );
-    case 'expert':
-      return (
-        <svg className={cls} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="12" cy="8" r="3" />
-          <path d="M6 20v-1a4 4 0 014-4h4a4 4 0 014 4v1" strokeLinecap="round" />
-          <path d="M16 4l2 1M18 7l2-1" strokeLinecap="round" />
-        </svg>
-      );
-    default:
-      return null;
-  }
+function TrustFeature({ feature, index, centered }) {
+  return (
+    <Reveal delay={index * 60}>
+      <article
+        className={cn(
+          'flex flex-col items-center text-center',
+          !centered && 'sm:flex-row sm:items-start sm:text-left'
+        )}
+      >
+        <div
+          className="mb-3 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-sage/70 bg-fresh text-secondary shadow-[0_4px_12px_rgba(41,70,51,0.06)]"
+          style={{ boxShadow: `0 0 0 1px ${feature.ring || 'transparent'}, 0 4px 12px rgba(41,70,51,0.06)` }}
+        >
+          <TrustFeatureIcon name={feature.icon} />
+        </div>
+        <div className={cn('min-w-0', !centered && 'sm:pt-0.5')}>
+          <h3 className="text-sm font-semibold text-primary md:text-[0.95rem]">{feature.title}</h3>
+          <p className="mt-1.5 text-xs leading-relaxed text-muted">{feature.desc}</p>
+        </div>
+      </article>
+    </Reveal>
+  );
 }
 
-export default function TrustCard() {
+export default function TrustCard({ overlap = false, embedded = false }) {
+  const isFloating = overlap || !embedded;
+  const centered = overlap || embedded;
   const [stats, setStats] = useState(DEFAULT_STATS);
 
   useEffect(() => {
@@ -61,38 +54,48 @@ export default function TrustCard() {
   }, []);
 
   return (
-    <section className="relative z-10 -mt-14 px-4 md:-mt-20 md:px-6">
-      <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-white shadow-[0_12px_40px_-12px_rgba(45,62,46,0.18)]">
-        {/* Top — feature highlights */}
-        <div className="grid grid-cols-1 gap-8 px-6 py-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-6 lg:px-10 lg:py-12">
-          {TRUST_FEATURES.map((f) => (
-            <div key={f.title} className="flex gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f3f3f3]">
-                <TrustIcon type={f.icon} />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-[#1a1a1a]">{f.title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-[#777]">{f.desc}</p>
-              </div>
-            </div>
+    <div className={cn(isFloating && !overlap && 'site-container relative')}>
+      <div
+        className={cn(
+          'relative overflow-hidden bg-white',
+          isFloating && 'rounded-[1.75rem] shadow-[0_20px_50px_rgba(41,70,51,0.12)]'
+        )}
+      >
+        <div
+          className={cn(
+            'grid grid-cols-1 gap-8 bg-white sm:grid-cols-2 lg:grid-cols-4 lg:gap-6',
+            overlap
+              ? 'px-6 py-8 md:px-10 md:py-9'
+              : embedded
+                ? 'border-t border-sage/40 px-6 py-8 md:px-10 md:py-10'
+                : 'px-6 py-10 lg:px-10 lg:py-12'
+          )}
+        >
+          {TRUST_FEATURES.map((f, i) => (
+            <TrustFeature key={f.title} feature={f} index={i} centered={centered} />
           ))}
         </div>
 
-        {/* Bottom — stats bar */}
-        <div className="relative overflow-hidden bg-[#5b6743] px-6 py-9 md:px-10 md:py-10">
-          <span className="pointer-events-none absolute -bottom-2 left-2 text-5xl opacity-20">🍃</span>
-          <span className="pointer-events-none absolute -bottom-2 right-2 text-5xl opacity-20">🍃</span>
+        <div className="relative overflow-hidden bg-primary px-6 py-8 md:px-10 md:py-9">
+          <div className="pointer-events-none absolute inset-0 opacity-[0.07]" aria-hidden="true">
+            <div className="absolute -left-8 top-0 h-32 w-32 rounded-full bg-white blur-2xl" />
+            <div className="absolute -right-8 bottom-0 h-32 w-32 rounded-full bg-secondary blur-2xl" />
+          </div>
 
           <div className="relative flex flex-col divide-y divide-white/15 sm:flex-row sm:divide-x sm:divide-y-0">
-            {stats.map((s) => (
-              <div key={s.label} className="flex flex-1 flex-col items-center py-4 text-center first:pt-0 last:pb-0 sm:py-0">
+            {stats.map((s, i) => (
+              <Reveal
+                key={s.label}
+                delay={i * 80}
+                className="flex flex-1 flex-col items-center py-4 text-center first:pt-0 last:pb-0 sm:py-0"
+              >
                 <span className="font-heading text-3xl font-bold text-white md:text-4xl">{s.value}</span>
-                <span className="mt-1 text-sm text-white/85">{s.label}</span>
-              </div>
+                <span className="mt-1 max-w-[10rem] text-sm leading-snug text-white/85">{s.label}</span>
+              </Reveal>
             ))}
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
