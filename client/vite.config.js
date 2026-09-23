@@ -10,7 +10,7 @@ export default defineConfig({
     port: 5173,
     /** Listen on LAN — open http://<your-wifi-ip>:5173 from phone/other PC */
     host: true,
-    strictPort: true,
+    strictPort: false,
   },
   build: {
     outDir: 'dist',
