@@ -10,7 +10,7 @@ export const BRAND_SHORT_TAGLINE = 'Real Fruit. Real Crunch. Nothing Added.';
 export const BRAND_EMAIL = 'naturepure.in@gmail.com';
 export const BRAND_PHONE = '+91 77679 70227';
 export const BRAND_PHONE_RAW = '7767970227';
-// export const BRAND_WEBSITE = 'www.naturepurefresh.com';
+export const BRAND_WEBSITE = 'www.naturepurefresh.com';
 export const BRAND_WEBSITE_URL = 'https://www.naturepurefresh.com';
 
 export const BRAND_ADDRESS = {
