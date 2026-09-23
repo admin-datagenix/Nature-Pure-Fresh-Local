@@ -138,9 +138,9 @@ export function AuthPageHeader({ title, subtitle, showBrand = true, compact = fa
   );
 }
 
-export function AuthModeTabs({ mode, onChange }) {
+export function AuthModeTabs({ mode, onChange, compact = false }) {
   return (
-    <div className={authToggleTrack} role="tablist" aria-label="Login method">
+    <div className={compact ? authToggleTrackCompact : authToggleTrack} role="tablist" aria-label="Login method">
       {[
         { id: 'email', label: 'Email' },
         { id: 'mobile', label: 'Mobile' },
@@ -321,10 +321,16 @@ export function ClaySubmitButton({ loading, children }) {
   );
 }
 
-export function AuthError({ message }) {
+export function AuthError({ message, compact = false }) {
   if (!message) return null;
   return (
-    <div className="mb-5 rounded-2xl border border-strawberry/15 bg-strawberry/5 px-4 py-3 text-sm text-strawberry" role="alert">
+    <div
+      className={cn(
+        'rounded-xl border border-strawberry/15 bg-strawberry/5 px-3 text-sm text-strawberry',
+        compact ? 'mb-2.5 py-2' : 'mb-5 py-3'
+      )}
+      role="alert"
+    >
       {message}
     </div>
   );

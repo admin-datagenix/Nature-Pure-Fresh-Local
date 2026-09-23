@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/client';
-import { renderStars } from '../../utils/helpers';
+import StarRating from '../ui/StarRating';
 import Reveal from '../ui/Reveal';
 
 const AVATAR_COLORS = ['bg-mango/80', 'bg-strawberry/70', 'bg-secondary/70', 'bg-primary/60'];
@@ -27,35 +27,38 @@ export default function ReviewsSection() {
   return (
     <section className="pb-16 md:pb-20">
       <div className="site-container">
-        <Reveal variant="scale" className="mb-10 text-center">
-          <h2 className="font-heading text-3xl font-semibold tracking-tight text-primary md:text-4xl">
-            Testimonials
-          </h2>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-muted">What our customers say</p>
+        <Reveal variant="scale" className="mb-6 md:mb-8">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+            <div className="min-w-0 text-center sm:text-left">
+              <h2 className="font-heading text-3xl font-semibold tracking-tight text-primary md:text-4xl">
+                Testimonials
+              </h2>
+              <p className="mt-1 max-w-lg text-base text-muted sm:mt-2">What our customers say</p>
+            </div>
+            <div className="flex shrink-0 gap-2">
+              <button
+                type="button"
+                onClick={goPrev}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-sage/60 bg-white text-lg text-primary shadow-sm transition hover:bg-cream"
+                aria-label="Previous testimonials"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-sage/60 bg-white text-lg text-primary shadow-sm transition hover:bg-cream"
+                aria-label="Next testimonials"
+              >
+                ›
+              </button>
+            </div>
+          </div>
         </Reveal>
 
-        <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="grid gap-5 lg:grid-cols-[1.15fr_0.85fr] lg:items-start">
           <Reveal variant="left">
-            <div className="flex h-full flex-col gap-4">
-              <div className="flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={goPrev}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-sage/60 bg-white text-lg text-primary shadow-sm transition hover:bg-cream"
-                  aria-label="Previous testimonials"
-                >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  onClick={goNext}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-sage/60 bg-white text-lg text-primary shadow-sm transition hover:bg-cream"
-                  aria-label="Next testimonials"
-                >
-                  ›
-                </button>
-              </div>
-
+            <div className="flex flex-col gap-4">
               {visible.map((review) => (
                 <TestimonialCard key={`${review.id}-${active}`} review={review} />
               ))}
@@ -64,7 +67,9 @@ export default function ReviewsSection() {
 
           <Reveal variant="right" delay={120}>
             <article className="flex h-full min-h-full flex-col rounded-[1.75rem] bg-primary p-7 text-white transition duration-500 hover:shadow-[0_20px_48px_rgba(41,70,51,0.2)] md:p-9">
-              <div className="mb-3 text-sm tracking-tight text-white/90">{renderStars(4.5)}</div>
+              <div className="mb-3">
+                <StarRating rating={4.5} size="md" />
+              </div>
               <p className="font-heading text-2xl font-semibold leading-snug md:text-[1.65rem]">
                 More than 50K+
                 <span className="block text-white/85">Satisfied Customers</span>
@@ -105,7 +110,9 @@ export default function ReviewsSection() {
 function TestimonialCard({ review }) {
   return (
     <article className="neo-card flex flex-col rounded-[1.75rem] p-6 md:p-7">
-      <div className="mb-3 text-sm tracking-tight text-mango">{renderStars(review.rating)}</div>
+      <div className="mb-3">
+        <StarRating rating={review.rating} size="md" />
+      </div>
 
       <blockquote className="flex-1 text-base italic leading-relaxed text-primary/85">
         &ldquo;{review.comment}&rdquo;

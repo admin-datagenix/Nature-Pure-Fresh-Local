@@ -4,8 +4,6 @@ import {
   BRAND_EMAIL,
   BRAND_PHONE,
   BRAND_PHONE_RAW,
-  BRAND_WEBSITE,
-  BRAND_WEBSITE_URL,
   BRAND_ADDRESS_FULL,
   COMPANY_NAME,
   CATALOG_PDF,
@@ -25,7 +23,7 @@ const FOOTER_LINKS = {
     { to: '/about#recipes', label: 'Recipes' },
   ],
   Support: [
-    { to: '/about#contact', label: 'Contact' },
+    { to: '/contact', label: 'Contact' },
     { to: '/about#faq', label: 'FAQ' },
     { to: '/about#shipping', label: 'Shipping Policy' },
   ],
@@ -55,39 +53,6 @@ export default function Footer() {
                 className="block opacity-80 transition hover:opacity-100"
               >
                 {BRAND_PHONE}
-              </a>
-              <a
-                href={BRAND_WEBSITE_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block opacity-80 transition hover:opacity-100"
-              >
-                {BRAND_WEBSITE}
-              </a>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <a
-                href={`https://wa.me/91${BRAND_PHONE_RAW}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white"
-                aria-label="WhatsApp"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                  <path d="M20 11.5A8.5 8.5 0 1111 4.1L4 5.5l1.5-6.8A8.5 8.5 0 1120 11.5z" strokeLinejoin="round" />
-                  <path d="M9.2 8.8c.2-.4.4-.5.8-.5h.6c.2 0 .4.1.5.4l.7 1.7c.1.2 0 .5-.2.6l-.5.4c.7 1.1 1.6 2 2.8 2.8l.4-.5c.2-.2.4-.3.6-.2l1.7.7c.3.1.4.3.4.5v.6c0 .4-.1.6-.5.8A6.2 6.2 0 019.2 8.8z" strokeLinejoin="round" />
-                </svg>
-              </a>
-              <a
-                href={`mailto:${BRAND_EMAIL}`}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white"
-                aria-label="Email"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
-                  <rect x="3" y="5" width="18" height="14" rx="2" />
-                  <path d="M3 7l9 6 9-6" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
               </a>
             </div>
 

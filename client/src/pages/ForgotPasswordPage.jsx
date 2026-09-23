@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useOtpCountdown } from '../hooks/useOtpCountdown';
-import { OTP_RESEND_COOLDOWN_SECONDS } from '../utils/authConfig';
+import { LOCKOUT_MINUTES, OTP_EXPIRY_SECONDS, OTP_RESEND_COOLDOWN_SECONDS } from '../utils/authConfig';
 import {
   AuthSplitLayout,
   AuthPageHeader,
@@ -129,6 +129,10 @@ export default function ForgotPasswordPage() {
       />
 
       <AuthModeTabs mode={mode} onChange={handleModeChange} />
+      <AuthHint>
+        Reset OTP expires in {Math.floor(OTP_EXPIRY_SECONDS / 60)} minutes. Too many failed attempts lock recovery for{' '}
+        {LOCKOUT_MINUTES} minutes.
+      </AuthHint>
       <AuthError message={error} />
       <AuthSuccess message={success} />
 

@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/client';
+import { cn } from '../../lib/cn';
 
 const AVATAR_COLORS = ['bg-mango/90', 'bg-strawberry/80', 'bg-secondary/80', 'bg-primary/70'];
 
 const DEFAULT_COUNT = '50K+';
 
-export default function HeroCustomerAvatars() {
+export default function HeroCustomerAvatars({ className, style }) {
   const [count, setCount] = useState(DEFAULT_COUNT);
 
   useEffect(() => {
-    api.getStats()
+    api
+      .getStats()
       .then((res) => setCount(res.data?.happyCustomers || DEFAULT_COUNT))
       .catch(() => {});
   }, []);
 
   return (
-    <div className="mt-6 flex animate-fade-up items-center justify-center gap-3 lg:justify-start" style={{ animationDelay: '0.4s' }}>
+    <div className={cn('flex items-center gap-3', className)} style={style}>
       <div className="flex -space-x-2.5">
         {AVATAR_COLORS.map((color, i) => (
           <span

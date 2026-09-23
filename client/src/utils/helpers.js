@@ -23,14 +23,14 @@ export function getDiscountPercent(product) {
 export function getBadgeClass(badge) {
   if (!badge) return '';
   const map = {
-    SALE: 'bg-strawberry text-white',
-    BESTSELLER: 'bg-primary text-white',
-    NEW: 'bg-secondary text-white',
-    'FAN FAV': 'bg-mango text-white',
-    'GREAT VALUE': 'bg-secondary text-white',
-    'RARE FIND': 'bg-mango text-white',
+    SALE: 'label-chip bg-strawberry text-white',
+    BESTSELLER: 'label-chip bg-primary text-white',
+    NEW: 'label-chip bg-secondary text-white',
+    'FAN FAV': 'label-chip bg-mango text-white',
+    'GREAT VALUE': 'label-chip bg-secondary text-white',
+    'RARE FIND': 'label-chip bg-mango text-white',
   };
-  return map[badge] || 'bg-primary text-white';
+  return map[badge] || 'label-chip bg-primary text-white';
 }
 
 export function renderStars(rating) {
@@ -45,14 +45,14 @@ export const TRUST_BADGES = [
 ];
 
 export const TRUST_BADGE_FEATURES = [
-  { emoji: '🥝', title: 'Vegan', desc: 'Pure plant-based freeze-dried fruit snacks' },
-  { emoji: '🍇', title: 'Gluten Free', desc: 'Naturally gluten-free for everyday snacking' },
-  { emoji: '🍎', title: 'Non-Fried', desc: 'Freeze-dried only — never fried in oil' },
-  { emoji: '🍓', title: 'Real Fruit', desc: 'Single ingredient whole fruit slices' },
-  { emoji: '🍌', title: 'No Added Sugar', desc: 'Sweetness comes from real fruit alone' },
-  { emoji: '🍍', title: 'Zero Preservatives', desc: 'No artificial preservatives or sulphites' },
-  { emoji: '🥭', title: 'Made in India', desc: 'Crafted in Miraj, Maharashtra' },
-  { emoji: '🫐', title: 'High Fibre', desc: 'Natural fibre preserved in every bite' },
+  { icon: 'vegan', accent: '#4a7c59', title: 'Vegan', desc: 'Pure plant-based freeze-dried fruit snacks' },
+  { icon: 'glutenFree', accent: '#c4a882', title: 'Gluten Free', desc: 'Naturally gluten-free for everyday snacking' },
+  { icon: 'nonFried', accent: '#3D6049', title: 'Non-Fried', desc: 'Freeze-dried only — never fried in oil' },
+  { icon: 'realFruit', accent: '#e85d5d', title: 'Real Fruit', desc: 'Single ingredient whole fruit slices' },
+  { icon: 'noSugar', accent: '#8b4b8c', title: 'No Added Sugar', desc: 'Sweetness comes from real fruit alone' },
+  { icon: 'zeroPreservatives', accent: '#f5a623', title: 'Zero Preservatives', desc: 'No artificial preservatives or sulphites' },
+  { icon: 'madeInIndia', accent: '#294633', title: 'Made in India', desc: 'Crafted in Miraj, Maharashtra' },
+  { icon: 'highFibre', accent: '#5a8f6a', title: 'High Fibre', desc: 'Natural fibre preserved in every bite' },
 ];
 
 export const MARQUEE_OFFERS = [

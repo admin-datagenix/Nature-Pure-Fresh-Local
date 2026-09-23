@@ -7,7 +7,7 @@ import { PRODUCT_GRID_CLASS } from '../../utils/productLayout';
 import Reveal from '../ui/Reveal';
 
 export default function ProductGrid({
-  title = 'Best Seller / Popular Products',
+  title = 'Best Seller',
   subtitle = 'Our most-loved freeze-dried fruits, rated by thousands of happy snackers',
   limit = 4,
   shopLink = '/shop',
@@ -53,7 +53,7 @@ export default function ProductGrid({
               {title}
             </h2>
             {subtitle && (
-              <p className="mt-2 max-w-xl text-sm text-muted">{subtitle}</p>
+              <p className="mt-2 max-w-xl text-base text-muted">{subtitle}</p>
             )}
           </div>
           <Link

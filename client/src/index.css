@@ -139,7 +139,7 @@
 .neo-input {
   width: 100%;
   border: 0;
-  border-radius: 9999px;
+  border-radius: 6px;
   background: #EEF2EA;
   color: #294633;
   padding: 0.75rem 1.25rem;
@@ -157,17 +157,36 @@
   box-shadow: inset 2px 2px 6px rgba(61, 96, 73, 0.08), 0 0 0 3px rgba(221, 231, 220, 0.9);
 }
 
-.neo-select {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding-right: 2.75rem;
-  overflow: hidden;
-  background-clip: padding-box;
+.neo-select-trigger {
+  padding-right: 1rem;
 }
 
-.neo-select::-ms-expand {
+.neo-select-panel {
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid rgba(221, 231, 220, 0.95);
+  box-shadow:
+    0 16px 40px rgba(41, 70, 51, 0.1),
+    0 4px 12px rgba(41, 70, 51, 0.06);
+  scrollbar-width: none;
+}
+
+.neo-select-panel::-webkit-scrollbar {
   display: none;
+}
+
+.neo-select-option {
+  color: #294633;
+}
+
+.neo-select-option:hover:not(:disabled) {
+  background: #eef2ea;
+}
+
+.neo-select-option-active {
+  background: #dde7dc;
+  font-weight: 600;
+  color: #294633;
 }
 
 .neo-input-error {
@@ -175,7 +194,7 @@
 }
 
 .neo-textarea {
-  border-radius: 1.5rem;
+  border-radius: 6px;
   min-height: 4.5rem;
   resize: none;
   line-height: 1.5;
@@ -221,6 +240,12 @@
 
 .step-connector-active {
   background: var(--color-secondary);
+}
+
+.marquee-bar {
+  overflow: hidden;
+  contain: layout paint;
+  max-width: 100%;
 }
 
 .reveal-hidden {
@@ -305,26 +330,54 @@
 
 @layer base {
   html {
+    font-size: 17px;
     scroll-behavior: smooth;
     scroll-padding-top: 5.5rem;
     overflow-x: hidden;
     width: 100%;
     max-width: 100%;
-    scrollbar-gutter: stable;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
   body {
     @apply font-body text-primary bg-cream antialiased;
+    font-size: 1rem;
+    line-height: 1.55;
     overflow-x: hidden;
     width: 100%;
     max-width: 100%;
     overscroll-behavior-x: none;
     touch-action: pan-y pinch-zoom;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  @media (min-width: 768px) {
+    html {
+      font-size: 18px;
+    }
   }
   #root {
     overflow-x: hidden;
     width: 100%;
     max-width: 100%;
     min-width: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  #root::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
   img,
   video {
@@ -399,6 +452,94 @@
   background: var(--color-primary);
   border: 2px solid white;
   box-shadow: 0 2px 6px rgba(41, 70, 51, 0.25);
+  cursor: pointer;
+}
+
+/* Flipkart-style flat chips (badges, tags, filter pills) */
+.label-chip {
+  border-radius: 2px;
+}
+
+.shop-price-filter {
+  padding-top: 2px;
+}
+
+.shop-price-track {
+  height: 2px;
+  border-radius: 1px;
+  background: #e8ece9;
+}
+
+.shop-price-track-active {
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-primary);
+}
+
+.shop-price-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #dde7dc;
+  border-radius: 2px;
+  background: #fff;
+  color: #294633;
+  padding: 0.45rem 1.75rem 0.45rem 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.shop-price-select:hover {
+  border-color: #c5d4c8;
+}
+
+.shop-price-select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(221, 231, 220, 0.95);
+}
+
+.shop-range-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 8px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.shop-range-thumb::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+}
+
+.shop-range-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  pointer-events: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 1px 4px rgba(41, 70, 51, 0.22);
+  cursor: pointer;
+  margin-top: -6px;
+}
+
+.shop-range-thumb::-moz-range-track {
+  background: transparent;
+  border: none;
+}
+
+.shop-range-thumb::-moz-range-thumb {
+  pointer-events: auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 1px 4px rgba(41, 70, 51, 0.22);
   cursor: pointer;
 }
 

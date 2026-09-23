@@ -63,10 +63,10 @@ export function CartProvider({ children }) {
     setSelectedIds([]);
   }, []);
 
-  const addItem = useCallback(async (productId, quantity = 1) => {
+  const addItem = useCallback(async (productId, quantity = 1, options = {}) => {
     setLoading(true);
     try {
-      const res = await api.addToCart(productId, quantity);
+      const res = await api.addToCart(productId, quantity, options);
       setCart(res.data);
       setSelectedIds((prev) => {
         if (prev.includes(productId)) return prev;

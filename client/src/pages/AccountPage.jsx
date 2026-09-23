@@ -11,8 +11,12 @@ import { cn } from '../lib/cn';
 
 const NEWSLETTER_KEY = 'fresh_nature_newsletter';
 
-const H_SCROLL =
-  'flex gap-4 overflow-x-auto pb-2 scroll-smooth snap-x snap-mandatory [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-sage/80';
+const TABS = [
+  { id: 'profile', label: 'Profile' },
+  { id: 'orders', label: 'My Orders' },
+  { id: 'addresses', label: 'Addresses' },
+  { id: 'help', label: 'Help & support' },
+];
 
 function getInitials(name) {
   return (name || 'U')
@@ -81,28 +85,9 @@ function isNewsletterSubscribed(email) {
   }
 }
 
-function Panel({ title, description, children, className, action }) {
-  return (
-    <section
-      className={cn(
-        'min-w-0 overflow-hidden rounded-[24px] border border-sage/55 bg-cream shadow-[0_6px_20px_rgba(41,70,51,0.05)]',
-        className
-      )}
-    >
-      <div className="flex flex-wrap items-end justify-between gap-2 border-b border-sage/45 px-4 py-3.5 sm:px-5">
-        <div>
-          <h2 className="font-heading text-base font-semibold text-primary sm:text-lg">{title}</h2>
-          {description ? <p className="mt-0.5 text-xs text-muted sm:text-sm">{description}</p> : null}
-        </div>
-        {action}
-      </div>
-      <div className="px-4 py-4 sm:px-5 sm:py-5">{children}</div>
-    </section>
-  );
-}
-
 export default function AccountPage() {
   const { user, loading, authLoading, logout, isAuthenticated, refreshUser } = useAuth();
+  const [tab, setTab] = useState('profile');
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [profileForm, setProfileForm] = useState({ name: '', address: '' });
@@ -167,256 +152,259 @@ export default function AccountPage() {
 
   return (
     <div className="site-container py-8 md:py-10">
-      <header className="flex flex-wrap items-center justify-between gap-4">
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-sage/40 pb-5">
         <div>
           <h1 className="font-heading text-2xl font-semibold tracking-tight text-primary md:text-3xl">
             My Account
           </h1>
-          <p className="mt-1 text-sm text-muted">
-            Hi {firstName} — orders, addresses, and profile in one dashboard
-          </p>
+          <p className="mt-1 text-sm text-muted">Hi {firstName} — manage profile, orders, and addresses</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/shop"
-            className="inline-flex rounded-full border border-primary px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary hover:text-white"
+            className="label-chip inline-flex border border-primary px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary hover:text-white"
           >
-            Shop
+            Continue shopping
           </Link>
           <button
             type="button"
             onClick={logout}
             disabled={authLoading}
-            className="rounded-full px-4 py-2 text-sm font-medium text-strawberry transition hover:bg-strawberry/10 disabled:opacity-50"
+            className="label-chip px-4 py-2 text-sm font-medium text-strawberry transition hover:bg-strawberry/10 disabled:opacity-50"
           >
-            {authLoading ? '…' : 'Sign out'}
+            {authLoading ? '…' : 'Logout'}
           </button>
         </div>
       </header>
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6 xl:grid-cols-[300px_minmax(0,1fr)]">
-        {/* Left: profile + stats (compact, no long scroll) */}
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="overflow-hidden rounded-[24px] border border-sage/55 bg-cream shadow-[0_6px_20px_rgba(41,70,51,0.05)]">
-            <div className="bg-cream-dark/75 px-4 py-5">
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[16px] border border-sage/50 bg-white font-heading text-base font-bold text-primary"
-                  aria-hidden="true"
-                >
-                  {getInitials(user.name)}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate font-heading text-lg font-semibold text-primary">{user.name}</p>
-                  <p className="truncate text-xs text-muted">{user.email}</p>
-                </div>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
+        <aside className="h-fit rounded-sm border border-sage/55 bg-white shadow-[0_4px_16px_rgba(41,70,51,0.05)]">
+          <div className="border-b border-sage/45 px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-sage/50 bg-cream font-heading text-sm font-bold text-primary"
+                aria-hidden="true"
+              >
+                {getInitials(user.name)}
               </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-primary">{user.name}</p>
+                <p className="truncate text-xs text-muted">{user.email}</p>
+              </div>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <dt className="text-muted">Orders</dt>
+                <dd className="font-semibold text-primary">{stats.orderCount}</dd>
+              </div>
+              <div>
+                <dt className="text-muted">Spent</dt>
+                <dd className="font-semibold text-primary">{formatPrice(stats.totalSpent)}</dd>
+              </div>
+            </dl>
+          </div>
+          <nav className="flex flex-row flex-wrap lg:flex-col lg:p-1">
+            {TABS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setTab(item.id)}
+                className={cn(
+                  'flex-1 border-b-2 px-4 py-3 text-left text-sm font-medium transition lg:flex-none lg:border-b-0 lg:border-l-[3px]',
+                  tab === item.id
+                    ? 'border-primary bg-cream/80 text-primary lg:bg-cream/50'
+                    : 'border-transparent text-primary/75 hover:bg-cream/40 hover:text-primary'
+                )}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        <main className="min-w-0 rounded-sm border border-sage/55 bg-white p-5 shadow-[0_4px_16px_rgba(41,70,51,0.05)] md:p-6">
+          {tab === 'profile' && (
+            <div>
+              <h2 className="font-heading text-lg font-semibold text-primary">Personal information</h2>
+              <p className="mt-1 text-sm text-muted">
+                Member since {memberSince} · Newsletter {newsletterOn ? 'subscribed' : 'off'}
+              </p>
               {user.phone && (
-                <p className="mt-3 text-xs text-muted">
+                <p className="mt-2 text-sm text-muted">
                   {formatIndianPhone(user.phone)}
                   {user.phone_verified && (
-                    <span className="ml-2 font-semibold text-secondary">Verified</span>
+                    <span className="label-chip ml-2 bg-secondary/15 px-1.5 py-0.5 text-[0.65rem] font-semibold text-secondary">
+                      Verified
+                    </span>
                   )}
                 </p>
               )}
-            </div>
-            <div className="grid grid-cols-2 gap-2 p-3">
-              <MiniStat label="Orders" value={String(stats.orderCount)} />
-              <MiniStat label="Spent" value={formatPrice(stats.totalSpent)} />
-              <MiniStat label="Since" value={memberSince} />
-              <MiniStat label="News" value={newsletterOn ? 'On' : 'Off'} />
-            </div>
-          </div>
-        </aside>
-
-        {/* Right: horizontal panels */}
-        <div className="flex min-w-0 flex-col gap-5">
-          <Panel
-            title="Order history"
-            description="Swipe sideways to browse orders"
-            action={
-              orders.length > 1 ? (
-                <span className="text-xs text-muted">Scroll →</span>
-              ) : null
-            }
-          >
-            {ordersLoading ? (
-              <p className="text-sm text-muted">Loading…</p>
-            ) : orders.length === 0 ? (
-              <div className="flex flex-wrap items-center justify-between gap-4 rounded-[20px] border border-dashed border-sage/55 bg-cream-dark/40 px-4 py-5">
-                <p className="text-sm text-muted">No orders yet.</p>
-                <Link
-                  to="/shop"
-                  className="shrink-0 rounded-full border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary hover:text-white"
-                >
-                  Browse products
-                </Link>
-              </div>
-            ) : (
-              <ul className={H_SCROLL}>
-                {orders.map((order) => (
-                  <li
-                    key={order.id}
-                    className="w-[min(100%,280px)] shrink-0 snap-start rounded-[20px] border border-sage/45 bg-cream-dark/40 p-4 sm:w-[300px]"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="font-heading text-sm font-semibold text-primary">{order.id}</p>
-                      <span className="rounded-full bg-secondary/15 px-2 py-0.5 text-[0.6rem] font-semibold capitalize text-secondary">
-                        {order.status || 'confirmed'}
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs text-muted">
-                      {formatOrderDate(order.created_at)} · {formatPrice(order.total)}
-                    </p>
-                    {order.items?.length > 0 && (
-                      <div className="mt-3 flex gap-1.5">
-                        {order.items.slice(0, 3).map((item) => (
-                          <img
-                            key={item.id || item.product_id}
-                            src={getCartItemImage(item)}
-                            alt=""
-                            className="h-10 w-10 rounded-lg border border-sage/45 bg-white object-contain p-0.5"
-                          />
-                        ))}
-                      </div>
-                    )}
-                    <p className="mt-2 text-[0.65rem] text-muted">{formatPaymentMethod(order.payment_method)}</p>
-                    <Link
-                      to={`/order-confirmation/${order.id}`}
-                      className="mt-2 inline-block text-xs font-medium text-primary underline underline-offset-2"
-                    >
-                      Details
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Panel>
-
-          <div className="grid min-w-0 gap-5 md:grid-cols-2">
-            <Panel title="Saved addresses" description="Horizontal list">
-              {savedAddresses.length === 0 ? (
-                <p className="text-sm text-muted">Set your default address in Profile →</p>
-              ) : (
-                <ul className={H_SCROLL}>
-                  {savedAddresses.map((addr) => (
-                    <li
-                      key={addr.id}
-                      className="w-[min(100%,260px)] shrink-0 snap-start rounded-[20px] border border-sage/45 bg-cream-dark/40 px-3.5 py-3 text-sm sm:w-[280px]"
-                    >
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium text-primary">{addr.label}</p>
-                        {addr.isDefault && (
-                          <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.55rem] font-bold uppercase text-primary">
-                            Default
-                          </span>
-                        )}
-                      </div>
-                      <div className="mt-1.5 line-clamp-4 text-xs leading-relaxed text-muted">
-                        {addr.lines.join(' · ')}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Panel>
-
-            <Panel title="Profile" description="Name & delivery address">
-              <form onSubmit={handleProfileSave} className="space-y-3">
+              <form onSubmit={handleProfileSave} className="mt-6 max-w-lg space-y-4">
                 <label className="block">
-                  <span className="text-xs text-muted">Full name</span>
+                  <span className="text-xs font-medium text-muted">Full name</span>
                   <input
                     type="text"
                     value={profileForm.name}
                     onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))}
                     className="neo-input mt-1 px-3 py-2 text-sm"
+                    placeholder="Your full name"
                   />
                 </label>
                 <label className="block">
-                  <span className="text-xs text-muted">Address</span>
+                  <span className="text-xs font-medium text-muted">Default delivery address</span>
                   <textarea
                     value={profileForm.address}
                     onChange={(e) => setProfileForm((f) => ({ ...f, address: e.target.value }))}
-                    rows={2}
+                    rows={3}
                     className="neo-input neo-textarea mt-1 px-3 py-2 text-sm"
+                    placeholder="116/3, Shivaji Road, Miraj, 416410"
                   />
                 </label>
-                <p className="text-[0.65rem] text-muted">
+                <p className="text-xs text-muted">
                   Password:{' '}
-                  <Link to="/forgot-password" className="text-primary underline">
-                    Reset
+                  <Link to="/forgot-password" className="font-medium text-primary underline">
+                    Reset via email
                   </Link>
                 </p>
                 {profileError && <p className="text-xs text-strawberry">{profileError}</p>}
                 {profileMessage && <p className="text-xs text-secondary">{profileMessage}</p>}
-                <button type="submit" disabled={profileSaving} className="neo-btn px-4 py-2 text-sm disabled:opacity-60">
-                  {profileSaving ? 'Saving…' : 'Save'}
+                <button type="submit" disabled={profileSaving} className="neo-btn px-5 py-2 text-sm disabled:opacity-60">
+                  {profileSaving ? 'Saving…' : 'Save changes'}
                 </button>
               </form>
-            </Panel>
-          </div>
-
-          <Panel title="Support & links" description="Reach us anytime">
-            <div className={cn(H_SCROLL, 'items-stretch')}>
-              <HelpBlock
-                className="w-[240px] shrink-0 snap-start sm:w-[260px]"
-                title="Customer support"
-                lines={[BRAND_PHONE, BRAND_EMAIL, 'Mon–Sat 9–6 IST']}
-              />
-              <HelpBlock
-                className="w-[240px] shrink-0 snap-start sm:w-[260px]"
-                title="Quick links"
-                links={[
-                  { to: '/shop', label: 'Shop' },
-                  { to: '/cart', label: 'Cart' },
-                  { to: '/about', label: 'About' },
-                ]}
-              />
-              <div className="flex w-[240px] shrink-0 snap-start flex-col justify-center rounded-[20px] border border-sage/45 bg-cream-dark/40 px-4 py-4 sm:w-[260px]">
-                <p className="text-sm font-semibold text-primary">Delivery address on file</p>
-                <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-muted">
-                  {user.address || 'Add an address in Profile to speed up checkout.'}
-                </p>
-              </div>
             </div>
-          </Panel>
-        </div>
+          )}
+
+          {tab === 'orders' && (
+            <div>
+              <h2 className="font-heading text-lg font-semibold text-primary">Order history</h2>
+              <p className="mt-1 text-sm text-muted">Track deliveries and open order details</p>
+              {ordersLoading ? (
+                <p className="mt-6 text-sm text-muted">Loading orders…</p>
+              ) : orders.length === 0 ? (
+                <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border border-dashed border-sage/55 bg-cream/50 px-4 py-6">
+                  <p className="text-sm text-muted">You have not placed any orders yet.</p>
+                  <Link
+                    to="/shop"
+                    className="label-chip shrink-0 border border-primary px-4 py-2 text-sm font-medium text-primary hover:bg-primary hover:text-white"
+                  >
+                    Start shopping
+                  </Link>
+                </div>
+              ) : (
+                <ul className="mt-6 divide-y divide-sage/40">
+                  {orders.map((order) => (
+                    <li key={order.id} className="flex flex-col gap-3 py-4 first:pt-0 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="font-heading text-sm font-semibold text-primary">{order.id}</p>
+                          <span className="label-chip bg-secondary/15 px-2 py-0.5 text-[0.65rem] font-semibold capitalize text-secondary">
+                            {order.status || 'confirmed'}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-muted">
+                          {formatOrderDate(order.created_at)} · {formatPaymentMethod(order.payment_method)} ·{' '}
+                          <span className="font-medium text-primary">{formatPrice(order.total)}</span>
+                        </p>
+                        {order.items?.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {order.items.slice(0, 4).map((item) => (
+                              <img
+                                key={item.id || item.product_id}
+                                src={getCartItemImage(item)}
+                                alt=""
+                                className="h-12 w-12 border border-sage/45 bg-white object-contain p-0.5"
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <Link
+                        to={`/order-confirmation/${order.id}`}
+                        className="label-chip shrink-0 self-start border border-sage/60 px-3 py-1.5 text-xs font-semibold text-primary hover:bg-cream"
+                      >
+                        View details
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {tab === 'addresses' && (
+            <div>
+              <h2 className="font-heading text-lg font-semibold text-primary">Saved addresses</h2>
+              <p className="mt-1 text-sm text-muted">From your profile and past orders</p>
+              {savedAddresses.length === 0 ? (
+                <p className="mt-6 text-sm text-muted">
+                  No saved addresses yet. Add one under{' '}
+                  <button type="button" onClick={() => setTab('profile')} className="font-medium text-primary underline">
+                    Profile
+                  </button>
+                  .
+                </p>
+              ) : (
+                <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+                  {savedAddresses.map((addr) => (
+                    <li key={addr.id} className="border border-sage/45 bg-cream/40 p-4">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold text-primary">{addr.label}</p>
+                        {addr.isDefault && (
+                          <span className="label-chip bg-primary/10 px-1.5 py-0.5 text-[0.55rem] font-bold uppercase text-primary">
+                            Default
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-2 text-xs leading-relaxed text-muted">{addr.lines.join(' · ')}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {tab === 'help' && (
+            <div>
+              <h2 className="font-heading text-lg font-semibold text-primary">Help &amp; support</h2>
+              <p className="mt-1 text-sm text-muted">We are here for orders, returns, and product questions</p>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div className="border border-sage/45 bg-cream/40 p-4">
+                  <p className="text-sm font-semibold text-primary">Customer care</p>
+                  <ul className="mt-2 space-y-1 text-xs text-muted">
+                    <li>{BRAND_PHONE}</li>
+                    <li>{BRAND_EMAIL}</li>
+                    <li>Mon–Sat, 9 AM – 6 PM IST</li>
+                  </ul>
+                </div>
+                <div className="border border-sage/45 bg-cream/40 p-4">
+                  <p className="text-sm font-semibold text-primary">Quick links</p>
+                  <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                    <li>
+                      <Link to="/shop" className="font-medium text-primary hover:underline">
+                        Shop
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/cart" className="font-medium text-primary hover:underline">
+                        Cart
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/contact" className="font-medium text-primary hover:underline">
+                        Contact us
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <p className="mt-6 text-xs leading-relaxed text-muted">
+                Delivery address on file: {user.address || 'None — update in Profile for faster checkout.'}
+              </p>
+            </div>
+          )}
+        </main>
       </div>
-    </div>
-  );
-}
-
-function MiniStat({ label, value }) {
-  return (
-    <div className="rounded-[14px] border border-sage/40 bg-cream px-2.5 py-2">
-      <p className="text-[0.6rem] font-semibold uppercase tracking-wide text-muted">{label}</p>
-      <p className="mt-0.5 truncate font-heading text-xs font-semibold text-primary">{value}</p>
-    </div>
-  );
-}
-
-function HelpBlock({ title, lines, links, className }) {
-  return (
-    <div className={cn('rounded-[20px] border border-sage/45 bg-cream-dark/40 px-4 py-3.5', className)}>
-      <p className="text-sm font-semibold text-primary">{title}</p>
-      {lines?.length > 0 && (
-        <ul className="mt-2 space-y-1 text-xs text-muted">
-          {lines.map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-        </ul>
-      )}
-      {links?.length > 0 && (
-        <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-          {links.map((link) => (
-            <li key={link.to}>
-              <Link to={link.to} className="font-medium text-primary hover:underline">
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }

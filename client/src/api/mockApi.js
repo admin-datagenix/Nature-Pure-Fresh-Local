@@ -7,6 +7,7 @@ import {
   getBestsellers,
   getProductBySlug,
 } from './mockData.js';
+import { getProductWeightOptions, scalePrice } from '../utils/productVariants.js';
 
 const CART_KEY = 'fresh_nature_mock_cart';
 const ORDERS_KEY = 'fresh_nature_orders';
@@ -230,6 +231,29 @@ function verifyOtpCode(pending, code, scope, identifier) {
   }
 }
 
+function validateQuickRegistration({ name, mobile }) {
+  const trimmedName = (name || '').trim();
+  const normalizedPhone = normalizePhone(mobile);
+
+  if (!trimmedName || trimmedName.length < 2) {
+    throw new Error('Please enter your full name');
+  }
+  if (!normalizedPhone || !isValidIndianMobile(normalizedPhone)) {
+    throw new Error('Please enter a valid 10-digit mobile number');
+  }
+
+  const users = loadUsers();
+  if (users.some((u) => u.phone === normalizedPhone)) {
+    throw new Error('An account with this mobile number already exists');
+  }
+
+  return { trimmedName, normalizedPhone };
+}
+
+function isQuickRegistrationPayload({ email, password, address }) {
+  return !String(email || '').trim() && !password && !String(address || '').trim();
+}
+
 function validateRegistrationPayload({ name, email, password, mobile, address }) {
   const trimmedName = (name || '').trim();
   const trimmedAddress = (address || '').trim();
@@ -296,21 +320,38 @@ function saveCart(cart) {
   localStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
 
+function normalizeCartLine(productId, raw, product) {
+  if (typeof raw === 'number') {
+    return { quantity: raw, weight_grams: product?.weight_grams ?? 50 };
+  }
+  if (raw && typeof raw === 'object') {
+    return {
+      quantity: Math.max(0, Number(raw.quantity) || 0),
+      weight_grams: Number(raw.weight_grams) || product?.weight_grams || 50,
+    };
+  }
+  return { quantity: 1, weight_grams: product?.weight_grams ?? 50 };
+}
+
 function buildCartResponse(cartMap) {
-  const items = Object.entries(cartMap).map(([productId, quantity]) => {
+  const items = Object.entries(cartMap).map(([productId, raw]) => {
     const product = MOCK_PRODUCTS.find((p) => p.id === productId);
     if (!product) return null;
+    const { quantity, weight_grams } = normalizeCartLine(productId, raw, product);
+    if (quantity <= 0) return null;
+    const baseGrams = product.weight_grams || weight_grams;
+    const unitPrice = scalePrice(product.price, baseGrams, weight_grams);
     return {
       id: productId,
       product_id: productId,
       quantity,
       name: product.name,
       slug: product.slug,
-      price: product.price,
+      price: unitPrice,
       image: product.image?.replace?.('/catalog/snacks/', '/products/snacks/') ?? product.image,
       category_name: product.category_name,
-      weight_grams: product.weight_grams,
-      line_total: product.price * quantity,
+      weight_grams,
+      line_total: unitPrice * quantity,
     };
   }).filter(Boolean);
 
@@ -369,7 +410,13 @@ export const mockApi = {
     await delay();
     const product = getProductBySlug(slug);
     if (!product) throw new Error('Product not found');
-    return { success: true, data: product };
+    return {
+      success: true,
+      data: {
+        ...product,
+        weight_options: getProductWeightOptions(product),
+      },
+    };
   },
 
   async getReviews(limit = 6) {
@@ -394,21 +441,31 @@ export const mockApi = {
     return { success: true, data: buildCartResponse(cart) };
   },
 
-  async addToCart(productId, quantity = 1) {
+  async addToCart(productId, quantity = 1, options = {}) {
     await delay(100);
     const product = MOCK_PRODUCTS.find((p) => p.id === productId);
     if (!product) throw new Error('Product not found');
+    const weight_grams = Number(options.weightGrams) || product.weight_grams || 50;
     const cart = loadCart();
-    cart[productId] = (cart[productId] || 0) + quantity;
+    const existing = normalizeCartLine(productId, cart[productId], product);
+    if (cart[productId] && existing.weight_grams !== weight_grams) {
+      cart[productId] = { quantity, weight_grams };
+    } else {
+      cart[productId] = { quantity: existing.quantity + quantity, weight_grams };
+    }
     saveCart(cart);
     return { success: true, data: buildCartResponse(cart) };
   },
 
   async updateCartItem(productId, quantity) {
     await delay(100);
+    const product = MOCK_PRODUCTS.find((p) => p.id === productId);
     const cart = loadCart();
     if (quantity <= 0) delete cart[productId];
-    else cart[productId] = quantity;
+    else {
+      const line = normalizeCartLine(productId, cart[productId], product);
+      cart[productId] = { ...line, quantity };
+    }
     saveCart(cart);
     return { success: true, data: buildCartResponse(cart) };
   },
@@ -554,13 +611,30 @@ export const mockApi = {
 
   async sendRegistrationOtp({ name, email, password, mobile, address }) {
     await delay(250);
-    const { trimmedName, trimmedEmail, trimmedAddress, normalizedPhone } = validateRegistrationPayload({
-      name,
-      email,
-      password,
-      mobile,
-      address,
-    });
+
+    let pendingPayload;
+    let normalizedPhone;
+
+    if (isQuickRegistrationPayload({ email, password, address })) {
+      const quick = validateQuickRegistration({ name, mobile });
+      normalizedPhone = quick.normalizedPhone;
+      pendingPayload = {
+        name: quick.trimmedName,
+        phone: normalizedPhone,
+        quick: true,
+      };
+    } else {
+      const full = validateRegistrationPayload({ name, email, password, mobile, address });
+      normalizedPhone = full.normalizedPhone;
+      pendingPayload = {
+        name: full.trimmedName,
+        email: full.trimmedEmail,
+        address: full.trimmedAddress,
+        password,
+        phone: normalizedPhone,
+        quick: false,
+      };
+    }
 
     const otp = generateOtp();
     const expiresAt = Date.now() + OTP_EXPIRY_MS;
@@ -568,13 +642,7 @@ export const mockApi = {
       mobile: normalizedPhone,
       otp,
       expiresAt,
-      payload: {
-        name: trimmedName,
-        email: trimmedEmail,
-        address: trimmedAddress,
-        password,
-        phone: normalizedPhone,
-      },
+      payload: pendingPayload,
     };
 
     savePendingOtp(pending);
@@ -645,23 +713,29 @@ export const mockApi = {
     verifyOtpCode(pending, code, 'register-otp', normalizedPhone);
 
     const users = loadUsers();
-    if (users.some((u) => u.email === pending.payload.email)) {
-      clearPendingOtp();
-      throw new Error('An account with this email already exists');
-    }
     if (users.some((u) => u.phone === normalizedPhone)) {
       clearPendingOtp();
       throw new Error('An account with this mobile number already exists');
     }
 
+    const quick = pending.payload.quick;
+    const email = quick
+      ? `${normalizedPhone}@mobile.naturepure.in`
+      : pending.payload.email;
+
+    if (users.some((u) => u.email === email)) {
+      clearPendingOtp();
+      throw new Error('An account with this email already exists');
+    }
+
     const user = {
       id: `user-${Date.now()}`,
       name: pending.payload.name,
-      email: pending.payload.email,
-      address: pending.payload.address,
+      email,
+      address: quick ? '' : pending.payload.address,
       phone: normalizedPhone,
       phone_verified: true,
-      password: pending.payload.password,
+      password: quick ? `otp-${normalizedPhone}-${Date.now()}` : pending.payload.password,
       created_at: new Date().toISOString(),
     };
 

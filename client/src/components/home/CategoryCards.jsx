@@ -21,7 +21,7 @@ const SHOP_CATEGORIES = [
 
 export default function CategoryCards() {
   return (
-    <section className="pb-12 md:pb-14">
+    <section className="pt-8 pb-12 md:pt-10 md:pb-14">
       <div className="site-container">
         <Reveal variant="blur" className="mb-8 flex items-end justify-between gap-4">
           <h2 className="font-heading text-3xl font-semibold tracking-tight text-primary md:text-[2rem]">

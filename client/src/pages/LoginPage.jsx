@@ -13,11 +13,11 @@ import {
   ClaySubmitButton,
   PasswordToggle,
   AuthError,
-  AuthHint,
   AuthOtpStatus,
+  AuthHint,
   AuthFooter,
 } from '../components/auth/AuthSplitLayout';
-import { authFormStack } from '../components/auth/authTheme';
+import { authFormStackCompact } from '../components/auth/authTheme';
 import { formatIndianPhone } from '../components/auth/AuthForm';
 
 export default function LoginPage() {
@@ -139,20 +139,19 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthSplitLayout>
-      <AuthPageHeader title="Welcome Back!" subtitle="Sign in with password or mobile OTP" />
+    <AuthSplitLayout compact>
+      <AuthPageHeader compact title="Welcome Back!" subtitle="Sign in with password or mobile OTP" />
 
-      <AuthModeTabs mode={mode} onChange={handleModeChange} />
-      <AuthError message={error} />
+      <AuthModeTabs compact mode={mode} onChange={handleModeChange} />
+      <AuthError compact message={error} />
 
       {mode === 'email' ? (
-        <form onSubmit={handlePasswordSubmit} className={authFormStack}>
+        <form onSubmit={handlePasswordSubmit} className={authFormStackCompact}>
           <ClayAuthField
             id="email"
             type="email"
             icon="mail"
             placeholder="Email address"
-            label="Email address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             autoComplete="email"
@@ -163,7 +162,6 @@ export default function LoginPage() {
             type={showPassword ? 'text' : 'password'}
             icon="lock"
             placeholder="Password"
-            label="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoComplete="current-password"
@@ -172,21 +170,19 @@ export default function LoginPage() {
             }
           />
 
-          <div className="-mt-1 text-right">
+          <div className="flex items-center justify-end">
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-[#7C8A80] transition hover:text-[#294633] hover:underline"
+              className="text-xs font-medium text-[#7C8A80] transition hover:text-[#294633] hover:underline"
             >
               Forgot Password?
             </Link>
           </div>
 
-          <AuthHint>After 5 failed attempts, login is temporarily locked for 15 minutes.</AuthHint>
-
           <ClaySubmitButton loading={authLoading}>Login</ClaySubmitButton>
         </form>
       ) : (
-        <form onSubmit={handleOtpSubmit} className={authFormStack}>
+        <form onSubmit={handleOtpSubmit} className={authFormStackCompact}>
           <ClayPhoneField
             id="mobile"
             value={mobile}
@@ -225,7 +221,7 @@ export default function LoginPage() {
         </form>
       )}
 
-      <AuthFooter>
+      <AuthFooter compact>
         Don&apos;t have an account?{' '}
         <Link to="/register" className="font-bold text-[#294633] hover:underline">
           Sign Up

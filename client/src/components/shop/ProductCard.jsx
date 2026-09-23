@@ -5,6 +5,7 @@ import { getProductCardTone, PRODUCT_CARD_WIDTH } from '../../utils/productLayou
 import { getProductImage } from '../../data/productImages';
 import { useCart } from '../../context/CartContext';
 import { cn } from '../../lib/cn';
+import StarRating from '../ui/StarRating';
 
 function CartIcon({ className }) {
   return (
@@ -44,7 +45,7 @@ export default function ProductCard({ product, className, compact = false, selec
     <article
       className={cn(
         'group flex h-full min-w-0 flex-col overflow-hidden rounded-[24px]',
-        'border border-sage/55 bg-cream',
+        'border border-sage/55 bg-white',
         'shadow-[0_6px_20px_rgba(41,70,51,0.05)]',
         'transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(41,70,51,0.08)]',
         selected && 'border-primary/35 ring-1 ring-primary/15',
@@ -68,7 +69,7 @@ export default function ProductCard({ product, className, compact = false, selec
           {product.badge && (
             <span
               className={cn(
-                'absolute left-2.5 top-2.5 z-10 rounded-full px-2.5 py-1 text-[0.58rem] font-bold uppercase tracking-wide shadow-sm',
+                'absolute left-2.5 top-2.5 z-10 text-[0.58rem] font-bold uppercase tracking-wide shadow-sm',
                 getBadgeClass(product.badge)
               )}
             >
@@ -76,7 +77,7 @@ export default function ProductCard({ product, className, compact = false, selec
             </span>
           )}
           {discount > 0 && (
-            <span className="absolute right-2.5 top-2.5 z-10 rounded-full bg-white/95 px-2 py-1 text-[0.58rem] font-bold text-strawberry shadow-sm">
+            <span className="label-chip absolute right-2.5 top-2.5 z-10 bg-white/95 px-2 py-1 text-[0.58rem] font-bold text-strawberry shadow-sm">
               −{discount}%
             </span>
           )}
@@ -96,7 +97,7 @@ export default function ProductCard({ product, className, compact = false, selec
         </div>
       </Link>
 
-      <div className="flex flex-1 flex-col rounded-[20px] bg-cream-dark/90 p-3 sm:p-3.5 m-2.5 mt-2">
+      <div className="flex flex-1 flex-col rounded-[20px] bg-white p-3 sm:p-3.5 m-2.5 mt-2">
         <Link to={`/product/${product.slug}`} className="block min-w-0 flex-1" onClick={(e) => e.stopPropagation()}>
           <h3 className="line-clamp-2 font-heading text-[0.95rem] font-semibold leading-snug text-primary transition group-hover:text-secondary sm:text-base">
             {shortName}
@@ -110,15 +111,14 @@ export default function ProductCard({ product, className, compact = false, selec
 
           <div className="mt-2 flex items-center gap-2">
             {product.rating > 0 && (
-              <p className="flex items-center gap-1 text-[0.7rem] text-muted">
-                <span className="tracking-tight text-mango">★ {product.rating}</span>
-                {product.review_count > 0 && (
-                  <span>({product.review_count})</span>
-                )}
+              <p className="flex flex-wrap items-center gap-1.5 text-[0.7rem] text-muted">
+                <StarRating rating={product.rating} size="sm" />
+                <span className="font-medium text-primary/80">{product.rating}</span>
+                {product.review_count > 0 && <span>({product.review_count})</span>}
               </p>
             )}
             {product.weight_grams && (
-              <span className="ml-auto rounded-full border border-sage/45 bg-cream px-2 py-0.5 text-[0.65rem] font-medium text-muted">
+              <span className="label-chip ml-auto border border-sage/45 bg-white px-2 py-0.5 text-[0.65rem] font-medium text-muted">
                 {product.weight_grams}g
               </span>
             )}
@@ -137,11 +137,12 @@ export default function ProductCard({ product, className, compact = false, selec
             onClick={handleAdd}
             disabled={loading}
             aria-label={`Add ${shortName} to cart`}
+            style={!added ? { backgroundColor: getProductCardTone(product) } : undefined}
             className={cn(
               'flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition duration-200',
               added
                 ? 'bg-success text-white shadow-[0_6px_14px_rgba(74,124,89,0.22)]'
-                : 'border border-sage/50 bg-cream text-primary hover:border-primary hover:bg-primary hover:text-white'
+                : 'border border-sage/55 text-primary shadow-[0_2px_8px_rgba(41,70,51,0.06)] hover:border-primary hover:bg-primary hover:text-white'
             )}
           >
             {added ? <CheckIcon className="h-5 w-5" /> : <CartIcon className="h-5 w-5" />}
@@ -156,13 +157,13 @@ export function ProductCardSkeleton({ className, compact = false }) {
   return (
     <div
       className={cn(
-        'animate-pulse overflow-hidden rounded-[24px] border border-sage/55 bg-cream shadow-[0_6px_20px_rgba(41,70,51,0.04)]',
+        'animate-pulse overflow-hidden rounded-[24px] border border-sage/55 bg-white shadow-[0_6px_20px_rgba(41,70,51,0.04)]',
         compact && PRODUCT_CARD_WIDTH,
         className
       )}
     >
       <div className="m-2.5 mb-0 aspect-square rounded-[20px] border border-sage/40 bg-cream-dark" />
-      <div className="m-2.5 mt-2 space-y-2 rounded-[20px] bg-cream-dark/90 p-3">
+      <div className="m-2.5 mt-2 space-y-2 rounded-[20px] bg-white p-3">
         <div className="h-4 w-4/5 rounded-full bg-sage/40" />
         <div className="h-3 w-1/2 rounded-full bg-sage/35" />
         <div className="flex items-center justify-between pt-2">

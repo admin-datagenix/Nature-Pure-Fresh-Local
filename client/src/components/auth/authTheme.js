@@ -20,7 +20,7 @@ export const authCardCompact =
 
 /** Light, modern neumorphism — inset sage + cream highlight */
 export const authInput =
-  'auth-clay-input h-[58px] w-full rounded-full border-0 bg-[#EEF2EA] text-[0.9375rem] font-normal text-[#294633] placeholder:text-[#7C8A80] shadow-[inset_3px_3px_8px_rgba(61,96,73,0.07),inset_-2px_-2px_6px_rgba(255,255,255,0.92)] outline-none transition duration-200 focus:bg-[#F7F5EF] focus:shadow-[inset_2px_2px_6px_rgba(61,96,73,0.08),0_0_0_3px_rgba(221,231,220,0.9)]';
+  'auth-clay-input h-[58px] w-full rounded-[6px] border-0 bg-[#EEF2EA] text-[0.9375rem] font-normal text-[#294633] placeholder:text-[#7C8A80] shadow-[inset_3px_3px_8px_rgba(61,96,73,0.07),inset_-2px_-2px_6px_rgba(255,255,255,0.92)] outline-none transition duration-200 focus:bg-[#F7F5EF] focus:shadow-[inset_2px_2px_6px_rgba(61,96,73,0.08),0_0_0_3px_rgba(221,231,220,0.9)]';
 
 export const authFieldIcon = 'text-[#3D6049]/70';
 

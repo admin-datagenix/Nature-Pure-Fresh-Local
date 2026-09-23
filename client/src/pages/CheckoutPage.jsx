@@ -10,6 +10,7 @@ import StepIndicator from '../components/checkout/StepIndicator';
 import OrderSummary from '../components/checkout/OrderSummary';
 import Reveal from '../components/ui/Reveal';
 import { cn } from '../lib/cn';
+import NeoSelect from '../components/ui/NeoSelect';
 
 const PAYMENT_METHODS = [
   { id: 'upi', label: 'UPI', desc: 'Google Pay, PhonePe, Paytm', icon: '📱' },
@@ -183,7 +184,7 @@ export default function CheckoutPage() {
                     value={shipping.phone}
                     onChange={(e) => updateField('phone', e.target.value)}
                     className={inputCls(errors.phone)}
-                    placeholder="10-digit mobile"
+                    placeholder="+91 98765 43210"
                   />
                 </Field>
                 <Field label="Email" error={errors.email} className="sm:col-span-2">
@@ -201,7 +202,7 @@ export default function CheckoutPage() {
                     onChange={(e) => updateField('address', e.target.value)}
                     rows={2}
                     className={inputCls(errors.address, true)}
-                    placeholder="House no., street, landmark"
+                    placeholder="Flat / house, street, area"
                   />
                 </Field>
                 <Field label="City" error={errors.city}>
@@ -209,20 +210,21 @@ export default function CheckoutPage() {
                     value={shipping.city}
                     onChange={(e) => updateField('city', e.target.value)}
                     className={inputCls(errors.city)}
-                    placeholder="City"
+                    placeholder="e.g. Miraj"
                   />
                 </Field>
                 <Field label="State" error={errors.state}>
-                  <select
+                  <NeoSelect
                     value={shipping.state}
                     onChange={(e) => updateField('state', e.target.value)}
                     className={inputCls(errors.state)}
+                    placeholder="Select state"
                   >
                     <option value="">Select state</option>
                     {INDIAN_STATES.map((s) => (
                       <option key={s} value={s}>{s}</option>
                     ))}
-                  </select>
+                  </NeoSelect>
                 </Field>
                 <Field label="PIN Code" error={errors.pincode}>
                   <input

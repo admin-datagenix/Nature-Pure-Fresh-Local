@@ -5,6 +5,7 @@ import { getFruitKey, FRUIT_COMPONENTS } from '../components/ui/FruitArt';
 export { getFruitKey, FRUIT_COMPONENTS };
 
 const SNACK_SVG = (n) => `/products/snacks/${n}.svg`;
+const POWDER_SVG = (n) => `/products/powder/${n}.svg`;
 
 /** SVG paths keyed by fruit / product type (no catalog JPGs on product UI) */
 export const SVG_PRODUCT_IMAGES = {
@@ -21,7 +22,7 @@ export const SVG_PRODUCT_IMAGES = {
   pineapple: SNACK_SVG(10),
   strawberry: SNACK_SVG(11),
   sugarcane: SNACK_SVG(12),
-  powder: '/products/powder.svg',
+  powder: POWDER_SVG(1),
   kiwi: SNACK_SVG(5),
 };
 
@@ -37,7 +38,7 @@ export const FRUIT_IMAGES = {
   strawberry: '/products/strawberry.svg',
   pineapple: '/products/pineapple.svg',
   combo: SNACK_SVG(7),
-  powder: '/products/powder.svg',
+  powder: POWDER_SVG(1),
 };
 
 function isSvgPath(src) {
@@ -50,7 +51,8 @@ function svgForProduct(product) {
     return SVG_PRODUCT_IMAGES.combo;
   }
   if (key === 'powder' || product?.slug?.includes('powder')) {
-    return SVG_PRODUCT_IMAGES.powder;
+    const powderSvg = powderSvgFromProductId(product?.product_id || product?.id);
+    return powderSvg || SVG_PRODUCT_IMAGES.powder;
   }
   return SVG_PRODUCT_IMAGES[key] || SVG_PRODUCT_IMAGES.strawberry;
 }
@@ -62,6 +64,9 @@ export function getProductImage(product) {
   const snackSvg = snackSvgFromProductId(product?.product_id || product?.id);
   if (snackSvg) return snackSvg;
 
+  const powderSvg = powderSvgFromProductId(product?.product_id || product?.id);
+  if (powderSvg) return powderSvg;
+
   return svgForProduct(product);
 }
 
@@ -71,6 +76,8 @@ export function getCartItemImage(item) {
   if (resolved && isSvgPath(resolved)) return resolved;
   const snackSvg = snackSvgFromProductId(item?.product_id || item?.id);
   if (snackSvg) return snackSvg;
+  const powderSvg = powderSvgFromProductId(item?.product_id || item?.id);
+  if (powderSvg) return powderSvg;
   return getProductImage(item);
 }
 
@@ -79,7 +86,13 @@ function snackSvgFromProductId(productId) {
   const match = /^snack-(\d{2})$/i.exec(id);
   if (match) return SNACK_SVG(Number(match[1]));
   if (id === 'combo-01' || id === 'combo-02') return SNACK_SVG(7);
-  if (id === 'powder-01') return SVG_PRODUCT_IMAGES.powder;
+  return null;
+}
+
+function powderSvgFromProductId(productId) {
+  const id = String(productId || '');
+  const match = /^powder-(\d{2})$/i.exec(id);
+  if (match) return POWDER_SVG(Number(match[1]));
   return null;
 }
 
@@ -90,6 +103,9 @@ function resolveSnackSvgPath(src) {
     return src.replace('/catalog/snacks/', '/products/snacks/').replace(/\.(jpe?g|png|webp)$/i, '.svg');
   }
   if (src.startsWith('/products/snacks/')) {
+    return src.replace(/\.(jpe?g|png|webp)$/i, '.svg');
+  }
+  if (src.startsWith('/products/powder/')) {
     return src.replace(/\.(jpe?g|png|webp)$/i, '.svg');
   }
   if (src.startsWith('/products/') && isSvgPath(src)) {
@@ -105,6 +121,7 @@ export function isProductImageUrl(src) {
   if (!src) return false;
   if (isSvgPath(src)) return true;
   if (src.startsWith('/products/snacks/')) return true;
+  if (src.startsWith('/products/powder/')) return true;
   if (src.startsWith('/products/') && !/\.(jpe?g|png|webp|avif)(\?|$)/i.test(src)) return true;
   return false;
 }

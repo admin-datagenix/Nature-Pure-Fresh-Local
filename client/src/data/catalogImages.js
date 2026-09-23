@@ -4,6 +4,7 @@ export const CATALOG_SNACKS = '/catalog/NaturePrue-Fresh-LLP-Snacks';
 /** Numbered snack SVGs — served from public/products/snacks (same as dist/products/snacks) */
 export const CATALOG_SNACK_SVGS = '/products/snacks';
 export const CATALOG_POWDER = '/catalog/Naturepure-fresh-Powder';
+export const CATALOG_POWDER_SVGS = '/products/powder';
 
 /** Numbered SVG product art — 1 Apple … 12 Sugarcane */
 export const SNACK_SVG_IMAGES = Object.fromEntries(
@@ -24,6 +25,10 @@ export const SNACK_IMAGES = {
   strawberry: `${CATALOG_SNACKS}/Strawberry.jpg`,
   sugarcane: `${CATALOG_SNACKS}/Sugarcane.jpg`,
 };
+
+export const POWDER_SVG_IMAGES = Object.fromEntries(
+  Array.from({ length: 16 }, (_, i) => [`powder-${i + 1}`, `${CATALOG_POWDER_SVGS}/${i + 1}.svg`])
+);
 
 export const POWDER_IMAGES = {
   abc: `${CATALOG_POWDER}/ABC-Powder.jpg`,

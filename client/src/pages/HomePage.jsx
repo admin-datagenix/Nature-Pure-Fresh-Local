@@ -16,7 +16,7 @@ export default function HomePage() {
 
       <Reveal variant="up" delay={0}>
         <ProductGrid
-          title="Best Seller / Popular Products"
+          title="Best Seller"
           subtitle="Our most-loved freeze-dried fruit chunks — name, price and details for every flavour"
           limit={8}
           shopLink="/shop/fruit-snacks"

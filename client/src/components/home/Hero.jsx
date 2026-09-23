@@ -1,21 +1,19 @@
 import { Link } from 'react-router-dom';
 import { BRAND_NAME, BRAND_TAGLINE, COMPANY_NAME } from '../../data/brand';
 import HeroBanner from './HeroBanner';
-import HeroCustomerAvatars from './HeroCustomerAvatars';
-import TrustCard from './TrustCard';
-import Reveal from '../ui/Reveal';
+import HeroTrustBrief from './HeroTrustBrief';
 
 export default function Hero() {
   return (
-    <section className="relative w-full overflow-x-hidden bg-cream pb-6 pt-8 md:pb-8 md:pt-10">
+    <section className="relative w-full overflow-x-hidden bg-cream pb-8 pt-8 md:pb-10 md:pt-10">
       <div className="site-container">
-        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#eef6f0] via-white to-[#e8f0f8] pb-16 shadow-[0_20px_50px_rgba(41,70,51,0.08)] md:pb-20 lg:pb-24">
+        <div className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-[#eef6f0] via-white to-[#e8f0f8] shadow-[0_20px_50px_rgba(41,70,51,0.08)]">
           <div className="pointer-events-none absolute inset-0">
             <div className="absolute -left-16 top-0 h-48 w-48 rounded-full bg-secondary/10 blur-3xl" />
             <div className="absolute right-0 top-8 h-56 w-56 rounded-full bg-sky-100/70 blur-3xl" />
           </div>
 
-          <div className="relative grid items-center gap-8 p-6 md:p-10 lg:grid-cols-[1fr_1.28fr] lg:gap-10 lg:p-12 lg:pb-10 xl:grid-cols-[0.92fr_1.35fr]">
+          <div className="relative grid items-center gap-8 p-6 pb-8 md:p-10 md:pb-9 lg:grid-cols-[1fr_1.28fr] lg:gap-10 lg:p-12 lg:pb-10 xl:grid-cols-[0.92fr_1.35fr]">
             <div className="text-center lg:text-left">
               <span className="inline-flex animate-fade-up rounded-full border border-secondary/30 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
                 Premium Freeze-Dried
@@ -45,7 +43,7 @@ export default function Hero() {
               </p>
 
               <div
-                className="mt-7 flex animate-fade-up flex-wrap justify-center gap-3 lg:justify-start"
+                className="mt-6 flex animate-fade-up flex-wrap justify-center gap-3 lg:justify-start"
                 style={{ animationDelay: '0.35s' }}
               >
                 <Link
@@ -58,14 +56,17 @@ export default function Hero() {
                   </span>
                 </Link>
                 <Link
-                  to="/about#contact"
+                  to="/contact"
                   className="neo-btn-ghost inline-flex items-center rounded-full px-7 py-3.5 text-base font-semibold"
                 >
                   Contact Us
                 </Link>
               </div>
 
-              <HeroCustomerAvatars />
+              <HeroTrustBrief
+                className="animate-fade-up mx-auto lg:mx-0"
+                style={{ animationDelay: '0.45s' }}
+              />
             </div>
 
             <div
@@ -78,10 +79,6 @@ export default function Hero() {
             </div>
           </div>
         </div>
-
-        <Reveal variant="scale" delay={280} className="site-container relative z-10 -mt-14 md:-mt-20 lg:-mt-24">
-          <TrustCard overlap />
-        </Reveal>
       </div>
     </section>
   );

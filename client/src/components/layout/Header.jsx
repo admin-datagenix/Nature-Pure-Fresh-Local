@@ -8,7 +8,7 @@ import { cn } from '../../lib/cn';
 
 const NAV_LINKS_AFTER_SHOP = [
   { to: '/about', label: 'About Us' },
-  { to: '/about#contact', label: 'Contact Us' },
+  { to: '/contact', label: 'Contact Us' },
 ];
 
 function SearchIcon({ className }) {

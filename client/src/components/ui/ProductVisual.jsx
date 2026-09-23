@@ -79,7 +79,7 @@ export default function ProductVisual({ product, className, plain = false, hideB
 
 function TypeBadge({ type }) {
   return (
-    <span className="pointer-events-none absolute bottom-3 left-3 z-10 rounded-full bg-white/92 px-2.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-wider text-primary/75 backdrop-blur-sm">
+    <span className="label-chip pointer-events-none absolute bottom-3 left-3 z-10 bg-white/92 px-2.5 py-0.5 text-[0.55rem] font-bold uppercase tracking-wider text-primary/75 backdrop-blur-sm">
       {TYPE_LABELS[type]}
     </span>
   );

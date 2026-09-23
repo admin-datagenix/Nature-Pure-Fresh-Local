@@ -1,14 +1,14 @@
 /** Static mock catalog — frontend-only, no backend required */
 
 import { CHUNK_PRODUCTS } from '../data/chunkProducts.js';
-import { SVG_PRODUCT_IMAGES } from '../data/productImages.js';
+import { POWDER_PRODUCTS } from '../data/powderProducts.js';
 
 export const MOCK_CATEGORIES = [
   { id: '1', slug: 'fruit-snacks', name: 'Fruit Snacks', description: '100% real fruit, freeze-dried to perfection', color: '#2D3E2E', product_count: 12 },
   { id: '2', slug: 'tropical-mix', name: 'Tropical Mix', description: 'Exotic flavours from sun-kissed orchards', color: '#F5A623', product_count: 2 },
   { id: '3', slug: 'berry-boost', name: 'Berry Boost', description: 'Energy & antioxidants from nature\'s berries', color: '#E85D5D', product_count: 2 },
   { id: '4', slug: 'combos', name: 'Combos & Bundles', description: 'Curated variety packs at great value', color: '#8B4B8C', product_count: 2 },
-  { id: '5', slug: 'baking-essentials', name: 'Baking Essentials', description: 'Fruit powders for smoothies & baking', color: '#C4A882', product_count: 1 },
+  { id: '5', slug: 'baking-essentials', name: 'Fruit Powders', description: 'Fruit powders for smoothies & baking', color: '#C4A882', product_count: 16 },
   { id: '6', slug: 'kids-snacks', name: 'Kids\' Snacks', description: 'Lunchbox-ready, parent-approved crunch', color: '#6B8F71', product_count: 1 },
 ];
 
@@ -62,29 +62,9 @@ const COMBO_AND_POWDER_PRODUCTS = [
     is_active: true,
     image: '/products/snacks/7.svg',
   },
-  {
-    id: 'powder-01',
-    slug: 'freeze-dried-mango-powder',
-    name: 'Freeze Dried Mango Powder',
-    short_description: '100% natural mango powder for smoothies & baking.',
-    description: 'Finely milled freeze-dried Alphonso mango. Add to smoothies, lassi, cakes and desserts.',
-    price: 300,
-    compare_at_price: null,
-    weight_grams: 50,
-    category_slug: 'baking-essentials',
-    category_name: 'Baking Essentials',
-    badge: null,
-    rating: 4.5,
-    review_count: 67,
-    tags: ['100% Natural'],
-    is_bestseller: false,
-    stock: 180,
-    is_active: true,
-    image: SVG_PRODUCT_IMAGES.powder,
-  },
 ];
 
-export const MOCK_PRODUCTS = [...CHUNK_PRODUCTS, ...COMBO_AND_POWDER_PRODUCTS];
+export const MOCK_PRODUCTS = [...CHUNK_PRODUCTS, ...COMBO_AND_POWDER_PRODUCTS, ...POWDER_PRODUCTS];
 
 export const PROMO_CODES = {
   FRESH10: { discount: 10, type: 'percent', minOrder: 299 },
