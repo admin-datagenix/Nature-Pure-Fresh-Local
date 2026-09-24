@@ -48,6 +48,11 @@ export const BRAND_LOGO_PUBLIC = '/brand/logo.png';
 export const HERO_BANNER_IMAGE = '/hero/Banner-img-1.svg';
 export const HERO_BANNER_FALLBACKS = ['/hero/Banner-img-2.svg', '/hero/banner-products.png', '/hero/banner-products.jpg'];
 
+/** Homepage Shop By Category — card art (public/hero) */
+export const CHUNKS_CATEGORY_BANNER = '/hero/chunks-category-banner.svg';
+export const CHUNKS_CATEGORY_BANNER_FALLBACK = '/hero/chunks-category-banner.png';
+export const POWDER_CATEGORY_BANNER = '/hero/powder-category-banner.svg';
+
 export const CATALOG_PDF = {
   snacks: '/catalog/naturepure-snacks.pdf',
   powder: '/catalog/naturepure-powder.pdf',

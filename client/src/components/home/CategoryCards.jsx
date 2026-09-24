@@ -1,23 +1,83 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { SNACK_IMAGES, POWDER_IMAGES } from '../../data/catalogImages';
+import {
+  CHUNKS_CATEGORY_BANNER,
+  CHUNKS_CATEGORY_BANNER_FALLBACK,
+  POWDER_CATEGORY_BANNER,
+} from '../../data/brand';
 import Reveal from '../ui/Reveal';
+
+const CARD_CLASS =
+  'group relative isolate block min-h-[168px] overflow-hidden rounded-[1.25rem] border border-sage/40 bg-white transition hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(41,70,51,0.1)] sm:min-h-[200px] md:min-h-[220px]';
 
 const SHOP_CATEGORIES = [
   {
     slug: 'fruit-snacks',
     label: 'Chunks',
-    description: 'Crunchy freeze-dried fruit slices & cubes',
-    image: SNACK_IMAGES.strawberry,
-    bg: '#DDE7DC',
+    eyebrow: 'Freeze-dried snacks',
+    subline: 'Crunchy fruit slices & cubes · real fruit · no added sugar',
+    image: CHUNKS_CATEGORY_BANNER,
+    imageFallback: CHUNKS_CATEGORY_BANNER_FALLBACK,
+    imageWidth: 'w-[54%] sm:w-[52%] md:w-[50%]',
+    imageClass:
+      'absolute bottom-0 right-0 h-full w-[115%] max-w-none -translate-x-[4%] object-contain object-bottom object-right drop-shadow-[0_12px_28px_rgba(41,70,51,0.12)] transition duration-500 group-hover:scale-[1.03] sm:-translate-x-[6%]',
   },
   {
     slug: 'baking-essentials',
     label: 'Powder',
-    description: '100% fruit powders for smoothies & baking',
-    image: POWDER_IMAGES.strawberry,
-    bg: '#F0E8DC',
+    eyebrow: 'Fruit powders',
+    subline: '100% fruit for smoothies, baking & everyday nutrition · 16 flavours',
+    image: POWDER_CATEGORY_BANNER,
+    imageWidth: 'w-[54%] sm:w-[52%] md:w-[50%]',
+    imageClass:
+      'absolute bottom-0 right-0 h-full w-[115%] max-w-none -translate-x-[5%] object-contain object-bottom object-right drop-shadow-[0_12px_28px_rgba(41,70,51,0.1)] transition duration-500 group-hover:scale-[1.02] sm:-translate-x-[7%]',
   },
 ];
+
+function CategoryCardImage({ cat }) {
+  const [src, setSrc] = useState(cat.image);
+
+  return (
+    <img
+      src={src}
+      alt={cat.label}
+      className={cat.imageClass}
+      decoding="async"
+      onError={() => {
+        if (cat.imageFallback && src !== cat.imageFallback) setSrc(cat.imageFallback);
+      }}
+    />
+  );
+}
+
+function CategoryPromoCard({ cat }) {
+  return (
+    <Link to={`/shop/${cat.slug}`} className={CARD_CLASS}>
+      <div className="relative z-10 flex h-full min-h-[inherit] max-w-[56%] flex-col justify-center px-5 py-5 sm:max-w-[54%] sm:px-6 sm:py-6 md:px-7">
+        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-secondary sm:text-xs">
+          {cat.eyebrow}
+        </p>
+        <h3 className="font-heading mt-1.5 text-2xl font-semibold leading-[1.1] text-primary sm:mt-2 sm:text-[1.85rem] md:text-[2rem]">
+          {cat.label}
+        </h3>
+        <p className="mt-2 max-w-[14rem] text-[0.7rem] leading-relaxed text-muted sm:text-xs md:text-sm">
+          {cat.subline}
+        </p>
+        <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-md bg-primary px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition group-hover:gap-2.5 sm:mt-5 sm:px-4 sm:py-2.5 sm:text-sm">
+          Shop Now
+          <span aria-hidden="true">→</span>
+        </span>
+      </div>
+
+      <div
+        className={`pointer-events-none absolute inset-y-0 right-0 overflow-hidden ${cat.imageWidth}`}
+        aria-hidden
+      >
+        <CategoryCardImage cat={cat} />
+      </div>
+    </Link>
+  );
+}
 
 export default function CategoryCards() {
   return (
@@ -38,35 +98,7 @@ export default function CategoryCards() {
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
           {SHOP_CATEGORIES.map((cat, i) => (
             <Reveal key={cat.slug} variant={i === 0 ? 'left' : 'right'} delay={i * 100}>
-              <Link
-                to={`/shop/${cat.slug}`}
-                className="group relative flex min-h-[220px] overflow-hidden rounded-[1.5rem] transition hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(41,70,51,0.1)] sm:min-h-[260px]"
-                style={{ backgroundColor: cat.bg }}
-              >
-                <div className="relative z-10 flex flex-1 flex-col p-6 md:p-7">
-                  <h3 className="font-heading text-2xl font-semibold text-primary md:text-[1.65rem]">
-                    {cat.label}
-                  </h3>
-                  <p className="mt-2 max-w-[12rem] text-sm leading-relaxed text-muted">
-                    {cat.description}
-                  </p>
-                  <span className="mt-auto flex h-10 w-10 items-center justify-center rounded-full bg-white text-sm text-primary shadow-sm transition group-hover:scale-110">
-                    →
-                  </span>
-                </div>
-
-                <div className="absolute bottom-0 right-0 top-0 w-[48%] overflow-hidden sm:w-[44%]">
-                  <img
-                    src={cat.image}
-                    alt={cat.label}
-                    className="h-full w-full object-cover object-center transition duration-500 group-hover:scale-105"
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-0"
-                    style={{ background: `linear-gradient(to right, ${cat.bg} 5%, ${cat.bg}99 30%, transparent 70%)` }}
-                  />
-                </div>
-              </Link>
+              <CategoryPromoCard cat={cat} />
             </Reveal>
           ))}
         </div>
