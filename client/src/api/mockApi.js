@@ -305,7 +305,7 @@ function createSession(user) {
   return sanitizeUser(user);
 }
 
-const delay = (ms = 120) => new Promise((r) => setTimeout(r, ms));
+const delay = (ms = 50) => new Promise((r) => setTimeout(r, ms));
 
 function loadCart() {
   try {

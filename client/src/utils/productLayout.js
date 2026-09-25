@@ -7,6 +7,8 @@ export const PRODUCT_GRID_CLASS =
 export const PRODUCT_GRID_SHOP_CLASS =
   'grid grid-cols-2 items-stretch gap-5 sm:gap-6 md:grid-cols-3 [&>*]:min-w-0 [&>*]:h-full';
 
+export const PRODUCT_LIST_SHOP_CLASS = 'flex flex-col gap-4 sm:gap-5 [&>*]:min-w-0';
+
 export const PRODUCT_GRID_FEATURED_CLASS =
   'flex gap-5 overflow-x-auto scroll-smooth pb-1 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-6';
 

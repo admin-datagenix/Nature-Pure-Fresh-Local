@@ -37,21 +37,25 @@ export default function HeroTrustBrief({ className, style }) {
   return (
     <div
       className={cn(
-        'mt-4 w-full overflow-hidden rounded-lg border border-sage/45 bg-white/90 shadow-[0_4px_16px_rgba(41,70,51,0.06)]',
+        'hero-trust-brief mt-4 w-full min-w-0 overflow-hidden rounded-lg border border-sage/45 bg-white/90 shadow-[0_4px_16px_rgba(41,70,51,0.06)]',
         className
       )}
       style={style}
     >
-      <ul className="grid grid-cols-2 gap-x-2 gap-y-2 px-2.5 py-2.5 sm:grid-cols-4 sm:gap-x-1 sm:py-3 sm:pl-3 sm:pr-2">
+      {/* 2×2 grid until very wide screens — avoids 4 cramped columns in the hero left panel */}
+      <ul className="hero-trust-brief__features grid grid-cols-2 gap-x-3 gap-y-2.5 px-2.5 py-2.5 sm:gap-x-4 sm:px-3 sm:py-2.5">
         {TRUST_FEATURES.map((feature) => (
-          <li key={feature.title} className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+          <li
+            key={feature.title}
+            className="hero-trust-brief__item flex min-w-0 items-start gap-1.5 sm:items-center sm:gap-2"
+          >
             <span
               className="flex h-7 w-7 shrink-0 items-center justify-center rounded-sm border border-sage/50 bg-fresh sm:h-8 sm:w-8"
               style={{ color: ICON_COLORS[feature.icon] || '#3D6049' }}
             >
               <TrustFeatureIcon name={feature.icon} />
             </span>
-            <span className="text-[0.65rem] font-semibold leading-[1.15] text-primary sm:text-[0.7rem] lg:text-xs">
+            <span className="min-w-0 flex-1 text-[0.65rem] font-semibold leading-snug text-primary sm:text-[0.7rem] lg:text-xs">
               {feature.title}
             </span>
           </li>

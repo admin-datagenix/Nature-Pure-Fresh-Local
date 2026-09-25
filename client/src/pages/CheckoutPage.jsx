@@ -8,6 +8,7 @@ import { formatPrice } from '../utils/helpers';
 import { getCartItemImage } from '../data/productImages';
 import StepIndicator from '../components/checkout/StepIndicator';
 import OrderSummary from '../components/checkout/OrderSummary';
+import { notifyError } from '../utils/notify';
 import Reveal from '../components/ui/Reveal';
 import { cn } from '../lib/cn';
 import NeoSelect from '../components/ui/NeoSelect';
@@ -113,7 +114,9 @@ export default function CheckoutPage() {
       await refreshCart();
       navigate(`/order-confirmation/${res.data.id}`, { replace: true });
     } catch (err) {
-      setErrors({ submit: err.message });
+      const message = err.message || 'Could not place order';
+      setErrors({ submit: message });
+      notifyError(message);
     } finally {
       setSubmitting(false);
     }
@@ -375,7 +378,6 @@ function inputCls(error, textarea = false) {
     error && 'neo-input-error'
   );
 }
-
 function ConfirmBlock({ title, children }) {
   return (
     <div className="rounded-[1.25rem] bg-cream-dark p-4 shadow-[inset_2px_2px_6px_rgba(61,96,73,0.05)]">
@@ -384,3 +386,4 @@ function ConfirmBlock({ title, children }) {
     </div>
   );
 }
+

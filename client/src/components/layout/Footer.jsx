@@ -9,14 +9,9 @@ import {
   CATALOG_PDF,
 } from '../../data/brand';
 import BrandLogo from '../ui/BrandLogo';
+import useCategoryTree from '../../hooks/useCategoryTree';
 
-const FOOTER_LINKS = {
-  Shop: [
-    { to: '/shop', label: 'All Products' },
-    { to: '/shop/fruit-snacks', label: 'Fruit Snacks' },
-    { to: '/shop/combos', label: 'Combos' },
-    { to: '/shop/baking-essentials', label: 'Fruit Powders' },
-  ],
+const FOOTER_STATIC = {
   Learn: [
     { to: '/about', label: 'About Us' },
     { to: '/about#process', label: 'Our Process' },
@@ -30,6 +25,13 @@ const FOOTER_LINKS = {
 };
 
 export default function Footer() {
+  const { categories } = useCategoryTree();
+
+  const footerSections = {
+    Shop: [{ to: '/shop', label: 'All Products' }, ...categories.map((c) => ({ to: `/shop/${c.slug}`, label: c.name }))],
+    ...FOOTER_STATIC,
+  };
+
   return (
     <footer className="mt-auto w-full max-w-full overflow-x-hidden bg-primary py-16 text-white/85">
       <div className="site-container">
@@ -76,7 +78,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {Object.entries(FOOTER_LINKS).map(([title, links]) => (
+          {Object.entries(footerSections).map(([title, links]) => (
             <div key={title}>
               <h4 className="mb-4 font-heading text-base text-white">{title}</h4>
               <ul className="flex flex-col gap-2.5">

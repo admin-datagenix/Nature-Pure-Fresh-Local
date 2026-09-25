@@ -1,4 +1,6 @@
 node_modules/
+**/node_modules/
+**/.vite/
 dist/
 .env
 .env.local
@@ -7,3 +9,4 @@ dist/
 coverage/
 .vite/
 .env.example
+.package-lock.json

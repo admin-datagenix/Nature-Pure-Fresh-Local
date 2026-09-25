@@ -6,6 +6,7 @@ import {
   saveStoredSelection,
   syncSelectionWithCart,
 } from '../utils/cartSelection';
+import { notifyError, notifySuccess } from '../utils/notify';
 
 const CartContext = createContext(null);
 
@@ -74,7 +75,15 @@ export function CartProvider({ children }) {
         saveStoredSelection(next);
         return next;
       });
+      const line = res.data.items.find((i) => i.product_id === productId);
+      const label = line?.name?.replace(/^Freeze Dried /i, '') || 'Item';
+      notifySuccess(
+        quantity > 1 ? `Added ${quantity} × ${label} to cart` : `Added ${label} to cart`
+      );
       return res.data;
+    } catch (err) {
+      notifyError(err.message || 'Could not add to cart');
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -83,20 +92,32 @@ export function CartProvider({ children }) {
   const updateItem = useCallback(async (productId, quantity) => {
     setLoading(true);
     try {
+      const prevLine = cart.items.find((i) => i.product_id === productId);
       const res = await api.updateCartItem(productId, quantity);
       setCart(res.data);
       if (quantity <= 0) {
         setSelectedIds((prev) => prev.filter((id) => id !== productId));
+        const label = prevLine?.name?.replace(/^Freeze Dried /i, '') || 'Item';
+        notifyInfo(`Removed ${label} from cart`);
       }
+    } catch (err) {
+      notifyError(err.message || 'Could not update cart');
+      throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [cart.items]);
 
   const clear = useCallback(async () => {
-    const res = await api.clearCart();
-    setCart(res.data);
-    setSelectedIds([]);
+    try {
+      const res = await api.clearCart();
+      setCart(res.data);
+      setSelectedIds([]);
+      notifyInfo('Cart cleared');
+    } catch (err) {
+      notifyError(err.message || 'Could not clear cart');
+      throw err;
+    }
   }, []);
 
   return (

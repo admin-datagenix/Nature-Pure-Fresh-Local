@@ -12,6 +12,7 @@ export default function ProductHoverZoom({
   className,
   imgClassName,
   scale = DEFAULT_SCALE,
+  compact = false,
 }) {
   const [zoom, setZoom] = useState({ active: false, x: 50, y: 50 });
 
@@ -36,7 +37,12 @@ export default function ProductHoverZoom({
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
-      <div className="flex h-full w-full items-center justify-center p-4 sm:p-6 md:p-8">
+      <div
+        className={cn(
+          'flex h-full w-full items-center justify-center',
+          compact ? 'p-2.5 sm:p-3' : 'p-4 sm:p-6 md:p-8'
+        )}
+      >
         <img
           src={src}
           alt={alt}
