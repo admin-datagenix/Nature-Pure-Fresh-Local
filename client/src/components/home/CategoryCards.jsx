@@ -4,6 +4,7 @@ import {
   CHUNKS_CATEGORY_BANNER,
   CHUNKS_CATEGORY_BANNER_FALLBACK,
   POWDER_CATEGORY_BANNER,
+  POWDER_CATEGORY_BANNER_FALLBACK,
 } from '../../data/brand';
 import Reveal from '../ui/Reveal';
 
@@ -13,14 +14,15 @@ const CARD_CLASS =
 const SHOP_CATEGORIES = [
   {
     slug: 'fruit-snacks',
-    label: 'Chunks',
+    label: 'Chunks/Slices',
     eyebrow: 'Freeze-dried snacks',
     subline: 'Crunchy fruit slices & cubes · real fruit · no added sugar',
     image: CHUNKS_CATEGORY_BANNER,
     imageFallback: CHUNKS_CATEGORY_BANNER_FALLBACK,
-    imageWidth: 'w-[54%] sm:w-[52%] md:w-[50%]',
+    imageWidth: 'w-[50%] sm:w-[48%] md:w-[46%]',
+    imagePanelClass: 'bg-white',
     imageClass:
-      'absolute bottom-0 right-0 h-full w-[115%] max-w-none -translate-x-[4%] object-contain object-bottom object-right drop-shadow-[0_12px_28px_rgba(41,70,51,0.12)] transition duration-500 group-hover:scale-[1.03] sm:-translate-x-[6%]',
+      'category-card-banner category-card-banner--chunks absolute inset-0 h-full w-full bg-white object-contain object-right-bottom p-2 transition duration-500 group-hover:scale-[1.03]',
   },
   {
     slug: 'baking-essentials',
@@ -28,9 +30,11 @@ const SHOP_CATEGORIES = [
     eyebrow: 'Fruit powders',
     subline: '100% fruit for smoothies, baking & everyday nutrition · 16 flavours',
     image: POWDER_CATEGORY_BANNER,
-    imageWidth: 'w-[54%] sm:w-[52%] md:w-[50%]',
+    imageFallback: POWDER_CATEGORY_BANNER_FALLBACK,
+    imageWidth: 'w-[50%] sm:w-[48%] md:w-[46%]',
+    imagePanelClass: 'bg-white',
     imageClass:
-      'absolute bottom-0 right-0 h-full w-[115%] max-w-none -translate-x-[5%] object-contain object-bottom object-right drop-shadow-[0_12px_28px_rgba(41,70,51,0.1)] transition duration-500 group-hover:scale-[1.02] sm:-translate-x-[7%]',
+      'category-card-banner category-card-banner--powder absolute inset-0 h-full w-full bg-white object-contain object-[68%_72%] p-2 transition duration-500 group-hover:scale-[1.02]',
   },
 ];
 
@@ -42,6 +46,7 @@ function CategoryCardImage({ cat }) {
       src={src}
       alt={cat.label}
       className={cat.imageClass}
+      loading="lazy"
       decoding="async"
       onError={() => {
         if (cat.imageFallback && src !== cat.imageFallback) setSrc(cat.imageFallback);
@@ -70,7 +75,7 @@ function CategoryPromoCard({ cat }) {
       </div>
 
       <div
-        className={`pointer-events-none absolute inset-y-0 right-0 overflow-hidden ${cat.imageWidth}`}
+        className={`pointer-events-none absolute inset-y-0 right-0 overflow-hidden rounded-r-[1.25rem] bg-white ${cat.imagePanelClass || ''} ${cat.imageWidth}`}
         aria-hidden
       >
         <CategoryCardImage cat={cat} />

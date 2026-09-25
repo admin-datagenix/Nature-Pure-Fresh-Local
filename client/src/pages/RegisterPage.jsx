@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useOtpCountdown } from '../hooks/useOtpCountdown';
 import { OTP_EXPIRY_SECONDS, OTP_RESEND_COOLDOWN_SECONDS } from '../utils/authConfig';
+import { notifySuccess } from '../utils/notify';
 import {
   AuthSplitLayout,
   AuthPageHeader,
@@ -143,7 +144,9 @@ export default function RegisterPage() {
     }
     try {
       const res = await verifyRegistrationOtp(pendingMobile, otp);
-      setSuccess(res.message || 'Account created — mobile verified. You are signed in.');
+      const msg = res.message || 'Account created — mobile verified. You are signed in.';
+      setSuccess(msg);
+      notifySuccess('Welcome to NaturePure Fresh!');
       setTimeout(() => navigate('/account', { replace: true }), 900);
     } catch (err) {
       setError(err.message || 'Registration failed');

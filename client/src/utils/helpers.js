@@ -20,17 +20,21 @@ export function getDiscountPercent(product) {
   return Math.round(((compare - price) / compare) * 100);
 }
 
+/** Compact promo badge — always `w-fit` so flex parents do not stretch it full width */
+export const PRODUCT_BADGE_CHIP =
+  'label-chip inline-flex w-fit max-w-full shrink-0 items-center px-2 py-0.5 text-[0.62rem] font-bold uppercase leading-none tracking-wide';
+
 export function getBadgeClass(badge) {
   if (!badge) return '';
   const map = {
-    SALE: 'label-chip bg-strawberry text-white',
-    BESTSELLER: 'label-chip bg-primary text-white',
-    NEW: 'label-chip bg-secondary text-white',
-    'FAN FAV': 'label-chip bg-mango text-white',
-    'GREAT VALUE': 'label-chip bg-secondary text-white',
-    'RARE FIND': 'label-chip bg-mango text-white',
+    SALE: 'bg-strawberry text-white',
+    BESTSELLER: 'bg-primary text-white',
+    NEW: 'bg-secondary text-white',
+    'FAN FAV': 'bg-mango text-white',
+    'GREAT VALUE': 'bg-secondary text-white',
+    'RARE FIND': 'bg-mango text-white',
   };
-  return map[badge] || 'label-chip bg-primary text-white';
+  return map[badge] || 'bg-primary text-white';
 }
 
 export function renderStars(rating) {

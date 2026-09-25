@@ -6,6 +6,7 @@ import { getCartItemImage } from '../data/productImages';
 import { api } from '../api/client';
 import Reveal from '../components/ui/Reveal';
 import { cn } from '../lib/cn';
+import { notifyError, notifySuccess } from '../utils/notify';
 
 export default function CartPage() {
   const {
@@ -49,9 +50,11 @@ export default function CartPage() {
     try {
       const res = await api.validatePromoCode(promoInput, subtotalForCheckout);
       setPromo(res.data);
+      notifySuccess(`Promo "${res.data.code}" applied`);
     } catch (err) {
       setPromo(null);
       setPromoError(err.message);
+      notifyError(err.message || 'Invalid promo code');
     } finally {
       setPromoLoading(false);
     }

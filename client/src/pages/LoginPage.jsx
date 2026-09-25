@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useOtpCountdown } from '../hooks/useOtpCountdown';
 import { OTP_RESEND_COOLDOWN_SECONDS } from '../utils/authConfig';
+import { notifySuccess } from '../utils/notify';
 import {
   AuthSplitLayout,
   AuthPageHeader,
@@ -85,6 +86,7 @@ export default function LoginPage() {
     setError('');
     try {
       await login(email, password);
+      notifySuccess('Welcome back!');
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -132,6 +134,7 @@ export default function LoginPage() {
     }
     try {
       await verifyLoginOtp(pendingMobile, otp);
+      notifySuccess('Signed in successfully');
       navigate(redirectTo, { replace: true });
     } catch (err) {
       setError(err.message || 'OTP sign in failed');

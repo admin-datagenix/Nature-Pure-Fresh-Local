@@ -3,7 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import BrandLogo from '../ui/BrandLogo';
-import { POPULAR_CATEGORIES } from '../../utils/helpers';
+import useCategoryTree, { categoryEmoji } from '../../hooks/useCategoryTree';
 import { cn } from '../../lib/cn';
 
 const NAV_LINKS_AFTER_SHOP = [
@@ -71,6 +71,7 @@ export default function Header() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const shopRef = useRef(null);
+  const { categories } = useCategoryTree();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [shopOpen, setShopOpen] = useState(false);
@@ -135,25 +136,34 @@ export default function Header() {
             </div>
 
             {shopOpen && (
-              <div className="absolute left-1/2 top-full z-50 mt-2 w-52 -translate-x-1/2 rounded-2xl border border-sage/60 bg-white p-2 shadow-[0_16px_40px_rgba(41,70,51,0.12)]">
+              <div className="absolute left-0 top-full z-50 mt-2 w-[min(calc(100vw-2rem),32rem)] rounded-2xl border border-sage/60 bg-white p-3 shadow-[0_16px_40px_rgba(41,70,51,0.12)] xl:w-[36rem]">
                 <Link
                   to="/shop"
                   onClick={() => setShopOpen(false)}
-                  className="mb-1 block rounded-xl px-3 py-2 text-sm font-semibold text-primary transition hover:bg-cream"
+                  className="mb-2 block rounded-xl px-3 py-2.5 text-sm font-semibold text-primary transition hover:bg-cream"
                 >
                   All Products
                 </Link>
-                {POPULAR_CATEGORIES.map((cat) => (
-                  <Link
-                    key={cat.slug}
-                    to={`/shop/${cat.slug}`}
-                    onClick={() => setShopOpen(false)}
-                    className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-primary/80 transition hover:bg-cream hover:text-primary"
-                  >
-                    <span>{cat.emoji}</span>
-                    {cat.label}
-                  </Link>
-                ))}
+                <div className="grid gap-0.5 sm:grid-cols-2">
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.slug}
+                      to={`/shop/${cat.slug}`}
+                      onClick={() => setShopOpen(false)}
+                      className="rounded-xl px-3 py-2.5 transition hover:bg-cream"
+                    >
+                      <span className="flex items-center gap-2 text-sm font-semibold text-primary">
+                        <span aria-hidden="true">{categoryEmoji(cat.slug)}</span>
+                        {cat.name}
+                      </span>
+                      {cat.description ? (
+                        <span className="mt-0.5 line-clamp-2 block text-xs leading-snug text-muted">
+                          {cat.description}
+                        </span>
+                      ) : null}
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -277,15 +287,15 @@ export default function Header() {
           ))}
 
           <p className="px-3 pt-2 text-xs font-semibold uppercase tracking-wider text-muted">Categories</p>
-          {POPULAR_CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <Link
               key={cat.slug}
               to={`/shop/${cat.slug}`}
               onClick={() => setMobileOpen(false)}
               className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-primary/75 hover:bg-cream"
             >
-              <span>{cat.emoji}</span>
-              {cat.label}
+              <span aria-hidden="true">{categoryEmoji(cat.slug)}</span>
+              {cat.name}
             </Link>
           ))}
         </div>

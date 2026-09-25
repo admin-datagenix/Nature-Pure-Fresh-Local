@@ -23,7 +23,14 @@ function ProductToneBackdrop() {
   );
 }
 
-export default function ProductVisual({ product, className, plain = false, hideBadge = false, hoverZoom = false }) {
+export default function ProductVisual({
+  product,
+  className,
+  plain = false,
+  hideBadge = false,
+  hoverZoom = false,
+  compactMedia = false,
+}) {
   const type = getProductType(product);
   const imageSrc = getProductImage(product);
   const usePhoto = isProductImageUrl(imageSrc);
@@ -37,7 +44,12 @@ export default function ProductVisual({ product, className, plain = false, hideB
       >
         {!plain && <ProductToneBackdrop />}
         {hoverZoom ? (
-          <ProductHoverZoom src={imageSrc} alt={product.name} className="relative z-[1] h-full w-full" />
+          <ProductHoverZoom
+            src={imageSrc}
+            alt={product.name}
+            className="relative z-[1] h-full w-full"
+            compact={compactMedia}
+          />
         ) : (
           <div className="relative z-[1] flex h-full w-full items-center justify-center p-3 sm:p-4">
             <img

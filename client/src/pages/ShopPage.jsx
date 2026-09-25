@@ -1,11 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import ProductCard, { ProductCardSkeleton } from '../components/shop/ProductCard';
 import ShopFilters from '../components/shop/ShopFilters';
+import ShopViewToggle from '../components/shop/ShopViewToggle';
 import NeoSelect from '../components/ui/NeoSelect';
-import { PRODUCT_GRID_SHOP_CLASS } from '../utils/productLayout';
+import { STORE_SETTINGS } from '../config/storeSettings';
 import { filterFallbackProducts } from '../data/fallbackProducts';
+import useCategoryTree from '../hooks/useCategoryTree';
+import {
+  PRODUCT_GRID_SHOP_CLASS,
+  PRODUCT_LIST_SHOP_CLASS,
+} from '../utils/productLayout';
+import { applyOutOfStockListingFilter } from '../utils/stockDisplay';
 
 const SORT_OPTIONS = [
   { value: 'bestseller', label: 'Best Selling' },
@@ -15,54 +22,99 @@ const SORT_OPTIONS = [
   { value: 'newest', label: 'Newest' },
 ];
 
+const paginationMode = STORE_SETTINGS.shopProductPagination;
+const pageSize = STORE_SETTINGS.shopPageSize;
+
 export default function ShopPage() {
   const { category } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { categories } = useCategoryTree();
+  const loadMoreRef = useRef(null);
+
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState(null);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
 
   const page = parseInt(searchParams.get('page') || '1', 10);
   const sort = searchParams.get('sort') || 'bestseller';
   const search = searchParams.get('q') || '';
+  const view = searchParams.get('view') === 'list' ? 'list' : 'grid';
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
   const rating = searchParams.get('rating') || '';
   const stock = searchParams.get('stock') || '';
   const format = searchParams.get('format') || '';
 
-  useEffect(() => {
-    api.getCategories().then((res) => setCategories(res.data)).catch(() => {});
-  }, []);
+  const fetchParams = {
+    page,
+    limit: pageSize,
+    category,
+    sort,
+    search: search || undefined,
+    minPrice: minPrice || undefined,
+    maxPrice: maxPrice || undefined,
+    rating: rating || undefined,
+    stock: stock || undefined,
+    format: format || undefined,
+  };
+
+  const loadProducts = useCallback(
+    (append = false) => {
+      const isAppend = append && paginationMode === 'infinite' && page > 1;
+      if (isAppend) setLoadingMore(true);
+      else setLoading(true);
+
+      api
+        .getProducts(fetchParams)
+        .then((res) => {
+          let list = res.data || res.products || [];
+          if (!list.length) {
+            list = filterFallbackProducts({ category, limit: pageSize });
+          }
+          list = applyOutOfStockListingFilter(list, stock);
+          setProducts((prev) => (isAppend ? [...prev, ...list] : list));
+          setPagination(res.pagination);
+        })
+        .catch(() => {
+          const fallback = applyOutOfStockListingFilter(
+            filterFallbackProducts({ category, limit: pageSize }),
+            stock
+          );
+          setProducts((prev) => (isAppend ? [...prev, ...fallback] : fallback));
+          setPagination(null);
+        })
+        .finally(() => {
+          setLoading(false);
+          setLoadingMore(false);
+        });
+    },
+    [category, page, sort, search, minPrice, maxPrice, rating, stock, format]
+  );
 
   useEffect(() => {
-    setLoading(true);
-    api
-      .getProducts({
-        page,
-        limit: 12,
-        category,
-        sort,
-        search: search || undefined,
-        minPrice: minPrice || undefined,
-        maxPrice: maxPrice || undefined,
-        rating: rating || undefined,
-        stock: stock || undefined,
-        format: format || undefined,
-      })
-      .then((res) => {
-        const list = res.data || res.products || [];
-        setProducts(list.length ? list : filterFallbackProducts({ category, limit: 12 }));
-        setPagination(res.pagination);
-      })
-      .catch(() => {
-        setProducts(filterFallbackProducts({ category, limit: 12 }));
-        setPagination(null);
-      })
-      .finally(() => setLoading(false));
-  }, [category, page, sort, search, minPrice, maxPrice, rating, stock, format]);
+    loadProducts(page > 1 && paginationMode === 'infinite');
+  }, [loadProducts, page]);
+
+  useEffect(() => {
+    if (paginationMode !== 'infinite' || !pagination?.hasMore || loading || loadingMore) {
+      return undefined;
+    }
+    const node = loadMoreRef.current;
+    if (!node) return undefined;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !loadingMore) {
+          updateParam('page', String(page + 1));
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [pagination, loading, loadingMore, page]);
 
   const updateFilterParam = (key, value) => {
     if (key === 'reset') {
@@ -88,6 +140,8 @@ export default function ShopPage() {
   const toggleSelectProduct = (id) => {
     setSelectedProductId((current) => (current === id ? null : id));
   };
+
+  const listClass = view === 'list' ? PRODUCT_LIST_SHOP_CLASS : PRODUCT_GRID_SHOP_CLASS;
 
   return (
     <div className="pb-16">
@@ -126,7 +180,7 @@ export default function ShopPage() {
           />
 
           <div className="min-w-0">
-            <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="min-w-0 flex-1">
                 <input
                   type="search"
@@ -139,23 +193,26 @@ export default function ShopPage() {
                   className="neo-input px-5 py-3 text-sm"
                 />
               </div>
-              <NeoSelect
-                value={sort}
-                onChange={(e) => updateParam('sort', e.target.value)}
-                wrapperClassName="w-full shrink-0 sm:w-auto sm:min-w-[12.5rem]"
-                className="px-5 py-3"
-                aria-label="Sort products"
-              >
-                {SORT_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </NeoSelect>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <ShopViewToggle view={view} onChange={(v) => updateParam('view', v === 'grid' ? '' : v)} />
+                <NeoSelect
+                  value={sort}
+                  onChange={(e) => updateParam('sort', e.target.value)}
+                  wrapperClassName="w-full shrink-0 sm:w-auto sm:min-w-[12.5rem]"
+                  className="px-5 py-3"
+                  aria-label="Sort products"
+                >
+                  {SORT_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </NeoSelect>
+              </div>
             </div>
 
             {loading ? (
-              <div className={PRODUCT_GRID_SHOP_CLASS}>
+              <div className={listClass}>
                 {[...Array(9)].map((_, i) => (
                   <ProductCardSkeleton key={i} className="h-full" />
                 ))}
@@ -164,11 +221,12 @@ export default function ShopPage() {
               <p className="py-16 text-center text-muted">No products match your filters.</p>
             ) : (
               <>
-                <div className={PRODUCT_GRID_SHOP_CLASS}>
+                <div className={listClass}>
                   {products.map((p) => (
                     <ProductCard
-                      key={p.id}
+                      key={`${p.id}-${p.slug}`}
                       product={p}
+                      layout={view}
                       className="h-full"
                       selected={selectedProductId === p.id}
                       onSelect={toggleSelectProduct}
@@ -176,7 +234,7 @@ export default function ShopPage() {
                   ))}
                 </div>
 
-                {pagination && pagination.totalPages > 1 && (
+                {paginationMode === 'pagination' && pagination && pagination.totalPages > 1 && (
                   <div className="mt-10 flex items-center justify-center gap-4 text-sm text-muted">
                     <button
                       type="button"
@@ -197,6 +255,12 @@ export default function ShopPage() {
                     >
                       Next
                     </button>
+                  </div>
+                )}
+
+                {paginationMode === 'infinite' && pagination?.hasMore && (
+                  <div ref={loadMoreRef} className="mt-8 flex justify-center py-4 text-sm text-muted">
+                    {loadingMore ? 'Loading more products…' : 'Scroll for more'}
                   </div>
                 )}
               </>

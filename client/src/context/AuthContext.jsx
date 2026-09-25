@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
+import { notifyInfo } from '../utils/notify';
 
 const AuthContext = createContext(null);
 
@@ -95,6 +96,7 @@ export function AuthProvider({ children }) {
     try {
       await api.logout();
       setUser(null);
+      notifyInfo('Signed out');
     } finally {
       setAuthLoading(false);
     }

@@ -22,7 +22,7 @@ function LogoTile({ logo }) {
 
 export default function AboutCertifications() {
   return (
-    <section className="bg-gradient-to-b from-cream-dark/80 to-cream py-16 md:py-24" id="certifications">
+    <section className="about-page-section border-t border-sage/45 bg-cream-dark/50 py-8 md:py-10" id="certifications">
       <div className="site-container">
         <Reveal className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">From farm to global quality</p>
@@ -30,9 +30,9 @@ export default function AboutCertifications() {
           <p className="mt-4 text-sm leading-relaxed text-muted md:text-base">{CERTIFICATIONS_INTRO}</p>
         </Reveal>
 
-        <Reveal delay={60} className="mt-12">
-          <div className="rounded-[1.75rem] border border-sage/50 bg-white/90 p-6 shadow-[0_16px_48px_rgba(41,70,51,0.07)] md:p-10">
-            <p className="mb-8 text-center text-sm font-medium text-muted">
+        <Reveal delay={60} className="mt-6">
+          <div className="rounded-xl border border-sage/50 bg-white/90 p-5 shadow-[0_12px_36px_rgba(41,70,51,0.06)] md:p-7">
+            <p className="mb-5 text-center text-sm font-medium text-muted">
               Official marks &amp; quality badges — as shown on{' '}
               <a
                 href="https://naturepurefresh.com/"
@@ -51,8 +51,8 @@ export default function AboutCertifications() {
           </div>
         </Reveal>
 
-        <Reveal delay={100} className="mt-14">
-          <div className="rounded-[1.5rem] border border-sage/50 bg-primary px-6 py-10 text-white md:px-10">
+        <Reveal delay={100} className="mt-8">
+          <div className="rounded-xl border border-sage/50 bg-primary px-5 py-8 text-white md:px-8">
             <h3 className="text-center font-heading text-xl font-semibold md:text-2xl">
               Quality standards at {BRAND_NAME}
             </h3>

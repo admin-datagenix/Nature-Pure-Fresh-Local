@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../../api/client';
+import { notifyError, notifySuccess } from '../../utils/notify';
 
 export default function Newsletter() {
   const [email, setEmail] = useState('');
@@ -12,8 +13,10 @@ export default function Newsletter() {
       await api.subscribeNewsletter(email);
       setStatus('success');
       setEmail('');
+      notifySuccess('Subscribed! Check your inbox for offers.');
     } catch {
       setStatus('error');
+      notifyError('Could not subscribe. Please try again.');
     }
   };
 

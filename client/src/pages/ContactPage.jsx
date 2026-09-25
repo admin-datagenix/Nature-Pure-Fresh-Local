@@ -11,6 +11,7 @@ import {
 } from '../data/brand';
 import Reveal from '../components/ui/Reveal';
 import NeoSelect from '../components/ui/NeoSelect';
+import { notifyError, notifySuccess } from '../utils/notify';
 
 const SUBJECTS = [
   'General enquiry',
@@ -45,8 +46,11 @@ export default function ContactPage() {
       await new Promise((r) => setTimeout(r, 700));
       setSent(true);
       setForm({ name: '', email: '', phone: '', subject: SUBJECTS[0], message: '' });
+      notifySuccess('Message sent! We will get back to you soon.');
     } catch {
-      setError('Could not send your message. Please email us directly.');
+      const msg = 'Could not send your message. Please email us directly.';
+      setError(msg);
+      notifyError(msg);
     } finally {
       setSending(false);
     }

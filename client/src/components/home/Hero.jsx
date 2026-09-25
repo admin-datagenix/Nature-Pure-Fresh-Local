@@ -13,7 +13,7 @@ export default function Hero() {
             <div className="absolute right-0 top-8 h-56 w-56 rounded-full bg-sky-100/70 blur-3xl" />
           </div>
 
-          <div className="relative grid items-center gap-8 p-6 pb-8 md:p-10 md:pb-9 lg:grid-cols-[1fr_1.28fr] lg:gap-10 lg:p-12 lg:pb-10 xl:grid-cols-[0.92fr_1.35fr]">
+          <div className="relative grid items-center gap-8 p-6 pb-8 md:p-10 md:pb-9 lg:grid-cols-[1fr_1.45fr] lg:gap-10 lg:p-12 lg:pb-10 xl:grid-cols-[0.88fr_1.5fr]">
             <div className="text-center lg:text-left">
               <span className="inline-flex animate-fade-up rounded-full border border-secondary/30 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
                 Premium Freeze-Dried
@@ -70,10 +70,10 @@ export default function Hero() {
             </div>
 
             <div
-              className="animate-fade-up flex min-h-[300px] min-w-0 items-center justify-center overflow-hidden sm:min-h-[360px] lg:min-h-[440px] xl:min-h-[520px]"
+              className="animate-fade-up flex min-h-[360px] min-w-0 items-center justify-center sm:min-h-[480px] lg:min-h-[560px] xl:min-h-[600px]"
               style={{ animationDelay: '0.2s' }}
             >
-              <div className="animate-drift w-full max-w-full">
+              <div className="hero-banner-column w-full max-w-full">
                 <HeroBanner />
               </div>
             </div>
