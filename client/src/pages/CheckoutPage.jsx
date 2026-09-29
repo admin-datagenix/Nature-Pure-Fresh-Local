@@ -8,20 +8,15 @@ import { formatPrice } from '../utils/helpers';
 import { getCartItemImage } from '../data/productImages';
 import StepIndicator from '../components/checkout/StepIndicator';
 import OrderSummary from '../components/checkout/OrderSummary';
+import AddressSelectionStep from '../components/checkout/AddressSelectionStep';
+import { loadStoredAddresses, mergeSavedAddresses } from '../utils/savedAddresses';
 import { notifyError } from '../utils/notify';
 import Reveal from '../components/ui/Reveal';
-import { cn } from '../lib/cn';
-import NeoSelect from '../components/ui/NeoSelect';
 
 const PAYMENT_METHODS = [
   { id: 'upi', label: 'UPI', desc: 'Google Pay, PhonePe, Paytm', icon: '📱' },
   { id: 'card', label: 'Credit / Debit Card', desc: 'Visa, Mastercard, RuPay', icon: '💳' },
   { id: 'cod', label: 'Cash on Delivery', desc: 'Pay when your order arrives', icon: '💵' },
-];
-
-const INDIAN_STATES = [
-  'Andhra Pradesh', 'Gujarat', 'Karnataka', 'Kerala', 'Maharashtra',
-  'Rajasthan', 'Tamil Nadu', 'Telangana', 'Uttar Pradesh', 'West Bengal',
 ];
 
 function emptyShipping() {
@@ -30,7 +25,7 @@ function emptyShipping() {
 
 export default function CheckoutPage() {
   const { cart, refreshCart } = useCart();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const promo = location.state?.promo || null;
@@ -49,6 +44,7 @@ export default function CheckoutPage() {
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [stepKey, setStepKey] = useState(0);
+  const [savedAddresses, setSavedAddresses] = useState([]);
 
   const shippingCost = checkoutCart.subtotal >= 999 ? 0 : 49;
   const discount = promo?.discount || 0;
@@ -66,23 +62,34 @@ export default function CheckoutPage() {
   }, [user]);
 
   useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      let orders = [];
+      if (isAuthenticated) {
+        try {
+          const res = await api.getOrders();
+          orders = res.data || [];
+        } catch {
+          orders = [];
+        }
+      }
+      if (cancelled) return;
+      const merged = mergeSavedAddresses(user, orders, loadStoredAddresses());
+      setSavedAddresses(merged);
+      if (merged[0]) {
+        setShipping((s) => ({ ...s, ...merged[0] }));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user, isAuthenticated]);
+
+  useEffect(() => {
     if (checkoutCart.items.length === 0 && step < 4) {
       navigate('/cart');
     }
   }, [checkoutCart.items.length, navigate, step]);
-
-  const validateShipping = () => {
-    const e = {};
-    if (!shipping.name.trim()) e.name = 'Name is required';
-    if (!/^[6-9]\d{9}$/.test(shipping.phone.replace(/\D/g, '').slice(-10))) e.phone = 'Valid 10-digit phone required';
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shipping.email)) e.email = 'Valid email required';
-    if (shipping.address.trim().length < 10) e.address = 'Full address required';
-    if (!shipping.city.trim()) e.city = 'City is required';
-    if (!shipping.state) e.state = 'State is required';
-    if (!/^\d{6}$/.test(shipping.pincode)) e.pincode = 'Valid 6-digit PIN required';
-    setErrors(e);
-    return Object.keys(e).length === 0;
-  };
 
   const goToStep = (next) => {
     setStepKey((k) => k + 1);
@@ -92,7 +99,6 @@ export default function CheckoutPage() {
 
   const handleNext = () => {
     if (step === 1) goToStep(2);
-    else if (step === 2 && validateShipping()) goToStep(3);
     else if (step === 3) goToStep(4);
   };
 
@@ -112,7 +118,7 @@ export default function CheckoutPage() {
         productIds: checkoutProductIds?.length ? checkoutProductIds : undefined,
       });
       await refreshCart();
-      navigate(`/order-confirmation/${res.data.id}`, { replace: true });
+      navigate(`/order-confirmation/${res.data.id}`, { replace: true, state: { fromCheckout: true } });
     } catch (err) {
       const message = err.message || 'Could not place order';
       setErrors({ submit: message });
@@ -122,9 +128,17 @@ export default function CheckoutPage() {
     }
   };
 
-  const updateField = (field, value) => {
-    setShipping((s) => ({ ...s, [field]: value }));
-    if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }));
+  const refreshSavedAddresses = async () => {
+    let orders = [];
+    if (isAuthenticated) {
+      try {
+        const res = await api.getOrders();
+        orders = res.data || [];
+      } catch {
+        orders = [];
+      }
+    }
+    setSavedAddresses(mergeSavedAddresses(user, orders, loadStoredAddresses()));
   };
 
   if (checkoutCart.items.length === 0 && step < 4) return null;
@@ -169,76 +183,18 @@ export default function CheckoutPage() {
             </section>
           )}
 
-          {/* Step 2: Shipping */}
           {step === 2 && (
-            <section className="neo-card p-6 md:p-8">
-              <h2 className="mb-6 font-heading text-xl font-semibold text-primary">Delivery Details</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Full Name" error={errors.name}>
-                  <input
-                    value={shipping.name}
-                    onChange={(e) => updateField('name', e.target.value)}
-                    className={inputCls(errors.name)}
-                    placeholder="Your full name"
-                  />
-                </Field>
-                <Field label="Phone" error={errors.phone}>
-                  <input
-                    value={shipping.phone}
-                    onChange={(e) => updateField('phone', e.target.value)}
-                    className={inputCls(errors.phone)}
-                    placeholder="+91 98765 43210"
-                  />
-                </Field>
-                <Field label="Email" error={errors.email} className="sm:col-span-2">
-                  <input
-                    type="email"
-                    value={shipping.email}
-                    onChange={(e) => updateField('email', e.target.value)}
-                    className={inputCls(errors.email)}
-                    placeholder="you@email.com"
-                  />
-                </Field>
-                <Field label="Address" error={errors.address} className="sm:col-span-2">
-                  <textarea
-                    value={shipping.address}
-                    onChange={(e) => updateField('address', e.target.value)}
-                    rows={2}
-                    className={inputCls(errors.address, true)}
-                    placeholder="Flat / house, street, area"
-                  />
-                </Field>
-                <Field label="City" error={errors.city}>
-                  <input
-                    value={shipping.city}
-                    onChange={(e) => updateField('city', e.target.value)}
-                    className={inputCls(errors.city)}
-                    placeholder="e.g. Miraj"
-                  />
-                </Field>
-                <Field label="State" error={errors.state}>
-                  <NeoSelect
-                    value={shipping.state}
-                    onChange={(e) => updateField('state', e.target.value)}
-                    className={inputCls(errors.state)}
-                    placeholder="Select state"
-                  >
-                    <option value="">Select state</option>
-                    {INDIAN_STATES.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </NeoSelect>
-                </Field>
-                <Field label="PIN Code" error={errors.pincode}>
-                  <input
-                    value={shipping.pincode}
-                    onChange={(e) => updateField('pincode', e.target.value.replace(/\D/g, '').slice(0, 6))}
-                    className={inputCls(errors.pincode)}
-                    placeholder="6-digit PIN"
-                  />
-                </Field>
-              </div>
-            </section>
+            <AddressSelectionStep
+              addresses={savedAddresses}
+              shipping={shipping}
+              setShipping={setShipping}
+              errors={errors}
+              setErrors={setErrors}
+              onDeliver={() => goToStep(3)}
+              onAddressesChange={() => {
+                refreshSavedAddresses();
+              }}
+            />
           )}
 
           {/* Step 3: Payment */}
@@ -330,14 +286,14 @@ export default function CheckoutPage() {
             >
               ← {step === 1 ? 'Back to Cart' : 'Previous'}
             </button>
-            {step < 4 ? (
+            {step < 4 && step !== 2 ? (
               <button
                 onClick={handleNext}
                 className="neo-btn flex-1 px-8 py-3 text-sm font-semibold sm:flex-none"
               >
                 Continue →
               </button>
-            ) : (
+            ) : step === 4 ? (
               <button
                 onClick={handlePlaceOrder}
                 disabled={submitting}
@@ -345,7 +301,7 @@ export default function CheckoutPage() {
               >
                 {submitting ? 'Placing Order…' : 'Place Order ✓'}
               </button>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -361,23 +317,6 @@ export default function CheckoutPage() {
   );
 }
 
-function Field({ label, error, children, className = '' }) {
-  return (
-    <div className={className}>
-      <label className="mb-1.5 block text-sm font-medium text-primary">{label}</label>
-      {children}
-      {error && <p className="mt-1 text-xs text-strawberry">{error}</p>}
-    </div>
-  );
-}
-
-function inputCls(error, textarea = false) {
-  return cn(
-    'neo-input px-4 py-2.5 text-sm',
-    textarea && 'neo-textarea',
-    error && 'neo-input-error'
-  );
-}
 function ConfirmBlock({ title, children }) {
   return (
     <div className="rounded-[1.25rem] bg-cream-dark p-4 shadow-[inset_2px_2px_6px_rgba(61,96,73,0.05)]">

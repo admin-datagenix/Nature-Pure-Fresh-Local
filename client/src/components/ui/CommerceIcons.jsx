@@ -34,6 +34,25 @@ export function BuyNowIcon({ className }) {
   );
 }
 
+export function HeartIcon({ className, filled = false }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      aria-hidden="true"
+    >
+      <path
+        d="M12 21s-7-4.5-7-10a4 4 0 117 0 4 4 0 117 0c0 5.5-7 10-7 10z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function CheckIcon({ className }) {
   return (
     <svg className={className} viewBox="0 0 20 20" fill="none" aria-hidden="true">

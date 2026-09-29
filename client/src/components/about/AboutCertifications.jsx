@@ -22,7 +22,7 @@ function LogoTile({ logo }) {
 
 export default function AboutCertifications() {
   return (
-    <section className="about-page-section border-t border-sage/45 bg-cream-dark/50 py-8 md:py-10" id="certifications">
+    <section className="border-t border-sage/45 bg-cream-dark/50 py-8 md:py-10" id="certifications">
       <div className="site-container">
         <Reveal className="mx-auto max-w-3xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">From farm to global quality</p>

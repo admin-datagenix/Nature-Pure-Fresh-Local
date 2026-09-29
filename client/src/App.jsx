@@ -7,6 +7,7 @@ import LoadingSpinner from './components/ui/LoadingSpinner';
 const ShopPage = lazy(() => import('./pages/ShopPage'));
 const ProductPage = lazy(() => import('./pages/ProductPage'));
 const CartPage = lazy(() => import('./pages/CartPage'));
+const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const ClientSignOffPage = lazy(() => import('./pages/ClientSignOffPage'));
@@ -16,6 +17,7 @@ const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
+const TrackOrderPage = lazy(() => import('./pages/TrackOrderPage'));
 
 export default function App() {
   return (
@@ -30,8 +32,10 @@ export default function App() {
           <Route path="/shop/:category" element={<ShopPage />} />
           <Route path="/product/:slug" element={<ProductPage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
+          <Route path="/track-order/:orderId" element={<TrackOrderPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/client-signoff" element={<ClientSignOffPage />} />

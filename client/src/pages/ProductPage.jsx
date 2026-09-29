@@ -13,6 +13,7 @@ import ProductWeightPicker from '../components/product/ProductWeightPicker';
 import { findWeightOption, getProductWeightOptions } from '../utils/productVariants';
 import { notifySuccess } from '../utils/notify';
 import { BuyNowIcon, CartIcon } from '../components/ui/CommerceIcons';
+import WishlistButton from '../components/wishlist/WishlistButton';
 
 const BTN_PRIMARY =
   'inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white shadow-[0_2px_8px_rgba(41,70,51,0.18)] transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-55';
@@ -91,14 +92,17 @@ export default function ProductPage() {
       <div className="site-container">
         <div className="flex items-center justify-between gap-3">
           <BackToShopLink />
-          <button
-            type="button"
-            onClick={handleShare}
-            className={cn(BTN_ICON, 'md:hidden')}
-            aria-label="Share product"
-          >
-            <ShareIcon className="h-[1.125rem] w-[1.125rem]" />
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <WishlistButton productId={product.id} productName={product.name} variant="toolbar" />
+            <button
+              type="button"
+              onClick={handleShare}
+              className={BTN_ICON}
+              aria-label="Share product"
+            >
+              <ShareIcon className="h-[1.125rem] w-[1.125rem]" />
+            </button>
+          </div>
         </div>
 
         <div className="product-detail-hero mt-4 grid w-full grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-5 xl:gap-x-8">
@@ -210,6 +214,11 @@ export default function ProductPage() {
                   <BuyNowIcon className="h-4 w-4 shrink-0" />
                   <span>Buy now</span>
                 </button>
+                <WishlistButton
+                  productId={product.id}
+                  productName={product.name}
+                  variant="toolbar"
+                />
                 <button
                   type="button"
                   onClick={handleShare}
