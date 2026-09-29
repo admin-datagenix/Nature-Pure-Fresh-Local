@@ -1,7 +1,5 @@
 /** NaturePure Fresh LLP — official brand & contact details */
 
-import brandLogoPng from '../assets/brand-logo.png';
-
 export const COMPANY_NAME = 'NaturePure Fresh LLP';
 export const BRAND_NAME = 'NaturePure Fresh';
 export const BRAND_TAGLINE = 'Nourishing Life, Naturally!';
@@ -36,13 +34,29 @@ export const BRAND_MAP_EMBED_URL =
 export const BRAND_MAP_OPEN_URL =
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(BRAND_MAP_QUERY)}`;
 
-/** Bundled PNG logo — used in navbar, footer, auth, and pages */
-export const BRAND_LOGO = brandLogoPng;
-/** Public path for favicon / static HTML */
-export const BRAND_LOGO_PUBLIC = '/brand/logo.png';
+/** Primary brand mark — public/brand/logo-3.png */
+export const BRAND_LOGO_PUBLIC = '/brand/logo-3.png';
+/** Intrinsic pixel size of logo-3.png (wide lockup) */
+export const BRAND_LOGO_PIXELS = { width: 4000, height: 1028 };
+/** Default logo (navbar, footer, auth, inline lockups) */
+export const BRAND_LOGO = BRAND_LOGO_PUBLIC;
+export const BRAND_LOGO_NAVBAR = BRAND_LOGO_PUBLIC;
 
-/** About page — same official lockup as public/brand/logo.png */
+/** About page lockup */
 export const ABOUT_PAGE_LOGO = BRAND_LOGO_PUBLIC;
+
+/** About story section — illustration (public/about/about-img.png) */
+export const ABOUT_STORY_IMAGE = '/about/about-img.png';
+
+/** About page heading — product banner (public/about/about-banner.svg) */
+export const ABOUT_PAGE_BANNER = '/about/about-banner.svg';
+
+/** Shop category heading banners (1920×700 art in public/) */
+export const POWDER_SHOP_BANNER = '/products/powder/powder-banner.svg';
+
+export const SHOP_CATEGORY_BANNERS = {
+  'baking-essentials': POWDER_SHOP_BANNER,
+};
 
 /** Homepage hero carousel — files in public/hero */
 /** Time each banner is shown before sliding to the next */

@@ -17,14 +17,14 @@ import {
 
 export default function AboutPage() {
   return (
-    <div className="about-page bg-cream">
+    <div className="min-w-0 w-full overflow-x-hidden bg-cream">
       <AboutPageHero />
 
       <AboutStory />
       <AboutCertifications />
       <ProcessTimeline />
 
-      <section className="about-page-section border-t border-sage/45 py-8 md:py-10" id="faq">
+      <section className="border-t border-sage/45 py-8 md:py-10" id="faq">
         <div className="site-container max-w-3xl">
           <Reveal>
             <h2 className="font-heading text-2xl text-primary md:text-3xl">Frequently Asked Questions</h2>
@@ -61,7 +61,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="about-page-section border-t border-sage/45 py-8 md:py-10" id="contact">
+      <section className="border-t border-sage/45 py-8 md:py-10" id="contact">
         <div className="site-container">
           <Reveal>
             <h2 className="font-heading text-2xl text-primary md:text-3xl">Contact Us</h2>

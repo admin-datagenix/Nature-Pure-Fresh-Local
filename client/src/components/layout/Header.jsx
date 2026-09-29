@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
 import { useAuth } from '../../context/AuthContext';
 import BrandLogo from '../ui/BrandLogo';
+import { BRAND_LOGO_NAVBAR } from '../../data/brand';
+import ProfileMenu from './ProfileMenu';
 import useCategoryTree, { categoryEmoji } from '../../hooks/useCategoryTree';
 import { cn } from '../../lib/cn';
 
@@ -68,7 +71,9 @@ const navLinkClass = ({ isActive }) =>
 
 export default function Header() {
   const { cart } = useCart();
-  const { isAuthenticated } = useAuth();
+  const { count: wishlistCount } = useWishlist();
+  const { isAuthenticated, user, logout } = useAuth();
+  const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
   const shopRef = useRef(null);
   const { categories } = useCategoryTree();
@@ -94,15 +99,21 @@ export default function Header() {
     setMobileOpen(false);
   };
 
-  const accountPath = isAuthenticated ? '/account' : '/login';
-  const accountLabel = isAuthenticated ? 'Account' : 'Login';
+  const accountPath = '/login';
+  const accountLabel = 'Login';
 
   return (
-    <header className="sticky top-0 z-50 w-full max-w-full border-b border-sage/50 bg-white shadow-[0_4px_20px_rgba(41,70,51,0.05)]">
+    <header className="sticky top-0 z-50 w-full max-w-full overflow-visible border-b border-sage/50 bg-white shadow-[0_4px_20px_rgba(41,70,51,0.05)]">
       <div className="site-container flex items-center gap-3 py-3 md:gap-5 lg:py-3.5">
-        <BrandLogo logoOnly className="shrink-0" />
+        <BrandLogo
+          bareLogo
+          logoOnly
+          src={BRAND_LOGO_NAVBAR}
+          className="navbar-brand-slot"
+          imageClassName="navbar-brand-logo"
+        />
 
-        <nav className="hidden items-center gap-6 lg:ml-10 lg:flex xl:ml-14 xl:gap-8" aria-label="Main navigation">
+        <nav className="hidden items-center gap-6 lg:ml-2 lg:flex xl:ml-4 xl:gap-8" aria-label="Main navigation">
           <NavLink to="/" end className={navLinkClass}>
             Home
           </NavLink>
@@ -200,20 +211,33 @@ export default function Header() {
             </span>
           </Link>
 
-          <Link
-            to={accountPath}
-            className="rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
-            aria-label={accountLabel}
-          >
-            <UserIcon className="h-5 w-5" />
-          </Link>
+          {isAuthenticated ? (
+            <ProfileMenu
+              open={profileOpen}
+              onToggle={() => setProfileOpen((o) => !o)}
+              onClose={() => setProfileOpen(false)}
+            />
+          ) : (
+            <Link
+              to={accountPath}
+              className="rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
+              aria-label={accountLabel}
+            >
+              <UserIcon className="h-5 w-5" />
+            </Link>
+          )}
 
           <Link
-            to="/shop"
-            className="rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
+            to="/wishlist"
+            className="relative rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
             aria-label="Wishlist"
           >
             <HeartIcon className="h-5 w-5" />
+            {wishlistCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white">
+                {wishlistCount > 99 ? '99+' : wishlistCount}
+              </span>
+            )}
           </Link>
 
           <button
@@ -268,6 +292,52 @@ export default function Header() {
             className="block rounded-xl px-3 py-2.5 text-base font-medium text-primary/75 hover:bg-cream"
           >
             Shop
+          </Link>
+
+          {isAuthenticated ? (
+            <div className="mb-3 rounded-xl border border-sage/45 bg-cream/50 px-3 py-3">
+              <p className="text-sm font-bold text-primary">Hello {(user?.name || 'User').split(/\s+/)[0]}</p>
+              <Link
+                to="/account"
+                state={{ section: 'orders' }}
+                onClick={() => setMobileOpen(false)}
+                className="mt-2 block text-sm font-semibold text-secondary"
+              >
+                My Orders
+              </Link>
+              <button
+                type="button"
+                onClick={async () => {
+                  setMobileOpen(false);
+                  await logout();
+                  navigate('/');
+                }}
+                className="mt-2 block text-sm font-semibold text-primary/80"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              onClick={() => setMobileOpen(false)}
+              className="mb-2 block rounded-xl px-3 py-2.5 text-base font-medium text-primary/75 hover:bg-cream"
+            >
+              Login
+            </Link>
+          )}
+
+          <Link
+            to="/wishlist"
+            onClick={() => setMobileOpen(false)}
+            className="flex items-center justify-between rounded-xl px-3 py-2.5 text-base font-medium text-primary/75 hover:bg-cream"
+          >
+            Wishlist
+            {wishlistCount > 0 && (
+              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-white">
+                {wishlistCount}
+              </span>
+            )}
           </Link>
 
           {NAV_LINKS_AFTER_SHOP.map((link) => (

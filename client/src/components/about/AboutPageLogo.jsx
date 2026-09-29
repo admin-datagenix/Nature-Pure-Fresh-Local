@@ -7,9 +7,9 @@ export default function AboutPageLogo({ className, size = 'hero', panel = false 
       src={ABOUT_PAGE_LOGO}
       alt={`${BRAND_NAME} — ${COMPANY_NAME}`}
       className={cn(
-        'about-page-logo',
-        !panel && 'about-page-logo--on-light',
-        size === 'hero' ? 'about-page-logo--hero' : 'about-page-logo--sidebar',
+        'mx-auto block h-auto w-auto object-contain',
+        !panel && 'mix-blend-multiply',
+        size === 'hero' ? 'max-h-24 sm:max-h-32' : 'max-h-16',
         className
       )}
       decoding="async"

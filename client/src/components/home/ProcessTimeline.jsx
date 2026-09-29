@@ -3,7 +3,7 @@ import Reveal from '../ui/Reveal';
 
 export default function ProcessTimeline() {
   return (
-    <section className="about-page-section py-8 md:py-10" id="process">
+    <section className="border-t border-sage/45 py-8 md:py-10" id="process">
       <div className="site-container">
         <Reveal className="mb-8 text-center">
           <h2 className="font-heading text-2xl font-semibold tracking-tight text-primary md:text-3xl">

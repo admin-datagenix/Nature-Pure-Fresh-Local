@@ -7,6 +7,7 @@ import { useCart } from '../../context/CartContext';
 import { cn } from '../../lib/cn';
 import StarRating from '../ui/StarRating';
 import { CartIcon, CheckIcon } from '../ui/CommerceIcons';
+import WishlistButton from '../wishlist/WishlistButton';
 import {
   isOutOfStock,
   outOfStockCardClass,
@@ -52,56 +53,73 @@ export default function ProductCard({
       )}
       onClick={() => onSelect?.(product.id)}
     >
-      <Link
-        to={`/product/${product.slug}`}
+      <div
         className={cn(
-          'block shrink-0',
+          'relative shrink-0',
           isList ? 'w-[34%] max-w-[148px] p-3 sm:max-w-[168px]' : 'p-3 pb-0'
         )}
-        onClick={(e) => e.stopPropagation()}
       >
+        <Link
+          to={`/product/${product.slug}`}
+          className="block"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            className={cn(
+              'relative overflow-hidden rounded-xl border border-sage/40 transition duration-300',
+              isList ? 'aspect-square h-full min-h-[112px]' : 'aspect-square w-full',
+              selected ? 'border-primary/50' : 'group-hover:border-secondary/70'
+            )}
+            style={{ backgroundColor: getProductCardTone(product) }}
+          >
+            <div className="pointer-events-none absolute inset-[18%] rounded-full bg-white/30 blur-2xl" />
+
+            {product.badge && (
+              <span
+                className={cn(
+                  'absolute left-2 top-2 z-10 shadow-sm',
+                  PRODUCT_BADGE_CHIP,
+                  getBadgeClass(product.badge)
+                )}
+              >
+                {product.badge}
+              </span>
+            )}
+            {discount > 0 && (
+              <span className="label-chip absolute right-2 top-2 z-10 bg-white/95 px-2 py-0.5 text-[0.58rem] font-bold text-strawberry shadow-sm">
+                −{discount}%
+              </span>
+            )}
+            {shouldShowOutOfStockBadge(product) && (
+              <span className="label-chip absolute bottom-2 left-2 z-10 bg-primary/90 px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wide text-white shadow-sm">
+                Out of stock
+              </span>
+            )}
+
+            <div className="relative flex h-full w-full items-center justify-center p-3 sm:p-4">
+              <img
+                src={imageSrc}
+                alt={product.name}
+                loading="lazy"
+                decoding="async"
+                className={cn(
+                  'max-h-full max-w-full object-contain transition duration-500 ease-out',
+                  selected ? 'scale-[1.05]' : 'group-hover:scale-[1.05]'
+                )}
+              />
+            </div>
+          </div>
+        </Link>
+
         <div
           className={cn(
-            'relative overflow-hidden rounded-xl border border-sage/40 transition duration-300',
-            isList ? 'aspect-square h-full min-h-[112px]' : 'aspect-square w-full',
-            selected ? 'border-primary/50' : 'group-hover:border-secondary/70'
+            'absolute z-20',
+            isList ? 'bottom-5 right-5' : 'bottom-5 right-5'
           )}
-          style={{ backgroundColor: getProductCardTone(product) }}
         >
-          <div className="pointer-events-none absolute inset-[18%] rounded-full bg-white/30 blur-2xl" />
-
-          {product.badge && (
-            <span
-              className={cn('absolute left-2 top-2 z-10 shadow-sm', PRODUCT_BADGE_CHIP, getBadgeClass(product.badge))}
-            >
-              {product.badge}
-            </span>
-          )}
-          {discount > 0 && (
-            <span className="label-chip absolute right-2 top-2 z-10 bg-white/95 px-2 py-0.5 text-[0.58rem] font-bold text-strawberry shadow-sm">
-              −{discount}%
-            </span>
-          )}
-          {shouldShowOutOfStockBadge(product) && (
-            <span className="label-chip absolute bottom-2 left-2 z-10 bg-primary/90 px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wide text-white shadow-sm">
-              Out of stock
-            </span>
-          )}
-
-          <div className="relative flex h-full w-full items-center justify-center p-3 sm:p-4">
-            <img
-              src={imageSrc}
-              alt={product.name}
-              loading="lazy"
-              decoding="async"
-              className={cn(
-                'max-h-full max-w-full object-contain transition duration-500 ease-out',
-                selected ? 'scale-[1.05]' : 'group-hover:scale-[1.05]'
-              )}
-            />
-          </div>
+          <WishlistButton productId={product.id} productName={product.name} />
         </div>
-      </Link>
+      </div>
 
       <div
         className={cn(

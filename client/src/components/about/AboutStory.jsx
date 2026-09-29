@@ -1,50 +1,76 @@
 import Reveal from '../ui/Reveal';
-import AboutPageLogo from './AboutPageLogo';
-import { COMPANY_NAME } from '../../data/brand';
+import AboutBenefitsStrip from './AboutBenefitsStrip';
+import { ABOUT_STORY_IMAGE, CATALOG_PDF } from '../../data/brand';
 import { ABOUT_SUBHEADING, ABOUT_MISSION_LINE, ABOUT_PARAGRAPHS } from '../../data/aboutContent';
 
 export default function AboutStory() {
   return (
-    <section className="about-page-section border-t border-sage/45 py-8 md:py-10" id="about-story">
+    <section className="border-t border-sage/45 py-10 md:py-12" id="about-story">
       <div className="site-container">
-        <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(220px,15rem)] lg:gap-10">
-          <div className="min-w-0">
+        <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-8 xl:gap-12">
+          <div className="flex min-w-0 flex-col justify-center lg:pr-3">
             <Reveal>
-              <p className="font-heading text-xl font-medium leading-snug text-secondary md:text-2xl">
+              <h2 className="font-heading text-2xl font-semibold text-primary md:text-3xl">Our Story</h2>
+              <p className="mt-3 font-heading text-lg font-medium leading-snug text-secondary md:text-xl">
                 {ABOUT_SUBHEADING}
               </p>
             </Reveal>
 
             <Reveal delay={60}>
-              <p className="mt-5 text-base leading-[1.75] text-muted">{ABOUT_PARAGRAPHS[0]}</p>
+              <p className="mt-6 text-base leading-[1.8] text-primary/85 md:text-[1.0625rem]">
+                {ABOUT_PARAGRAPHS[0]}
+              </p>
             </Reveal>
 
             <Reveal delay={100}>
-              <div className="mt-5 rounded-xl border border-sage/60 bg-fresh px-5 py-5">
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-primary/80">Our mission is simple</p>
+              <div className="mt-6 rounded-xl border border-sage/60 bg-white px-5 py-5 shadow-[0_8px_24px_rgba(41,70,51,0.06)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-secondary">Our mission is simple</p>
                 <p className="mt-2 font-heading text-lg font-semibold leading-snug text-primary md:text-xl">
                   {ABOUT_MISSION_LINE}
                 </p>
               </div>
             </Reveal>
 
-            {ABOUT_PARAGRAPHS.slice(1).map((paragraph, i) => (
-              <Reveal key={paragraph.slice(0, 24)} delay={140 + i * 50}>
-                <p className="mt-5 text-base leading-[1.75] text-muted">{paragraph}</p>
-              </Reveal>
-            ))}
+            <div className="mt-6 space-y-5">
+              {ABOUT_PARAGRAPHS.slice(1).map((paragraph, i) => (
+                <Reveal key={paragraph.slice(0, 24)} delay={140 + i * 50}>
+                  <p className="text-justify text-base leading-[1.8] text-primary/80 md:text-[1.0625rem]">{paragraph}</p>
+                </Reveal>
+              ))}
+            </div>
           </div>
 
-          <Reveal delay={120} className="mx-auto w-full max-w-[15rem] lg:mx-0 lg:sticky lg:top-24">
-            <aside className="about-story-aside flex flex-col items-center text-center">
-              <div className="about-story-aside__logo-wrap flex w-full items-center justify-center">
-                <AboutPageLogo size="sidebar" />
+          <Reveal delay={120} className="min-w-0 lg:pl-3">
+            <div className="mx-auto flex w-full max-w-[26rem] flex-col gap-3 sm:max-w-md lg:mx-0 lg:max-w-lg">
+              <div className="flex justify-center">
+                <img
+                  src={ABOUT_STORY_IMAGE}
+                  alt=""
+                  className="mx-auto block h-auto w-full max-w-[24rem] max-h-[28rem] object-contain object-bottom sm:max-w-[26rem] sm:max-h-[30rem] lg:max-w-[32rem] lg:max-h-[36rem] xl:max-h-[38rem]"
+                  decoding="async"
+                  loading="lazy"
+                />
               </div>
-              <p className="mt-4 text-sm font-semibold leading-snug text-primary">{COMPANY_NAME}</p>
-              <p className="mt-2 text-xs leading-relaxed text-muted">
-                Miraj, Sangli, Maharashtra — serving India &amp; export partners worldwide
-              </p>
-            </aside>
+              <AboutBenefitsStrip />
+              <div className="flex w-full flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+                <a
+                  href={CATALOG_PDF.snacks}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="neo-btn flex-1 px-5 py-3 text-center text-sm font-semibold"
+                >
+                  Download Snacks Catalog
+                </a>
+                <a
+                  href={CATALOG_PDF.powder}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="neo-btn-ghost flex-1 px-5 py-3 text-center text-sm font-semibold"
+                >
+                  Download Powder Catalog
+                </a>
+              </div>
+            </div>
           </Reveal>
         </div>
       </div>

@@ -7,6 +7,7 @@ import {
   BRAND_ADDRESS_FULL,
   COMPANY_NAME,
   CATALOG_PDF,
+  BRAND_LOGO_NAVBAR,
 } from '../../data/brand';
 import BrandLogo from '../ui/BrandLogo';
 import useCategoryTree from '../../hooks/useCategoryTree';
@@ -33,20 +34,21 @@ export default function Footer() {
   };
 
   return (
-    <footer className="mt-auto w-full max-w-full overflow-x-hidden bg-primary py-16 text-white/85">
+    <footer className="mt-auto w-full max-w-full overflow-x-hidden bg-primary py-10 text-white/85 md:py-11">
       <div className="site-container">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
           <div>
-            <div className="mb-4 inline-flex rounded-xl bg-white p-3 shadow-[0_4px_16px_rgba(0,0,0,0.12)]">
+            <div className="mb-3 inline-flex rounded-xl bg-white p-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.12)]">
               <BrandLogo
                 logoOnly
+                src={BRAND_LOGO_NAVBAR}
                 className="mb-0"
-                imageClassName="h-12 max-w-[200px] object-contain sm:h-14 sm:max-w-[220px]"
+                imageClassName="h-10 w-auto max-w-[min(100%,15rem)] object-contain object-left sm:h-11 sm:max-w-[17rem]"
               />
             </div>
-            <p className="mb-5 max-w-xs text-xs leading-relaxed opacity-65">{BRAND_ADDRESS_FULL}</p>
+            <p className="mb-4 max-w-xs text-xs leading-relaxed opacity-65">{BRAND_ADDRESS_FULL}</p>
 
-            <div className="mb-5 space-y-1 text-sm">
+            <div className="mb-4 space-y-1 text-sm">
               <a href={`mailto:${BRAND_EMAIL}`} className="block opacity-80 transition hover:opacity-100">
                 {BRAND_EMAIL}
               </a>
@@ -58,7 +60,7 @@ export default function Footer() {
               </a>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-2">
+            <div className="mt-4 flex flex-wrap gap-2">
               <a
                 href={CATALOG_PDF.snacks}
                 target="_blank"
@@ -80,8 +82,8 @@ export default function Footer() {
 
           {Object.entries(footerSections).map(([title, links]) => (
             <div key={title}>
-              <h4 className="mb-4 font-heading text-base text-white">{title}</h4>
-              <ul className="flex flex-col gap-2.5">
+              <h4 className="mb-3 font-heading text-base text-white">{title}</h4>
+              <ul className="flex flex-col gap-2">
                 {links.map((link) => (
                   <li key={link.to}>
                     <Link to={link.to} className="text-sm opacity-70 transition hover:opacity-100">
@@ -94,7 +96,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-6 text-xs opacity-60">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-5 text-xs opacity-60">
           <p>
             © {new Date().getFullYear()} {COMPANY_NAME} ({BRAND_NAME}). Made in India 🇮🇳
           </p>

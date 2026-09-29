@@ -3,8 +3,10 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import ProductCard, { ProductCardSkeleton } from '../components/shop/ProductCard';
 import ShopFilters from '../components/shop/ShopFilters';
+import CategoryBannerHero from '../components/shop/CategoryBannerHero';
 import ShopViewToggle from '../components/shop/ShopViewToggle';
 import NeoSelect from '../components/ui/NeoSelect';
+import { SHOP_CATEGORY_BANNERS } from '../data/brand';
 import { STORE_SETTINGS } from '../config/storeSettings';
 import { filterFallbackProducts } from '../data/fallbackProducts';
 import useCategoryTree from '../hooks/useCategoryTree';
@@ -142,17 +144,22 @@ export default function ShopPage() {
   };
 
   const listClass = view === 'list' ? PRODUCT_LIST_SHOP_CLASS : PRODUCT_GRID_SHOP_CLASS;
+  const categoryRecord = category ? categories.find((c) => c.slug === category) : null;
+  const categoryTitle = categoryRecord?.name || (category ? 'Shop' : 'All Products');
+  const categoryBannerSrc = category ? SHOP_CATEGORY_BANNERS[category] : null;
 
   return (
     <div className="pb-16">
-      <div className="mb-10 bg-primary py-12 text-center text-white">
-        <div className="site-container">
-          <h1 className="font-heading text-3xl font-semibold">
-            {category ? categories.find((c) => c.slug === category)?.name || 'Shop' : 'All Products'}
-          </h1>
-          <p className="mt-2 opacity-80">Premium freeze-dried fruits — 100% natural, no added sugar</p>
+      {categoryBannerSrc ? (
+        <CategoryBannerHero src={categoryBannerSrc} title={categoryTitle} />
+      ) : (
+        <div className="mb-10 bg-primary py-12 text-center text-white">
+          <div className="site-container">
+            <h1 className="font-heading text-3xl font-semibold">{categoryTitle}</h1>
+            <p className="mt-2 opacity-80">Premium freeze-dried fruits — 100% natural, no added sugar</p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="site-container">
         <details className="mb-6 rounded-[1.25rem] border border-sage/55 bg-white md:hidden">

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/AuthContext';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css';
@@ -13,11 +14,13 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <CartProvider>
-          <App />
-          <AppToastContainer />
-          <WhatsAppFab />
-        </CartProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <App />
+            <AppToastContainer />
+            <WhatsAppFab />
+          </CartProvider>
+        </WishlistProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>

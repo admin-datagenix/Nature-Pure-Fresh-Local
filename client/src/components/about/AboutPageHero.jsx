@@ -1,12 +1,15 @@
-import { BRAND_SHORT_TAGLINE } from '../../data/brand';
+import { ABOUT_PAGE_BANNER } from '../../data/brand';
+import CategoryBannerHero from '../shop/CategoryBannerHero';
 
 export default function AboutPageHero() {
   return (
-    <div className="mb-10 bg-primary py-12 text-center text-white">
-      <div className="site-container">
-        <h1 className="font-heading text-3xl font-semibold">About Us</h1>
-        <p className="mt-2 opacity-80">{BRAND_SHORT_TAGLINE}</p>
-      </div>
+    <div className="site-container pt-4 sm:pt-5 md:pt-10">
+      <CategoryBannerHero
+        src={ABOUT_PAGE_BANNER}
+        title="About Us"
+        className="mb-0 max-w-none rounded-lg sm:rounded-xl md:rounded-2xl"
+        imageClassName="object-contain object-center"
+      />
     </div>
   );
 }
