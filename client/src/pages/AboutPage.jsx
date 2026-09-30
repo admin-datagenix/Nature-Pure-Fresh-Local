@@ -1,19 +1,7 @@
 import AboutCertifications from '../components/about/AboutCertifications';
 import AboutStory from '../components/about/AboutStory';
 import ProcessTimeline from '../components/home/ProcessTimeline';
-import Reveal from '../components/ui/Reveal';
 import AboutPageHero from '../components/about/AboutPageHero';
-import {
-  BRAND_NAME,
-  BRAND_EMAIL,
-  BRAND_PHONE,
-  BRAND_PHONE_RAW,
-  BRAND_WEBSITE,
-  BRAND_WEBSITE_URL,
-  BRAND_ADDRESS_FULL,
-  COMPANY_NAME,
-  CATALOG_PDF,
-} from '../data/brand';
 
 export default function AboutPage() {
   return (
@@ -23,43 +11,6 @@ export default function AboutPage() {
       <AboutStory />
       <AboutCertifications />
       <ProcessTimeline />
-
-      <section className="border-t border-sage/45 py-8 md:py-10" id="faq">
-        <div className="site-container max-w-3xl">
-          <Reveal>
-            <h2 className="font-heading text-2xl text-primary md:text-3xl">Frequently Asked Questions</h2>
-          </Reveal>
-          <div className="mt-5">
-            {[
-              {
-                q: 'What is freeze-drying?',
-                a: 'Freeze-drying removes water from fruit at low temperatures, preserving nutrients, colour, and flavour without additives.',
-              },
-              {
-                q: 'Do you add sugar?',
-                a: 'Never. Our fruit snacks contain only the natural sugars present in the fruit itself — 0g added sugar.',
-              },
-              {
-                q: 'How long is the shelf life?',
-                a: 'Unopened packs last 12–18 months. No refrigeration needed — perfect for travel.',
-              },
-              {
-                q: 'Are products FSSAI certified?',
-                a: `Yes, all ${BRAND_NAME} products are FSSAI certified and made in India by ${COMPANY_NAME}.`,
-              },
-            ].map((item, i) => (
-              <Reveal key={item.q} delay={i * 60}>
-                <details className="border-b border-sage py-3.5">
-                  <summary className="cursor-pointer list-none font-semibold text-primary [&::-webkit-details-marker]:hidden">
-                    {item.q}
-                  </summary>
-                  <p className="mt-2 text-sm leading-relaxed text-muted">{item.a}</p>
-                </details>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* <section className="about-page-section border-t border-sage/45 py-8 md:py-10" id="contact">
         <div className="site-container">

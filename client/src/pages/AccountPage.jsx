@@ -639,8 +639,12 @@ export default function AccountPage() {
                   <span className="text-xs font-medium text-primary/80">Order cancellation policy</span>
                 </summary>
                 <p className="mt-3 leading-relaxed text-muted">
-                  Cancellation is handled by our team before your order is dispatched. Share your order ID by phone or
-                  email — we do not offer instant self-cancel from the app.
+                  Orders ship within 12 hours of placement. To cancel or change an order, contact us within that window
+                  with your order ID — we do not offer instant self-cancel from the app. See our{' '}
+                  <Link to="/refund-policy" className="text-primary underline">
+                    refund policy
+                  </Link>{' '}
+                  for full terms.
                 </p>
                 <p className="mt-2 text-xs text-muted">
                   Call{' '}

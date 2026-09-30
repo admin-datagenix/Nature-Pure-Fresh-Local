@@ -51,12 +51,26 @@ export const ABOUT_STORY_IMAGE = '/about/about-img.png';
 /** About page heading — product banner (public/about/about-banner.svg) */
 export const ABOUT_PAGE_BANNER = '/about/about-banner.svg';
 
+/** About — quality standards illustration (public/about/quality.svg) */
+export const ABOUT_QUALITY_IMAGE = '/about/quality.svg';
+
 /** Shop category heading banners (1920×700 art in public/) */
 export const ALL_PRODUCTS_SHOP_BANNER = '/hero/all-products.svg';
+
+/** Fruit snacks / chunks — shop header (public/products/snacks/) */
+export const CHUNKS_SHOP_BANNER = '/products/snacks/chunks-banner.svg';
+export const CHUNKS_SHOP_BANNER_FALLBACK = '/products/snacks/chunks-banner-1.svg';
+
+/** Powder category shop header */
 export const POWDER_SHOP_BANNER = '/products/powder/powder-banner.svg';
 
 export const SHOP_CATEGORY_BANNERS = {
+  'fruit-snacks': CHUNKS_SHOP_BANNER,
   'baking-essentials': POWDER_SHOP_BANNER,
+};
+
+export const SHOP_CATEGORY_BANNER_FALLBACKS = {
+  'fruit-snacks': CHUNKS_SHOP_BANNER_FALLBACK,
 };
 
 /** Homepage hero carousel — files in public/hero */
@@ -92,10 +106,10 @@ export const HERO_BANNER_SLIDES = [
 export const HERO_BANNER_IMAGE = HERO_BANNER_SLIDES[0].src;
 export const HERO_BANNER_FALLBACKS = ['/hero/Banner-img-1.svg'];
 
-/** Homepage Shop By Category — card art (public/hero) */
+/** Homepage Shop By Category — chunks card art (public/products/snacks/) */
 
-export const CHUNKS_CATEGORY_BANNER = '/hero/chunks-category-banner.svg';
-export const CHUNKS_CATEGORY_BANNER_FALLBACK = '/hero/chunks-category-banner.png';
+export const CHUNKS_CATEGORY_BANNER = '/products/snacks/chunks-category-img.svg';
+export const CHUNKS_CATEGORY_BANNER_FALLBACK = CHUNKS_SHOP_BANNER;
 export const POWDER_CATEGORY_BANNER = '/hero/powder-category-banner.jpg';
 /** Keep JPG-only — SVG fallback showed transparent areas in category cards */
 export const POWDER_CATEGORY_BANNER_FALLBACK = '/hero/powder-category-banner.jpg';
