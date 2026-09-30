@@ -7,7 +7,11 @@ import { InsetCategoryBanner } from '../components/shop/CategoryBannerHero';
 import ShopLowStockStrip from '../components/shop/ShopLowStockStrip';
 import ShopViewToggle from '../components/shop/ShopViewToggle';
 import NeoSelect from '../components/ui/NeoSelect';
-import { ALL_PRODUCTS_SHOP_BANNER, SHOP_CATEGORY_BANNERS } from '../data/brand';
+import {
+  ALL_PRODUCTS_SHOP_BANNER,
+  SHOP_CATEGORY_BANNER_FALLBACKS,
+  SHOP_CATEGORY_BANNERS,
+} from '../data/brand';
 import { STORE_SETTINGS } from '../config/storeSettings';
 import { filterFallbackProducts } from '../data/fallbackProducts';
 import useCategoryTree from '../hooks/useCategoryTree';
@@ -185,11 +189,16 @@ export default function ShopPage() {
   const categoryBannerSrc = category
     ? SHOP_CATEGORY_BANNERS[category] ?? null
     : ALL_PRODUCTS_SHOP_BANNER;
+  const categoryBannerFallback = category ? SHOP_CATEGORY_BANNER_FALLBACKS[category] : undefined;
 
   return (
     <div className="pb-16">
       {categoryBannerSrc ? (
-        <InsetCategoryBanner src={categoryBannerSrc} title={categoryTitle} />
+        <InsetCategoryBanner
+          src={categoryBannerSrc}
+          title={categoryTitle}
+          imageFallback={categoryBannerFallback}
+        />
       ) : (
         <div className="mb-10 bg-primary py-12 text-center text-white">
           <div className="site-container">

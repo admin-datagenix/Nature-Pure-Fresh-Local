@@ -55,7 +55,7 @@ export const TRUST_BADGE_FEATURES = [
   { icon: 'realFruit', accent: '#e85d5d', title: 'Real Fruit', desc: 'Single ingredient whole fruit slices' },
   { icon: 'noSugar', accent: '#8b4b8c', title: 'No Added Sugar', desc: 'Sweetness comes from real fruit alone' },
   { icon: 'zeroPreservatives', accent: '#f5a623', title: 'Zero Preservatives', desc: 'No artificial preservatives or sulphites' },
-  { icon: 'madeInIndia', accent: '#294633', title: 'Made in India', desc: 'Crafted in Miraj, Maharashtra' },
+  { icon: 'madeInIndia', accent: '#294633', title: 'Made in India', desc: 'Crafted in Maharashtra with care for Indian farms' },
   { icon: 'highFibre', accent: '#5a8f6a', title: 'High Fibre', desc: 'Natural fibre preserved in every bite' },
 ];
 
@@ -64,7 +64,7 @@ export const MARQUEE_OFFERS = [
   'Free Shipping on ₹999+',
   'Zero Preservatives',
   '100% Real Fruit',
-  'Made in Miraj, Maharashtra',
+  'Made in India',
 ];
 
 export const HERO_STATS = [

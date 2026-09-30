@@ -20,7 +20,8 @@ const FOOTER_STATIC = {
   ],
   Support: [
     { to: '/contact', label: 'Contact' },
-    { to: '/about#faq', label: 'FAQ' },
+    { to: '/return-policy', label: 'Return Policy' },
+    { to: '/refund-policy', label: 'Refund Policy' },
     { to: '/about#shipping', label: 'Shipping Policy' },
   ],
 };
@@ -100,7 +101,13 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} {COMPANY_NAME} ({BRAND_NAME}). Made in India 🇮🇳
           </p>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <Link to="/return-policy" className="transition hover:opacity-100">
+              Return Policy
+            </Link>
+            <Link to="/refund-policy" className="transition hover:opacity-100">
+              Refund Policy
+            </Link>
             <span>FSSAI Certified</span>
             <span>Secure Payments</span>
           </div>

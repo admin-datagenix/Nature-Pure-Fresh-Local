@@ -1,19 +1,22 @@
+import { Link } from 'react-router-dom';
+import { BRAND_EMAIL, BRAND_NAME } from '../../data/brand';
+
 const POLICY_ITEMS = [
   {
-    title: '7-day return',
-    desc: 'Damaged, wrong, or quality issues — contact us within 7 days of delivery with photos.',
+    title: 'Final sale',
+    desc: 'Freeze-dried products are hygiene-sensitive — orders are final once placed. Review cart and delivery details before checkout.',
   },
   {
-    title: 'Easy pickup',
-    desc: 'We arrange reverse pickup where available; refund after inspection (3–5 business days).',
+    title: '12-hour cancellation',
+    desc: 'Contact support within 12 hours of ordering to cancel or change an order before it ships.',
   },
   {
-    title: 'Non-returnable',
-    desc: 'Opened consumables without defect, or items marked final sale, are not eligible.',
+    title: 'No returns',
+    desc: 'We do not accept returns or exchanges after purchase, including promotional and discounted items.',
   },
   {
-    title: 'Replacement',
-    desc: 'Prefer a swap? We can ship a replacement for eligible snack & powder packs.',
+    title: 'Damaged or wrong item',
+    desc: 'Notify us within 24 hours of delivery with your order number, details, and photos for eligible resolution.',
   },
 ];
 
@@ -22,7 +25,7 @@ export default function ProductReturnPolicy() {
     <section className="mt-10 border border-sage/50 bg-white p-5 md:p-6">
       <h2 className="font-heading text-lg font-semibold text-primary">Return &amp; refund policy</h2>
       <p className="mt-1 text-sm text-muted">
-        NaturePure Fresh — fair returns like major marketplaces. Keep your invoice and batch details handy.
+        {BRAND_NAME} — premium freeze-dried fruit. Full terms on our policy pages.
       </p>
       <ul className="mt-5 grid gap-4 sm:grid-cols-2">
         {POLICY_ITEMS.map((item) => (
@@ -33,11 +36,17 @@ export default function ProductReturnPolicy() {
         ))}
       </ul>
       <p className="mt-4 text-xs text-muted">
-        Questions? Email{' '}
-        <a href="mailto:naturepure.in@gmail.com" className="font-medium text-primary underline">
-          naturepure.in@gmail.com
-        </a>{' '}
-        or call support from your account page.
+        <Link to="/return-policy" className="font-medium text-primary underline">
+          Return policy
+        </Link>
+        {' · '}
+        <Link to="/refund-policy" className="font-medium text-primary underline">
+          Refund policy
+        </Link>
+        {' · '}
+        <a href={`mailto:${BRAND_EMAIL}`} className="font-medium text-primary underline">
+          {BRAND_EMAIL}
+        </a>
       </p>
     </section>
   );

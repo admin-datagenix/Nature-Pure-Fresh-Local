@@ -31,16 +31,18 @@ export default function ReviewsSection() {
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
             <div className="min-w-0 text-center sm:text-left">
               <h2 className="font-heading text-3xl font-semibold tracking-tight text-primary md:text-4xl">
-                Testimonials
+                Our Happy Clients
               </h2>
-              <p className="mt-1 max-w-lg text-base text-muted sm:mt-2">What our customers say</p>
+              <p className="mt-1 max-w-lg text-base text-muted sm:mt-2">
+                Real stories from families who love our freeze-dried fruit
+              </p>
             </div>
             <div className="flex shrink-0 gap-2">
               <button
                 type="button"
                 onClick={goPrev}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-sage/60 bg-white text-lg text-primary shadow-sm transition hover:bg-cream"
-                aria-label="Previous testimonials"
+                aria-label="Previous client reviews"
               >
                 ‹
               </button>
@@ -48,7 +50,7 @@ export default function ReviewsSection() {
                 type="button"
                 onClick={goNext}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-sage/60 bg-white text-lg text-primary shadow-sm transition hover:bg-cream"
-                aria-label="Next testimonials"
+                aria-label="Next client reviews"
               >
                 ›
               </button>
@@ -60,7 +62,7 @@ export default function ReviewsSection() {
           <Reveal variant="left">
             <div className="flex flex-col gap-4">
               {visible.map((review) => (
-                <TestimonialCard key={`${review.id}-${active}`} review={review} />
+                <ClientReviewCard key={`${review.id}-${active}`} review={review} />
               ))}
             </div>
           </Reveal>
@@ -107,7 +109,7 @@ export default function ReviewsSection() {
   );
 }
 
-function TestimonialCard({ review }) {
+function ClientReviewCard({ review }) {
   return (
     <article className="neo-card flex flex-col rounded-[1.75rem] p-6 md:p-7">
       <div className="mb-3">

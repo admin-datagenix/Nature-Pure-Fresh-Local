@@ -1,11 +1,11 @@
 import { cn } from '../../lib/cn';
 
-/** About page + powder shop — contained banner with rounded frame */
+/** About page + shop category headers — contained banner with rounded frame */
 const INSET_WRAPPER_CLASS = 'site-container pt-4 sm:pt-5 md:pt-10';
 const INSET_HEADER_CLASS = 'mb-0 max-w-none rounded-lg sm:rounded-xl md:rounded-2xl';
 const INSET_IMAGE_CLASS = 'object-contain object-center';
 
-export function InsetCategoryBanner({ src, title, className, imageClassName }) {
+export function InsetCategoryBanner({ src, title, className, imageClassName, imageFallback }) {
   if (!src) return null;
 
   return (
@@ -15,12 +15,13 @@ export function InsetCategoryBanner({ src, title, className, imageClassName }) {
         title={title}
         className={cn(INSET_HEADER_CLASS, className)}
         imageClassName={cn(INSET_IMAGE_CLASS, imageClassName)}
+        imageFallback={imageFallback}
       />
     </div>
   );
 }
 
-export default function CategoryBannerHero({ src, title, className, imageClassName }) {
+export default function CategoryBannerHero({ src, title, className, imageClassName, imageFallback }) {
   if (!src) return null;
 
   return (
@@ -40,6 +41,11 @@ export default function CategoryBannerHero({ src, title, className, imageClassNa
         )}
         decoding="async"
         fetchPriority="high"
+        onError={(e) => {
+          if (!imageFallback || e.currentTarget.dataset.fallbackApplied) return;
+          e.currentTarget.dataset.fallbackApplied = '1';
+          e.currentTarget.src = imageFallback;
+        }}
       />
       {title ? <h1 className="sr-only">{title}</h1> : null}
     </header>

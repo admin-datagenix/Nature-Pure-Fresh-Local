@@ -4,7 +4,7 @@ import {
   CERTIFICATION_LOGOS,
   CERTIFICATION_STANDARDS,
 } from '../../data/certifications';
-import { BRAND_NAME } from '../../data/brand';
+import { ABOUT_QUALITY_IMAGE, BRAND_NAME } from '../../data/brand';
 
 function LogoTile({ logo }) {
   return (
@@ -51,29 +51,34 @@ export default function AboutCertifications() {
           </div>
         </Reveal>
 
-        <Reveal delay={100} className="mt-8">
-          <div className="rounded-xl border border-sage/50 bg-primary px-5 py-8 text-white md:px-8">
-            <h3 className="text-center font-heading text-xl font-semibold md:text-2xl">
-              Quality standards at {BRAND_NAME}
-            </h3>
-            <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {CERTIFICATION_STANDARDS.map((line) => (
-                <li
-                  key={line}
-                  className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 text-sm leading-snug text-white/95"
-                >
-                  <span
-                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold"
-                    aria-hidden="true"
-                  >
-                    ✓
-                  </span>
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </Reveal>
+        <div className="about-quality-split mt-10">
+          <Reveal variant="left" className="about-quality-split__col">
+            <div className="about-quality-split__media">
+              <img
+                src={ABOUT_QUALITY_IMAGE}
+                alt={`${BRAND_NAME} freeze-dried fruit quality`}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          </Reveal>
+
+          <Reveal variant="right" delay={80} className="about-quality-split__col">
+            <div className="about-quality-split__panel">
+              <h3 className="font-heading text-xl font-semibold leading-snug md:text-2xl">
+                Quality standards at {BRAND_NAME}
+              </h3>
+              <ul className="about-quality-split__list">
+                {CERTIFICATION_STANDARDS.map((line) => (
+                  <li key={line} className="about-quality-split__item">
+                    <span className="about-quality-split__check" aria-hidden="true">✓</span>
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
