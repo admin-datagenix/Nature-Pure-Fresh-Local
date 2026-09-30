@@ -14,6 +14,10 @@ export const STORE_SETTINGS = {
    * - `hidden` — omit from listing unless user filters "Out of stock"
    */
   outOfStockDisplay: 'badge',
+  /** Units left at or below this count = “low stock” (Meesho-style urgency). */
+  lowStockThreshold: 5,
+  /** Max product thumbnails in shop low-stock strip. */
+  lowStockShopDisplayCount: 3,
 };
 
 /** API response cache TTL (ms) — category / product list */

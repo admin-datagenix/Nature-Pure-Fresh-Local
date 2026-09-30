@@ -1,50 +1,15 @@
-import { useMemo } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { cn } from '../../lib/cn';
-
-function buildPriceSteps(min, max) {
-  const anchors = [
-    min,
-    199, 299, 399, 499, 599, 699, 799, 899, 999,
-    1099, 1199, 1299, 1399, 1499, 1599, 1699, 1799, 1899, 1999, 2099, max,
-  ];
-  const steps = [...new Set(anchors.filter((v) => v >= min && v <= max))].sort((a, b) => a - b);
-  if (steps[0] !== min) steps.unshift(min);
-  if (steps[steps.length - 1] !== max) steps.push(max);
-  return steps;
-}
 
 function formatInr(n) {
   return `₹${n.toLocaleString('en-IN')}`;
 }
 
-function FlipkartSelect({ value, onChange, options, ariaLabel, className }) {
-  return (
-    <div className={cn('relative min-w-0', className)}>
-      <select
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        aria-label={ariaLabel}
-        className="shop-price-select w-full cursor-pointer"
-      >
-        {options.map((v) => (
-          <option key={v} value={v}>
-            {formatInr(v)}
-          </option>
-        ))}
-      </select>
-      <svg
-        className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted"
-        viewBox="0 0 20 20"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path d="M5 7.5l5 5 5-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-      </svg>
-    </div>
-  );
+function clamp(n, floor, ceiling) {
+  return Math.min(ceiling, Math.max(floor, n));
 }
 
-/** Flipkart-style price filter: range slider + min/max dropdowns. */
+/** Price filter: gradient track, single thumb (max), min/max typed in inputs. */
 export default function PriceRangeSlider({
   min,
   max,
@@ -54,82 +19,86 @@ export default function PriceRangeSlider({
   onChangeMax,
   className,
 }) {
-  const steps = useMemo(() => buildPriceSteps(min, max), [min, max]);
-  const lo = Math.min(valueMin, valueMax);
-  const hi = Math.max(valueMin, valueMax);
-  const span = max - min || 1;
-  const leftPct = ((lo - min) / span) * 100;
-  const widthPct = ((hi - lo) / span) * 100;
+  const lo = clamp(Math.min(valueMin, valueMax), min, max);
+  const hi = clamp(Math.max(valueMin, valueMax), min, max);
 
-  const minOptions = useMemo(() => {
-    let opts = steps.filter((v) => v <= hi && v < max);
-    if (!opts.includes(lo)) opts = [...opts, lo].sort((a, b) => a - b);
-    return opts.length ? opts : [min];
-  }, [steps, lo, hi, min, max]);
+  const [minDraft, setMinDraft] = useState(String(lo));
+  const [maxDraft, setMaxDraft] = useState(String(hi));
 
-  const maxOptions = useMemo(() => {
-    let opts = steps.filter((v) => v >= lo);
-    if (!opts.includes(hi)) opts = [...opts, hi].sort((a, b) => a - b);
-    return opts.length ? opts : [max];
-  }, [steps, lo, hi, max]);
+  useEffect(() => {
+    setMinDraft(String(lo));
+    setMaxDraft(String(hi));
+  }, [lo, hi]);
 
-  const handleMinSelect = (v) => {
-    onChangeMin(v);
-    if (v > hi) onChangeMax(v);
-  };
+  const applyMin = useCallback(
+    (raw) => {
+      const parsed = parseInt(String(raw).replace(/\D/g, ''), 10);
+      const next = Number.isFinite(parsed) ? clamp(parsed, min, hi) : min;
+      onChangeMin(next);
+      if (next > hi) onChangeMax(next);
+    },
+    [min, hi, onChangeMin, onChangeMax]
+  );
 
-  const handleMaxSelect = (v) => {
-    onChangeMax(v);
-    if (v < lo) onChangeMin(v);
+  const applyMax = useCallback(
+    (raw) => {
+      const parsed = parseInt(String(raw).replace(/\D/g, ''), 10);
+      const next = Number.isFinite(parsed) ? clamp(parsed, lo, max) : max;
+      onChangeMax(next);
+      if (next < lo) onChangeMin(next);
+    },
+    [lo, max, onChangeMin, onChangeMax]
+  );
+
+  const handleSlider = (v) => {
+    const next = clamp(v, min, max);
+    onChangeMax(next);
+    if (next < lo) onChangeMin(next);
   };
 
   return (
     <div className={cn('shop-price-filter', className)}>
-      <div className="relative mb-4 h-6">
-        <div className="shop-price-track absolute left-0 right-0 top-1/2 -translate-y-1/2" />
-        <div
-          className="shop-price-track-active absolute top-1/2 -translate-y-1/2"
-          style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
-        />
+      <div className="relative mb-4 pt-1">
+        <div className="shop-price-track-gradient pointer-events-none absolute left-0 right-0 top-1/2 -translate-y-1/2" aria-hidden="true" />
         <input
           type="range"
           min={min}
           max={max}
-          step={10}
-          value={lo}
-          onChange={(e) => handleMinSelect(Number(e.target.value))}
-          className="shop-range-thumb absolute inset-0 z-20 w-full bg-transparent"
-          aria-label="Minimum price"
-        />
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={10}
+          step={1}
           value={hi}
-          onChange={(e) => handleMaxSelect(Number(e.target.value))}
-          className="shop-range-thumb absolute inset-0 z-30 w-full bg-transparent"
-          aria-label="Maximum price"
+          onChange={(e) => handleSlider(Number(e.target.value))}
+          className="shop-price-range relative z-10 w-full"
+          aria-label="Maximum price on scale"
         />
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <div>
           <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-muted">Min</span>
-          <FlipkartSelect
-            value={lo}
-            onChange={handleMinSelect}
-            options={minOptions}
-            ariaLabel="Minimum price"
+          <input
+            type="text"
+            inputMode="numeric"
+            value={minDraft}
+            onChange={(e) => setMinDraft(e.target.value)}
+            onBlur={() => applyMin(minDraft)}
+            onKeyDown={(e) => e.key === 'Enter' && applyMin(minDraft)}
+            className="neo-input w-full px-2.5 py-2 text-sm"
+            aria-label="Minimum price"
+            placeholder={formatInr(min)}
           />
         </div>
         <div>
           <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide text-muted">Max</span>
-          <FlipkartSelect
-            value={hi}
-            onChange={handleMaxSelect}
-            options={maxOptions.length ? maxOptions : [hi]}
-            ariaLabel="Maximum price"
+          <input
+            type="text"
+            inputMode="numeric"
+            value={maxDraft}
+            onChange={(e) => setMaxDraft(e.target.value)}
+            onBlur={() => applyMax(maxDraft)}
+            onKeyDown={(e) => e.key === 'Enter' && applyMax(maxDraft)}
+            className="neo-input w-full px-2.5 py-2 text-sm"
+            aria-label="Maximum price"
+            placeholder={formatInr(max)}
           />
         </div>
       </div>

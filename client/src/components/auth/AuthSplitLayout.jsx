@@ -128,11 +128,11 @@ export function AuthPageHeader({ title, subtitle, showBrand = true, compact = fa
           <BrandLogo logoOnly className="justify-center" imageClassName={compact ? 'max-w-[200px]' : 'max-w-[250px]'} />
         </div>
       )}
-      <h1 className={cn('font-bold leading-tight tracking-tight text-[#294633]', compact ? 'text-[1.4rem]' : 'text-[1.75rem]')}>
+      <h1 className={cn('font-bold leading-tight tracking-tight text-primary', compact ? 'text-[1.4rem]' : 'text-[1.75rem]')}>
         {title}
       </h1>
       {subtitle && (
-        <p className={cn('text-[#7C8A80]', compact ? 'mt-1 text-sm' : 'mt-2 text-[0.9375rem]')}>{subtitle}</p>
+        <p className={cn('text-muted', compact ? 'mt-1 text-sm' : 'mt-2 text-[0.9375rem]')}>{subtitle}</p>
       )}
     </header>
   );
@@ -266,7 +266,7 @@ export function ClayPhoneField({ id, value, onChange, placeholder = 'Mobile numb
         Mobile number
       </label>
       <FieldIcon icon="phone" />
-      <span className="pointer-events-none absolute left-12 top-1/2 -translate-y-1/2 text-[0.9375rem] font-medium text-[#3D6049]">
+      <span className="pointer-events-none absolute left-12 top-1/2 -translate-y-1/2 text-[0.9375rem] font-medium text-secondary">
         +91
       </span>
       <input
@@ -305,7 +305,7 @@ export function PasswordToggle({ visible, onToggle }) {
     <button
       type="button"
       onClick={onToggle}
-      className="rounded-full p-2 text-[#7C8A80] transition hover:text-[#3D6049]"
+      className="rounded-full p-2 text-muted transition hover:text-secondary"
       aria-label={visible ? 'Hide password' : 'Show password'}
     >
       {visible ? <EyeOffIcon className="h-[1.125rem] w-[1.125rem]" /> : <EyeIcon className="h-[1.125rem] w-[1.125rem]" />}
@@ -349,19 +349,19 @@ export function AuthOtpStatus({ otpSent, otpExpiresIn, otpExpired, resendIn, onR
   if (!otpSent) return null;
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-[#7C8A80]">
+    <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs text-muted">
       <span>
         {otpExpired ? (
           <span className="font-medium text-strawberry">OTP expired — request a new one</span>
         ) : (
-          <>OTP expires in <strong className="text-[#294633]">{Math.floor(otpExpiresIn / 60)}:{String(otpExpiresIn % 60).padStart(2, '0')}</strong></>
+          <>OTP expires in <strong className="text-primary">{Math.floor(otpExpiresIn / 60)}:{String(otpExpiresIn % 60).padStart(2, '0')}</strong></>
         )}
       </span>
       <button
         type="button"
         onClick={onResend}
         disabled={resendDisabled || resendIn > 0}
-        className="shrink-0 font-medium text-[#294633] hover:underline disabled:opacity-50"
+        className="shrink-0 font-medium text-primary hover:underline disabled:opacity-50"
       >
         {resendIn > 0 ? `Resend in ${resendIn}s` : 'Resend OTP'}
       </button>
@@ -371,7 +371,7 @@ export function AuthOtpStatus({ otpSent, otpExpiresIn, otpExpired, resendIn, onR
 
 export function AuthHint({ children }) {
   return (
-    <p className="rounded-full bg-[#EEF2EA] px-4 py-2.5 text-center text-xs leading-relaxed text-[#7C8A80] shadow-[inset_2px_2px_6px_rgba(61,96,73,0.05)]">
+    <p className="rounded-full bg-cream-dark px-4 py-2.5 text-center text-xs leading-relaxed text-muted shadow-[inset_2px_2px_6px_rgba(61,96,73,0.05)]">
       {children}
     </p>
   );
@@ -379,7 +379,7 @@ export function AuthHint({ children }) {
 
 export function AuthFooter({ children, compact = false }) {
   return (
-    <p className={cn('text-center text-sm text-[#7C8A80]', compact ? 'mt-3.5' : 'mt-7')}>
+    <p className={cn('text-center text-sm text-muted', compact ? 'mt-3.5' : 'mt-7')}>
       {children}
     </p>
   );

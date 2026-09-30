@@ -10,7 +10,9 @@ import { CartIcon, CheckIcon } from '../ui/CommerceIcons';
 import WishlistButton from '../wishlist/WishlistButton';
 import {
   isOutOfStock,
+  lowStockLabel,
   outOfStockCardClass,
+  shouldShowLowStockBadge,
   shouldShowOutOfStockBadge,
 } from '../../utils/stockDisplay';
 
@@ -90,9 +92,9 @@ export default function ProductCard({
                 −{discount}%
               </span>
             )}
-            {shouldShowOutOfStockBadge(product) && (
-              <span className="label-chip absolute bottom-2 left-2 z-10 bg-primary/90 px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wide text-white shadow-sm">
-                Out of stock
+            {shouldShowLowStockBadge(product) && (
+              <span className="label-chip absolute bottom-2 left-2 z-10 bg-strawberry px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-wide text-white shadow-sm">
+                {lowStockLabel(product)}
               </span>
             )}
 
@@ -104,10 +106,22 @@ export default function ProductCard({
                 decoding="async"
                 className={cn(
                   'max-h-full max-w-full object-contain transition duration-500 ease-out',
-                  selected ? 'scale-[1.05]' : 'group-hover:scale-[1.05]'
+                  selected ? 'scale-[1.05]' : 'group-hover:scale-[1.05]',
+                  outOfStock && 'opacity-85 saturate-[0.65]'
                 )}
               />
             </div>
+
+            {outOfStock && shouldShowOutOfStockBadge(product) && (
+              <div
+                className="pointer-events-none absolute inset-0 z-[18] flex items-center justify-center rounded-xl bg-cream/55"
+                aria-hidden
+              >
+                <span className="rounded-sm border border-white/90 bg-primary px-3 py-1.5 text-center text-[0.65rem] font-bold uppercase leading-snug tracking-wider text-white shadow-[0_4px_14px_rgba(41,70,51,0.28)] sm:text-[0.7rem]">
+                  Out of stock
+                </span>
+              </div>
+            )}
           </div>
         </Link>
 
@@ -177,7 +191,8 @@ export default function ProductCard({
               'flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition duration-200 sm:h-10 sm:w-10',
               added
                 ? 'bg-success text-white shadow-[0_6px_14px_rgba(74,124,89,0.22)]'
-                : 'border border-sage/55 text-primary shadow-[0_2px_8px_rgba(41,70,51,0.06)] hover:border-primary hover:bg-primary hover:text-white'
+                : 'border border-sage/55 text-primary shadow-[0_2px_8px_rgba(41,70,51,0.06)] hover:border-primary hover:bg-primary hover:text-white',
+              outOfStock && 'cursor-not-allowed opacity-40 hover:border-sage/55 hover:bg-transparent hover:text-primary'
             )}
           >
             {added ? <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5" /> : <CartIcon className="h-4 w-4 sm:h-5 sm:w-5" />}

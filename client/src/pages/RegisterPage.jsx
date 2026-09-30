@@ -11,7 +11,6 @@ import {
   ClayPhoneField,
   ClayOtpInput,
   ClaySubmitButton,
-  PasswordToggle,
   AuthError,
   AuthSuccess,
   AuthHint,
@@ -34,13 +33,6 @@ export default function RegisterPage() {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [mobile, setMobile] = useState('');
-  const [showOptional, setShowOptional] = useState(false);
-  const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [otp, setOtp] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [pendingMobile, setPendingMobile] = useState('');
@@ -71,44 +63,12 @@ export default function RegisterPage() {
     setResendIn(0);
   };
 
-  const buildRegistrationPayload = () => {
-    const base = { name, mobile };
-    if (!showOptional) return base;
-
-    const trimmedEmail = email.trim();
-    const trimmedAddress = address.trim();
-    const usingOptional = trimmedEmail || password || trimmedAddress;
-
-    if (!usingOptional) return base;
-
-    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
-      throw new Error('Please enter a valid email or hide optional fields');
-    }
-    if (!trimmedAddress || trimmedAddress.length < 8) {
-      throw new Error('Please enter your full address or hide optional fields');
-    }
-    if (!password || password.length < 6) {
-      throw new Error('Password must be at least 6 characters');
-    }
-    if (password !== confirmPassword) {
-      throw new Error('Passwords do not match');
-    }
-
-    return {
-      ...base,
-      email: trimmedEmail,
-      address: trimmedAddress,
-      password,
-    };
-  };
-
   const handleStart = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
     try {
-      const payload = buildRegistrationPayload();
-      const res = await sendRegistrationOtp(payload);
+      const res = await sendRegistrationOtp({ name, mobile });
       setStep(2);
       setOtpSent(true);
       setPendingMobile(res.data.mobile);
@@ -188,73 +148,11 @@ export default function RegisterPage() {
 
           <ClayPhoneField id="mobile" value={mobile} onChange={setMobile} />
 
-          <AuthHint>
-            Duplicate mobile numbers are blocked. After OTP verification, your account is created and you receive a
-            session token (mock demo).
-          </AuthHint>
-
-          <button
-            type="button"
-            onClick={() => setShowOptional((v) => !v)}
-            className="text-left text-xs font-semibold text-[#3D6049] underline underline-offset-2"
-          >
-            {showOptional ? 'Hide optional email & password' : 'Add email & password (optional)'}
-          </button>
-
-          {showOptional && (
-            <>
-              <ClayAuthField
-                id="email"
-                type="email"
-                icon="mail"
-                placeholder="Email address"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-              />
-              <ClayAuthField
-                id="address"
-                icon="map"
-                placeholder="Delivery address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                autoComplete="street-address"
-              />
-              <ClayAuthField
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                icon="lock"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="new-password"
-                rightSlot={
-                  <PasswordToggle visible={showPassword} onToggle={() => setShowPassword((v) => !v)} />
-                }
-              />
-              <ClayAuthField
-                id="confirmPassword"
-                type={showConfirmPassword ? 'text' : 'password'}
-                icon="lock"
-                placeholder="Confirm password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                autoComplete="new-password"
-                rightSlot={
-                  <PasswordToggle
-                    visible={showConfirmPassword}
-                    onToggle={() => setShowConfirmPassword((v) => !v)}
-                  />
-                }
-              />
-            </>
-          )}
-
           <ClaySubmitButton loading={authLoading}>Send OTP</ClaySubmitButton>
         </form>
       ) : (
         <form onSubmit={handleVerify} className={authFormStackCompact}>
-          <p className="px-1 text-xs text-[#7C8A80]">
+          <p className="px-1 text-xs text-muted">
             OTP sent to {formatIndianPhone(pendingMobile)} · expires in {Math.floor(OTP_EXPIRY_SECONDS / 60)} minutes
           </p>
 
@@ -271,7 +169,7 @@ export default function RegisterPage() {
 
           {demoOtp && (
             <AuthHint>
-              Mock OTP: <strong className="text-[#294633]">{demoOtp}</strong>
+              Mock OTP: <strong className="text-primary">{demoOtp}</strong>
             </AuthHint>
           )}
 
@@ -283,12 +181,12 @@ export default function RegisterPage() {
         {step === 1 ? (
           <>
             Already have an account?{' '}
-            <Link to="/login" className="font-bold text-[#294633] hover:underline">
+            <Link to="/login" className="font-bold text-primary hover:underline">
               Login
             </Link>
           </>
         ) : (
-          <button type="button" onClick={goBack} className="font-bold text-[#294633] hover:underline">
+          <button type="button" onClick={goBack} className="font-bold text-primary hover:underline">
             ← Change mobile number
           </button>
         )}

@@ -4,6 +4,35 @@ export function isOutOfStock(product) {
   return (product?.stock ?? 0) <= 0;
 }
 
+export function getLowStockThreshold() {
+  return STORE_SETTINGS.lowStockThreshold ?? 5;
+}
+
+/** In stock but at or below low-stock threshold (e.g. ≤5 units). */
+export function isLowStock(product) {
+  const qty = product?.stock ?? 0;
+  return qty > 0 && qty <= getLowStockThreshold();
+}
+
+export function lowStockLabel(product) {
+  const qty = product?.stock ?? 0;
+  if (!isLowStock(product)) return null;
+  return qty === 1 ? 'Only 1 left' : `Only ${qty} left`;
+}
+
+/** Fewest units first; cap for shop strip. */
+export function pickLowStockProducts(products, limit = STORE_SETTINGS.lowStockShopDisplayCount ?? 3) {
+  if (!Array.isArray(products) || limit <= 0) return [];
+  return products
+    .filter((p) => isLowStock(p))
+    .sort((a, b) => (a.stock ?? 0) - (b.stock ?? 0))
+    .slice(0, limit);
+}
+
+export function shouldShowLowStockBadge(product) {
+  return isLowStock(product) && !isOutOfStock(product);
+}
+
 export function getOutOfStockMode() {
   return STORE_SETTINGS.outOfStockDisplay;
 }

@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -53,6 +54,7 @@ export default function NeoSelect({
   required,
   disabled,
   placeholder,
+  menuPlacement = 'down',
   'aria-label': ariaLabel,
 }) {
   const autoId = useId();
@@ -68,7 +70,9 @@ export default function NeoSelect({
     'Select';
 
   const [open, setOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const rootRef = useRef(null);
+  const triggerRef = useRef(null);
   const listRef = useRef(null);
 
   const close = useCallback(() => setOpen(false), []);
@@ -98,6 +102,25 @@ export default function NeoSelect({
     };
   }, [open, close]);
 
+  useLayoutEffect(() => {
+    if (!open) return;
+    if (menuPlacement === 'down') {
+      setOpenUpward(false);
+      return;
+    }
+    if (menuPlacement === 'up') {
+      setOpenUpward(true);
+      return;
+    }
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+    const rect = trigger.getBoundingClientRect();
+    const estimatedMenuHeight = Math.min(options.length * 42 + 8, 244);
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    setOpenUpward(spaceBelow < estimatedMenuHeight && spaceAbove > spaceBelow);
+  }, [open, menuPlacement, options.length]);
+
   useEffect(() => {
     if (!open || !listRef.current) return;
     const el = listRef.current.querySelector('[data-selected="true"]');
@@ -120,6 +143,7 @@ export default function NeoSelect({
       )}
 
       <button
+        ref={triggerRef}
         type="button"
         id={id}
         disabled={disabled}
@@ -146,7 +170,10 @@ export default function NeoSelect({
           id={listboxId}
           role="listbox"
           aria-labelledby={id}
-          className="neo-select-panel absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-60 overflow-y-auto py-1"
+          className={cn(
+            'neo-select-panel absolute left-0 right-0 z-[200] max-h-60 overflow-y-auto py-1',
+            openUpward ? 'bottom-[calc(100%+6px)] top-auto' : 'top-[calc(100%+6px)]'
+          )}
         >
           {options.map((opt) => {
             const isSelected = opt.value === value;

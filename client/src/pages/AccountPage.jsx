@@ -43,18 +43,12 @@ function storeGender(userId, value) {
 }
 
 function ProfileFieldLabel({ children }) {
-  return (
-    <span className="mb-1 block text-xs font-semibold text-primary sm:text-sm">
-      {children}
-    </span>
-  );
+  return <span className="mb-1 block text-xs font-medium text-primary">{children}</span>;
 }
 
+/** Same inset fields as NeoSelect / checkout address form */
 function profileInputClass(extra = '') {
-  return cn(
-    'w-full rounded-lg border border-sage/55 bg-white px-3 py-2 text-sm text-primary outline-none transition placeholder:text-muted/80 focus:border-secondary focus:ring-2 focus:ring-secondary/20',
-    extra
-  );
+  return cn('neo-input px-3 py-2 text-sm', extra);
 }
 
 const MENU = [
@@ -429,132 +423,142 @@ export default function AccountPage() {
           )}
 
           {section === 'profile' && (
-            <div className="rounded-xl border border-sage/50 bg-white px-4 py-5 md:px-6 md:py-6">
-              <h2 className="sr-only">Personal Information</h2>
-              <div className="mx-auto flex max-w-md flex-col items-center">
-                <div className="relative mb-5">
-                  <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-sage/30 bg-secondary/12 shadow-sm md:h-[5.25rem] md:w-[5.25rem]">
-                    {avatarPreview ? (
-                      <img src={avatarPreview} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <span className="font-heading text-2xl font-semibold text-primary">
-                        {(profileForm.firstName || user.name || 'U').charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <label className="absolute -bottom-0.5 -right-0.5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow transition hover:bg-primary/90">
-                    <span className="sr-only">Change profile photo</span>
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    <input type="file" accept="image/*" className="sr-only" onChange={handleAvatarPick} />
-                  </label>
-                </div>
-
-                <form onSubmit={handleProfileSave} className="w-full space-y-3">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <label className="block">
-                      <ProfileFieldLabel>First name</ProfileFieldLabel>
-                      <input
-                        type="text"
-                        value={profileForm.firstName}
-                        onChange={(e) => setProfileForm((f) => ({ ...f, firstName: e.target.value }))}
-                        className={profileInputClass()}
-                        placeholder="First name"
-                        autoComplete="given-name"
-                      />
-                    </label>
-                    <label className="block">
-                      <ProfileFieldLabel>Last name</ProfileFieldLabel>
-                      <input
-                        type="text"
-                        value={profileForm.lastName}
-                        onChange={(e) => setProfileForm((f) => ({ ...f, lastName: e.target.value }))}
-                        className={profileInputClass()}
-                        placeholder="Last name"
-                        autoComplete="family-name"
-                      />
-                    </label>
-                  </div>
-
-                  <label className="block">
-                    <ProfileFieldLabel>Email</ProfileFieldLabel>
-                    <input
-                      type="email"
-                      value={profileForm.email}
-                      readOnly={showRealEmail}
-                      onChange={(e) => setProfileForm((f) => ({ ...f, email: e.target.value }))}
-                      className={profileInputClass(showRealEmail ? 'cursor-not-allowed bg-cream/60 text-muted' : '')}
-                      placeholder={mobileOnlyAccount ? 'Add email in account settings' : 'Email address'}
-                      autoComplete="email"
-                    />
-                    {mobileOnlyAccount && (
-                      <p className="mt-1 text-xs text-muted">Signed in with mobile OTP. Email is optional.</p>
-                    )}
-                  </label>
-
-                  <label className="block">
-                    <ProfileFieldLabel>Phone</ProfileFieldLabel>
-                    <input
-                      type="tel"
-                      value={showMobile ? formatIndianPhone(profileForm.phone) : profileForm.phone}
-                      readOnly={showMobile}
-                      onChange={(e) => setProfileForm((f) => ({ ...f, phone: e.target.value }))}
-                      className={profileInputClass(showMobile ? 'cursor-not-allowed bg-cream/60 text-muted' : '')}
-                      placeholder="10-digit mobile"
-                      autoComplete="tel"
-                    />
-                    {user.phone_verified && showMobile ? (
-                      <p className="mt-1 text-xs font-medium text-secondary">Verified mobile number</p>
-                    ) : null}
-                  </label>
-
-                  <label className="block">
-                    <ProfileFieldLabel>Gender</ProfileFieldLabel>
-                    <NeoSelect
-                      value={profileForm.gender}
-                      onChange={(e) => setProfileForm((f) => ({ ...f, gender: e.target.value }))}
-                      className={profileInputClass('pr-10')}
-                      placeholder="Select gender"
-                    >
-                      <option value="">Select gender</option>
-                      <option value="female">Female</option>
-                      <option value="male">Male</option>
-                      <option value="other">Other</option>
-                      <option value="prefer_not">Prefer not to say</option>
-                    </NeoSelect>
-                  </label>
-
-                  <label className="block">
-                    <ProfileFieldLabel>Delivery address</ProfileFieldLabel>
-                    <textarea
-                      value={profileForm.address}
-                      onChange={(e) => setProfileForm((f) => ({ ...f, address: e.target.value }))}
-                      rows={2}
-                      className={cn(profileInputClass(), 'neo-textarea min-h-[4.25rem] resize-y')}
-                      placeholder="Flat / house, street, area, city"
-                      autoComplete="street-address"
-                    />
-                  </label>
-
-                  {profileError && (
-                    <p className="rounded-lg bg-strawberry/10 px-3 py-2 text-sm text-strawberry">{profileError}</p>
-                  )}
-                  {profileMessage && (
-                    <p className="rounded-lg bg-secondary/10 px-3 py-2 text-sm font-medium text-secondary">
-                      {profileMessage}
-                    </p>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={profileSaving}
-                    className="neo-btn mt-1 px-6 py-2.5 text-sm font-semibold disabled:opacity-60"
-                  >
-                    {profileSaving ? 'Updating…' : 'Update changes'}
-                  </button>
-                </form>
+            <div>
+              <div className="mb-5">
+                <h2 className="font-heading text-lg font-semibold text-primary md:text-xl">Personal Information</h2>
               </div>
+
+              <article className="overflow-visible rounded-xl border border-sage/50 bg-white shadow-[0_4px_16px_rgba(41,70,51,0.05)]">
+                <div className="overflow-visible px-4 py-5 md:px-5 md:py-6">
+                  <div className="flex flex-col gap-6 overflow-visible md:flex-row md:items-start">
+                    <div className="relative mx-auto shrink-0 md:mx-0">
+                      <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-sage/30 bg-secondary/12 shadow-sm md:h-[5.25rem] md:w-[5.25rem]">
+                        {avatarPreview ? (
+                          <img src={avatarPreview} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <span className="font-heading text-2xl font-semibold text-primary">
+                            {(profileForm.firstName || user.name || 'U').charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <label className="absolute -bottom-0.5 -right-0.5 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-primary text-white shadow transition hover:bg-primary/90">
+                        <span className="sr-only">Change profile photo</span>
+                        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                        <input type="file" accept="image/*" className="sr-only" onChange={handleAvatarPick} />
+                      </label>
+                    </div>
+
+                    <form onSubmit={handleProfileSave} className="min-w-0 flex-1 space-y-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="block">
+                          <ProfileFieldLabel>First name</ProfileFieldLabel>
+                          <input
+                            type="text"
+                            value={profileForm.firstName}
+                            onChange={(e) => setProfileForm((f) => ({ ...f, firstName: e.target.value }))}
+                            className={profileInputClass()}
+                            placeholder="First name"
+                            autoComplete="given-name"
+                          />
+                        </label>
+                        <label className="block">
+                          <ProfileFieldLabel>Last name</ProfileFieldLabel>
+                          <input
+                            type="text"
+                            value={profileForm.lastName}
+                            onChange={(e) => setProfileForm((f) => ({ ...f, lastName: e.target.value }))}
+                            className={profileInputClass()}
+                            placeholder="Last name"
+                            autoComplete="family-name"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="block">
+                          <ProfileFieldLabel>Email</ProfileFieldLabel>
+                          <input
+                            type="email"
+                            value={profileForm.email}
+                            readOnly={showRealEmail}
+                            onChange={(e) => setProfileForm((f) => ({ ...f, email: e.target.value }))}
+                            className={profileInputClass(showRealEmail ? 'cursor-not-allowed opacity-75' : '')}
+                            placeholder={mobileOnlyAccount ? 'Add email in account settings' : 'Email address'}
+                            autoComplete="email"
+                          />
+                          {mobileOnlyAccount && (
+                            <p className="mt-1 text-xs text-muted">Signed in with mobile OTP. Email is optional.</p>
+                          )}
+                        </label>
+
+                        <label className="block">
+                          <ProfileFieldLabel>Phone</ProfileFieldLabel>
+                          <input
+                            type="tel"
+                            value={showMobile ? formatIndianPhone(profileForm.phone) : profileForm.phone}
+                            readOnly={showMobile}
+                            onChange={(e) => setProfileForm((f) => ({ ...f, phone: e.target.value }))}
+                            className={profileInputClass(showMobile ? 'cursor-not-allowed opacity-75' : '')}
+                            placeholder="10-digit mobile"
+                            autoComplete="tel"
+                          />
+                          {user.phone_verified && showMobile ? (
+                            <p className="mt-1 text-xs font-medium text-secondary">Verified mobile number</p>
+                          ) : null}
+                        </label>
+                      </div>
+
+                      <label className="relative z-20 block">
+                        <ProfileFieldLabel>Gender</ProfileFieldLabel>
+                        <NeoSelect
+                          value={profileForm.gender}
+                          onChange={(e) => setProfileForm((f) => ({ ...f, gender: e.target.value }))}
+                          className={profileInputClass()}
+                          placeholder="Select gender"
+                          menuPlacement="auto"
+                        >
+                          <option value="">Select gender</option>
+                          <option value="female">Female</option>
+                          <option value="male">Male</option>
+                          <option value="other">Other</option>
+                          <option value="prefer_not">Prefer not to say</option>
+                        </NeoSelect>
+                      </label>
+
+                      <label className="block">
+                        <ProfileFieldLabel>Delivery address</ProfileFieldLabel>
+                        <textarea
+                          value={profileForm.address}
+                          onChange={(e) => setProfileForm((f) => ({ ...f, address: e.target.value }))}
+                          rows={2}
+                          className={cn(profileInputClass(), 'neo-textarea min-h-[4.25rem] resize-y')}
+                          placeholder="Flat / house, street, area, city"
+                          autoComplete="street-address"
+                        />
+                      </label>
+
+                      {profileError && (
+                        <p className="rounded-lg bg-strawberry/10 px-3 py-2 text-sm text-strawberry">{profileError}</p>
+                      )}
+                      {profileMessage && (
+                        <p className="rounded-lg bg-secondary/10 px-3 py-2 text-sm font-medium text-secondary">
+                          {profileMessage}
+                        </p>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={profileSaving}
+                        className="neo-btn mt-1 px-6 py-2.5 text-sm font-semibold disabled:opacity-60"
+                      >
+                        {profileSaving ? 'Updating…' : 'Update changes'}
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </article>
             </div>
           )}
 
