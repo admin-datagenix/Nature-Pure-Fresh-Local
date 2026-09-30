@@ -17,7 +17,7 @@ import {
 
 export default function AboutPage() {
   return (
-    <div className="min-w-0 w-full overflow-x-hidden bg-cream">
+    <div className="bg-cream">
       <AboutPageHero />
 
       <AboutStory />
@@ -61,7 +61,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <section className="border-t border-sage/45 py-8 md:py-10" id="contact">
+      {/* <section className="about-page-section border-t border-sage/45 py-8 md:py-10" id="contact">
         <div className="site-container">
           <Reveal>
             <h2 className="font-heading text-2xl text-primary md:text-3xl">Contact Us</h2>
@@ -115,7 +115,7 @@ export default function AboutPage() {
             </a>
           </Reveal>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

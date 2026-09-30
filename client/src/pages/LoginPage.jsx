@@ -176,7 +176,7 @@ export default function LoginPage() {
           <div className="flex items-center justify-end">
             <Link
               to="/forgot-password"
-              className="text-xs font-medium text-[#7C8A80] transition hover:text-[#294633] hover:underline"
+              className="text-xs font-medium text-muted transition hover:text-primary hover:underline"
             >
               Forgot Password?
             </Link>
@@ -196,7 +196,7 @@ export default function LoginPage() {
           />
 
           {otpSent && (
-            <p className="px-1 text-xs text-[#7C8A80]">
+            <p className="px-1 text-xs text-muted">
               OTP sent to {formatIndianPhone(pendingMobile)}
             </p>
           )}
@@ -214,7 +214,7 @@ export default function LoginPage() {
 
           {demoOtp && (
             <AuthHint>
-              Mock OTP: <strong className="text-[#294633]">{demoOtp}</strong>
+              Mock OTP: <strong className="text-primary">{demoOtp}</strong>
             </AuthHint>
           )}
 
@@ -226,7 +226,7 @@ export default function LoginPage() {
 
       <AuthFooter compact>
         Don&apos;t have an account?{' '}
-        <Link to="/register" className="font-bold text-[#294633] hover:underline">
+        <Link to="/register" className="font-bold text-primary hover:underline">
           Sign Up
         </Link>
       </AuthFooter>

@@ -52,6 +52,7 @@ export const ABOUT_STORY_IMAGE = '/about/about-img.png';
 export const ABOUT_PAGE_BANNER = '/about/about-banner.svg';
 
 /** Shop category heading banners (1920×700 art in public/) */
+export const ALL_PRODUCTS_SHOP_BANNER = '/hero/all-products.svg';
 export const POWDER_SHOP_BANNER = '/products/powder/powder-banner.svg';
 
 export const SHOP_CATEGORY_BANNERS = {

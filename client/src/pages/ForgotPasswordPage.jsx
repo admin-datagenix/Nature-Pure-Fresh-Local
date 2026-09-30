@@ -163,7 +163,7 @@ export default function ForgotPasswordPage() {
 
         {otpSent && (
           <>
-            <p className="px-1 text-xs text-[#7C8A80]">
+            <p className="px-1 text-xs text-muted">
               OTP sent to{' '}
               {mode === 'email' ? email : formatIndianPhone(mobile.replace(/\D/g, '').slice(-10))}
             </p>
@@ -178,7 +178,7 @@ export default function ForgotPasswordPage() {
             <ClayOtpInput value={otp} onChange={setOtp} />
             {demoOtp && (
               <AuthHint>
-                Mock reset OTP: <strong className="text-[#294633]">{demoOtp}</strong>
+                Mock reset OTP: <strong className="text-primary">{demoOtp}</strong>
               </AuthHint>
             )}
             <ClayAuthField
@@ -212,7 +212,7 @@ export default function ForgotPasswordPage() {
 
       <AuthFooter>
         Remember your password?{' '}
-        <Link to="/login" className="font-bold text-[#294633] hover:underline">
+        <Link to="/login" className="font-bold text-primary hover:underline">
           Back to Login
         </Link>
       </AuthFooter>
