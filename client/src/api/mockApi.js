@@ -8,6 +8,7 @@ import {
   getProductBySlug,
 } from './mockData.js';
 import { getProductWeightOptions, scalePrice } from '../utils/productVariants.js';
+import { DEMO_ORDERS_ENABLED, getDemoAccountOrders, getDemoOrderById, isDemoOrderId } from '../data/demoAccountOrders.js';
 
 const CART_KEY = 'fresh_nature_mock_cart';
 const ORDERS_KEY = 'fresh_nature_orders';
@@ -925,6 +926,12 @@ export const mockApi = {
 
   async getOrder(orderId) {
     await delay(100);
+    const session = loadSession();
+    const user = session?.userId ? loadUsers().find((u) => u.id === session.userId) : null;
+    if (DEMO_ORDERS_ENABLED && isDemoOrderId(orderId)) {
+      const demo = getDemoOrderById(orderId, session?.userId, user);
+      if (demo) return { success: true, data: demo };
+    }
     const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
     const order = orders.find((o) => o.id === orderId);
     if (!order) throw new Error('Order not found');
@@ -939,11 +946,14 @@ export const mockApi = {
     const user = loadUsers().find((u) => u.id === session.userId);
     const email = user?.email?.toLowerCase();
     const mine = orders.filter((o) => {
+      if (isDemoOrderId(o.id)) return false;
       if (o.user_id === session.userId) return true;
       if (!o.user_id && email && o.shipping_address?.email?.toLowerCase() === email) return true;
       return false;
     });
-    return { success: true, data: mine };
+    const demos =
+      DEMO_ORDERS_ENABLED ? getDemoAccountOrders(session.userId, user) : [];
+    return { success: true, data: [...demos, ...mine] };
   },
 
   async updateProfile({ name, address }) {
@@ -954,7 +964,9 @@ export const mockApi = {
     const trimmedName = (name || '').trim();
     const trimmedAddress = (address || '').trim();
     if (trimmedName.length < 2) throw new Error('Please enter your full name');
-    if (trimmedAddress.length < 5) throw new Error('Please enter a complete delivery address');
+    if (trimmedAddress.length > 0 && trimmedAddress.length < 5) {
+      throw new Error('Please enter a complete delivery address');
+    }
 
     const users = loadUsers();
     const idx = users.findIndex((u) => u.id === session.userId);
@@ -968,5 +980,23 @@ export const mockApi = {
     saveUsers(users);
 
     return { success: true, data: sanitizeUser(users[idx]), message: 'Profile updated' };
+  },
+
+  async changePassword({ password }) {
+    await delay(120);
+    const session = loadSession();
+    if (!session?.userId) throw new Error('Please sign in to update your password');
+
+    const next = String(password || '');
+    if (next.length < 6) throw new Error('Password must be at least 6 characters');
+
+    const users = loadUsers();
+    const idx = users.findIndex((u) => u.id === session.userId);
+    if (idx === -1) throw new Error('Account not found');
+
+    users[idx] = { ...users[idx], password: next };
+    saveUsers(users);
+
+    return { success: true, message: 'Password updated successfully' };
   },
 };

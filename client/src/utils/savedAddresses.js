@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'npf_saved_addresses';
+const HIDDEN_IDS_KEY = 'npf_hidden_address_ids';
 
 export function addressKey(addr) {
   return [addr?.name, addr?.phone, addr?.address, addr?.city, addr?.state, addr?.pincode]
@@ -59,6 +60,30 @@ export function persistAddress(shipping) {
   if (list.some((a) => addressKey(a) === key)) return list;
   const next = [entry, ...list].slice(0, 8);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  return next;
+}
+
+export function removeStoredAddress(id) {
+  const list = loadStoredAddresses().filter((row) => row.id !== id);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  return list;
+}
+
+export function loadHiddenAddressIds() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(HIDDEN_IDS_KEY) || '[]');
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+
+export function hideAddressId(id) {
+  if (!id) return loadHiddenAddressIds();
+  const set = new Set(loadHiddenAddressIds());
+  set.add(id);
+  const next = [...set];
+  localStorage.setItem(HIDDEN_IDS_KEY, JSON.stringify(next));
   return next;
 }
 

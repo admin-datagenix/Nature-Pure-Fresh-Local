@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom';
-import { BRAND_NAME, BRAND_TAGLINE, COMPANY_NAME } from '../../data/brand';
+import { buildHomePage } from '../../api/mock/cms/homePage';
 import HeroBanner from './HeroBanner';
 import HeroTrustBrief from './HeroTrustBrief';
 
-export default function Hero() {
+const FALLBACK_HERO = buildHomePage().hero;
+
+export default function Hero({ content }) {
+  const hero = content || FALLBACK_HERO;
+
   return (
     <section className="relative w-full overflow-x-hidden bg-cream pb-8 pt-8 md:pb-10 md:pt-10">
       <div className="site-container">
@@ -16,30 +20,29 @@ export default function Hero() {
           <div className="relative grid items-center gap-8 p-6 pb-8 md:p-10 md:pb-9 lg:grid-cols-[1fr_1.45fr] lg:gap-10 lg:p-12 lg:pb-10 xl:grid-cols-[0.88fr_1.5fr]">
             <div className="text-center lg:text-left">
               <span className="inline-flex animate-fade-up rounded-full border border-secondary/30 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-secondary">
-                Premium Freeze-Dried
+                {hero.eyebrow}
               </span>
 
               <p
                 className="animate-fade-up mt-4 text-[0.65rem] font-bold uppercase tracking-[0.2em] text-muted sm:text-xs"
                 style={{ animationDelay: '0.05s' }}
               >
-                {COMPANY_NAME}
+                {hero.companyName}
               </p>
 
               <h1
                 className="animate-fade-up font-heading text-4xl font-semibold leading-[1.08] tracking-tight text-primary md:text-5xl lg:text-[3rem]"
                 style={{ animationDelay: '0.15s' }}
               >
-                {BRAND_TAGLINE.split(',')[0]}
-                <span className="block text-secondary">{BRAND_TAGLINE.split(',')[1]?.trim() || 'Naturally!'}</span>
+                {hero.titlePrimary}
+                <span className="block text-secondary">{hero.titleAccent}</span>
               </h1>
 
               <p
                 className="mx-auto mt-4 max-w-lg animate-fade-up text-base leading-relaxed text-muted md:text-lg lg:mx-0"
                 style={{ animationDelay: '0.25s' }}
               >
-                Premium freeze-dried fruit snacks &amp; powders from {BRAND_NAME}. 100% real fruit,
-                zero added sugar, no preservatives — crafted in Miraj, Maharashtra.
+                {hero.description}
               </p>
 
               <div
@@ -47,19 +50,19 @@ export default function Hero() {
                 style={{ animationDelay: '0.35s' }}
               >
                 <Link
-                  to="/shop"
+                  to={hero.primaryCta?.to || '/shop'}
                   className="neo-btn group inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
                 >
-                  Shop Collection
+                  {hero.primaryCta?.label || 'Shop Collection'}
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 transition group-hover:translate-x-0.5">
                     →
                   </span>
                 </Link>
                 <Link
-                  to="/contact"
+                  to={hero.secondaryCta?.to || '/contact'}
                   className="neo-btn-ghost inline-flex items-center rounded-full px-7 py-3.5 text-base font-semibold"
                 >
-                  Contact Us
+                  {hero.secondaryCta?.label || 'Contact Us'}
                 </Link>
               </div>
 
@@ -74,7 +77,7 @@ export default function Hero() {
               style={{ animationDelay: '0.2s' }}
             >
               <div className="hero-banner-column w-full max-w-full">
-                <HeroBanner />
+                <HeroBanner banner={hero.banner} />
               </div>
             </div>
           </div>

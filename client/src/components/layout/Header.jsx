@@ -4,16 +4,12 @@ import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
 import { useAuth } from '../../context/AuthContext';
 import BrandLogo from '../ui/BrandLogo';
-import { BRAND_LOGO_NAVBAR } from '../../data/brand';
+import { useSiteConfig } from '../../context/SiteConfigContext';
 import { CART_FLY_TARGET_ID, WISHLIST_FLY_TARGET_ID } from '../../utils/flyToCart';
 import ProfileMenu from './ProfileMenu';
 import useCategoryTree, { categoryEmoji } from '../../hooks/useCategoryTree';
 import { cn } from '../../lib/cn';
 
-const NAV_LINKS_AFTER_SHOP = [
-  { to: '/about', label: 'About Us' },
-  { to: '/contact', label: 'Contact Us' },
-];
 
 function SearchIcon({ className }) {
   return (
@@ -78,6 +74,8 @@ export default function Header() {
   const navigate = useNavigate();
   const shopRef = useRef(null);
   const { categories } = useCategoryTree();
+  const { assets, navigation } = useSiteConfig();
+  const navLinksAfterShop = navigation?.headerAfterShop || [];
 
   const [searchQuery, setSearchQuery] = useState('');
   const [shopOpen, setShopOpen] = useState(false);
@@ -149,7 +147,7 @@ export default function Header() {
         <BrandLogo
           bareLogo
           logoOnly
-          src={BRAND_LOGO_NAVBAR}
+          src={assets?.logoNavbar}
           className="navbar-brand-slot"
           imageClassName="navbar-brand-logo"
         />
@@ -220,7 +218,7 @@ export default function Header() {
             )}
           </div>
 
-          {NAV_LINKS_AFTER_SHOP.map((link) => (
+          {navLinksAfterShop.map((link) => (
             <NavLink key={link.to} to={link.to} className={navLinkClass}>
               {link.label}
             </NavLink>
@@ -262,22 +260,6 @@ export default function Header() {
             </span>
           </Link>
 
-          {isAuthenticated ? (
-            <ProfileMenu
-              open={profileOpen}
-              onToggle={() => setProfileOpen((o) => !o)}
-              onClose={() => setProfileOpen(false)}
-            />
-          ) : (
-            <Link
-              to={accountPath}
-              className="rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
-              aria-label={accountLabel}
-            >
-              <UserIcon className="h-5 w-5" />
-            </Link>
-          )}
-
           <Link
             id={WISHLIST_FLY_TARGET_ID}
             to="/wishlist"
@@ -299,6 +281,22 @@ export default function Header() {
               </span>
             )}
           </Link>
+
+          {isAuthenticated ? (
+            <ProfileMenu
+              open={profileOpen}
+              onToggle={() => setProfileOpen((o) => !o)}
+              onClose={() => setProfileOpen(false)}
+            />
+          ) : (
+            <Link
+              to={accountPath}
+              className="rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
+              aria-label={accountLabel}
+            >
+              <UserIcon className="h-5 w-5" />
+            </Link>
+          )}
 
           <button
             type="button"
@@ -400,7 +398,7 @@ export default function Header() {
             )}
           </Link>
 
-          {NAV_LINKS_AFTER_SHOP.map((link) => (
+          {navLinksAfterShop.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}

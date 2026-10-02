@@ -1,42 +1,12 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  CHUNKS_CATEGORY_BANNER,
-  CHUNKS_CATEGORY_BANNER_FALLBACK,
-  POWDER_CATEGORY_BANNER,
-  POWDER_CATEGORY_BANNER_FALLBACK,
-} from '../../data/brand';
+import { buildHomePage } from '../../api/mock/cms/homePage';
 import Reveal from '../ui/Reveal';
+
+const FALLBACK_SECTION = buildHomePage().categorySection;
 
 const CARD_CLASS =
   'group relative isolate block min-h-[168px] overflow-hidden rounded-[1.25rem] border border-sage/40 bg-white transition hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(41,70,51,0.1)] sm:min-h-[200px] md:min-h-[220px]';
-
-const SHOP_CATEGORIES = [
-  {
-    slug: 'fruit-snacks',
-    label: 'Chunks/Slices',
-    eyebrow: 'Freeze-dried snacks',
-    subline: 'Crunchy fruit slices & cubes · real fruit · no added sugar',
-    image: CHUNKS_CATEGORY_BANNER,
-    imageFallback: CHUNKS_CATEGORY_BANNER_FALLBACK,
-    imageWidth: 'w-[50%] sm:w-[48%] md:w-[46%]',
-    imagePanelClass: 'bg-white',
-    imageClass:
-      'category-card-banner category-card-banner--chunks absolute inset-0 h-full w-full bg-white object-contain object-right-bottom p-2 transition duration-500 group-hover:scale-[1.03]',
-  },
-  {
-    slug: 'baking-essentials',
-    label: 'Powder',
-    eyebrow: 'Fruit powders',
-    subline: '100% fruit for smoothies, baking & everyday nutrition · 16 flavours',
-    image: POWDER_CATEGORY_BANNER,
-    imageFallback: POWDER_CATEGORY_BANNER_FALLBACK,
-    imageWidth: 'w-[50%] sm:w-[48%] md:w-[46%]',
-    imagePanelClass: 'bg-white',
-    imageClass:
-      'category-card-banner category-card-banner--powder absolute inset-0 h-full w-full bg-white object-contain object-[68%_72%] p-2 transition duration-500 group-hover:scale-[1.02]',
-  },
-];
 
 function CategoryCardImage({ cat }) {
   const [src, setSrc] = useState(cat.image);
@@ -84,24 +54,27 @@ function CategoryPromoCard({ cat }) {
   );
 }
 
-export default function CategoryCards() {
+export default function CategoryCards({ section }) {
+  const data = section || FALLBACK_SECTION;
+  const cards = data.cards || [];
+
   return (
     <section className="pt-8 pb-12 md:pt-10 md:pb-14">
       <div className="site-container">
         <Reveal variant="blur" className="mb-8 flex items-end justify-between gap-4">
           <h2 className="font-heading text-3xl font-semibold tracking-tight text-primary md:text-[2rem]">
-            Shop By Category
+            {data.title}
           </h2>
           <Link
-            to="/shop"
+            to={data.viewAllLink?.to || '/shop'}
             className="shrink-0 text-sm font-medium text-muted transition hover:text-primary"
           >
-            View all <span aria-hidden="true">→</span>
+            {data.viewAllLink?.label || 'View all'} <span aria-hidden="true">→</span>
           </Link>
         </Reveal>
 
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
-          {SHOP_CATEGORIES.map((cat, i) => (
+          {cards.map((cat, i) => (
             <Reveal key={cat.slug} variant={i === 0 ? 'left' : 'right'} delay={i * 100}>
               <CategoryPromoCard cat={cat} />
             </Reveal>
