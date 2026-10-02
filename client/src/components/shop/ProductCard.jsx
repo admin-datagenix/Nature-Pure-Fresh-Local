@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { formatPrice, getDiscountPercent, getBadgeClass, PRODUCT_BADGE_CHIP } from '../../utils/helpers';
 import { getProductCardTone, PRODUCT_CARD_WIDTH } from '../../utils/productLayout';
@@ -15,6 +15,7 @@ import {
   shouldShowLowStockBadge,
   shouldShowOutOfStockBadge,
 } from '../../utils/stockDisplay';
+import { buildFlyPayload } from '../../utils/flyToCart';
 
 export default function ProductCard({
   product,
@@ -26,13 +27,20 @@ export default function ProductCard({
 }) {
   const { addItem, loading } = useCart();
   const [added, setAdded] = useState(false);
+  const imageRef = useRef(null);
+  const imageWrapRef = useRef(null);
   const outOfStock = isOutOfStock(product);
 
   const handleAdd = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (outOfStock) return;
-    await addItem(product.id);
+    const fly = buildFlyPayload({
+      imageSrc: getProductImage(product),
+      sourceElement: imageRef.current ?? imageWrapRef.current ?? e.currentTarget,
+      event: e,
+    });
+    await addItem(product.id, 1, fly ? { fly } : {});
     setAdded(true);
     setTimeout(() => setAdded(false), 1800);
   };
@@ -67,6 +75,7 @@ export default function ProductCard({
           onClick={(e) => e.stopPropagation()}
         >
           <div
+            ref={imageWrapRef}
             className={cn(
               'relative overflow-hidden rounded-xl border border-sage/40 transition duration-300',
               isList ? 'aspect-square h-full min-h-[112px]' : 'aspect-square w-full',
@@ -100,6 +109,7 @@ export default function ProductCard({
 
             <div className="relative flex h-full w-full items-center justify-center p-3 sm:p-4">
               <img
+                ref={imageRef}
                 src={imageSrc}
                 alt={product.name}
                 loading="lazy"
@@ -131,7 +141,12 @@ export default function ProductCard({
             isList ? 'bottom-5 right-5' : 'bottom-5 right-5'
           )}
         >
-          <WishlistButton productId={product.id} productName={product.name} />
+          <WishlistButton
+            productId={product.id}
+            productName={product.name}
+            imageSrc={imageSrc}
+            flySourceRef={imageRef}
+          />
         </div>
       </div>
 

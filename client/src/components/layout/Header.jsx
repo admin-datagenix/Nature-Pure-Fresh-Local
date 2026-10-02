@@ -5,6 +5,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { useAuth } from '../../context/AuthContext';
 import BrandLogo from '../ui/BrandLogo';
 import { BRAND_LOGO_NAVBAR } from '../../data/brand';
+import { CART_FLY_TARGET_ID, WISHLIST_FLY_TARGET_ID } from '../../utils/flyToCart';
 import ProfileMenu from './ProfileMenu';
 import useCategoryTree, { categoryEmoji } from '../../hooks/useCategoryTree';
 import { cn } from '../../lib/cn';
@@ -81,6 +82,46 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [shopOpen, setShopOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [cartBounce, setCartBounce] = useState(false);
+  const [countPop, setCountPop] = useState(false);
+  const [wishlistBounce, setWishlistBounce] = useState(false);
+  const [wishlistCountPop, setWishlistCountPop] = useState(false);
+  const prevCartCount = useRef(cart.itemCount);
+  const prevWishlistCount = useRef(wishlistCount);
+
+  useEffect(() => {
+    const onBounce = () => {
+      setCartBounce(true);
+      window.setTimeout(() => setCartBounce(false), 560);
+    };
+    window.addEventListener('cart-icon-bounce', onBounce);
+    return () => window.removeEventListener('cart-icon-bounce', onBounce);
+  }, []);
+
+  useEffect(() => {
+    const onBounce = () => {
+      setWishlistBounce(true);
+      window.setTimeout(() => setWishlistBounce(false), 560);
+    };
+    window.addEventListener('wishlist-icon-bounce', onBounce);
+    return () => window.removeEventListener('wishlist-icon-bounce', onBounce);
+  }, []);
+
+  useEffect(() => {
+    if (cart.itemCount > prevCartCount.current) {
+      setCountPop(true);
+      window.setTimeout(() => setCountPop(false), 500);
+    }
+    prevCartCount.current = cart.itemCount;
+  }, [cart.itemCount]);
+
+  useEffect(() => {
+    if (wishlistCount > prevWishlistCount.current) {
+      setWishlistCountPop(true);
+      window.setTimeout(() => setWishlistCountPop(false), 500);
+    }
+    prevWishlistCount.current = wishlistCount;
+  }, [wishlistCount]);
 
   useEffect(() => {
     const onClickOutside = (e) => {
@@ -201,12 +242,22 @@ export default function Header() {
           </form>
 
           <Link
+            id={CART_FLY_TARGET_ID}
             to="/cart"
-            className="relative rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
+            data-cart-fly-target=""
+            className={cn(
+              'relative rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary',
+              cartBounce && 'cart-fly-target-bounce'
+            )}
             aria-label="Shopping cart"
           >
-            <CartIcon className="h-5 w-5" />
-            <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white">
+            <CartIcon className="h-5 w-5" data-cart-fly-icon />
+            <span
+              className={cn(
+                'absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white',
+                countPop && 'cart-count-pop'
+              )}
+            >
               {cart.itemCount}
             </span>
           </Link>
@@ -228,13 +279,22 @@ export default function Header() {
           )}
 
           <Link
+            id={WISHLIST_FLY_TARGET_ID}
             to="/wishlist"
-            className="relative rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
+            className={cn(
+              'relative rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary',
+              wishlistBounce && 'cart-fly-target-bounce'
+            )}
             aria-label="Wishlist"
           >
-            <HeartIcon className="h-5 w-5" />
+            <HeartIcon className="h-5 w-5" data-wishlist-fly-icon />
             {wishlistCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white">
+              <span
+                className={cn(
+                  'absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white',
+                  wishlistCountPop && 'cart-count-pop'
+                )}
+              >
                 {wishlistCount > 99 ? '99+' : wishlistCount}
               </span>
             )}

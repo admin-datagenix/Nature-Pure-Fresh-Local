@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css';
 import AppToastContainer from './components/ui/AppToastContainer';
+import CartFlyLayer from './components/cart/CartFlyLayer';
 import WhatsAppFab from './components/layout/WhatsAppFab';
 
 createRoot(document.getElementById('root')).render(
@@ -17,6 +18,7 @@ createRoot(document.getElementById('root')).render(
         <WishlistProvider>
           <CartProvider>
             <App />
+            <CartFlyLayer />
             <AppToastContainer />
             <WhatsAppFab />
           </CartProvider>

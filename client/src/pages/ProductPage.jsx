@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useCart } from '../context/CartContext';
@@ -14,15 +14,17 @@ import { findWeightOption, getProductWeightOptions } from '../utils/productVaria
 import { notifySuccess } from '../utils/notify';
 import { BuyNowIcon, CartIcon } from '../components/ui/CommerceIcons';
 import WishlistButton from '../components/wishlist/WishlistButton';
+import { getProductImage } from '../data/productImages';
+import { buildFlyPayload } from '../utils/flyToCart';
 
 const BTN_PRIMARY =
-  'inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white shadow-[0_2px_8px_rgba(41,70,51,0.18)] transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-55';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-primary bg-primary px-5 py-2.5 text-base font-semibold text-white shadow-[0_2px_8px_rgba(41,70,51,0.18)] transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-55';
 
 const BTN_OUTLINE =
-  'inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-primary bg-white px-4 py-2 text-sm font-semibold text-primary transition hover:bg-cream-dark disabled:cursor-not-allowed disabled:opacity-55';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-primary bg-white px-5 py-2.5 text-base font-semibold text-primary transition hover:bg-cream-dark disabled:cursor-not-allowed disabled:opacity-55';
 
 const BTN_ICON =
-  'inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-sage/70 bg-white text-primary transition hover:border-primary/50 hover:bg-cream-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+  'inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-sage/70 bg-white text-primary transition hover:border-primary/50 hover:bg-cream-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -32,6 +34,7 @@ export default function ProductPage() {
   const [qty, setQty] = useState(1);
   const [selectedGrams, setSelectedGrams] = useState(null);
   const [loading, setLoading] = useState(true);
+  const galleryImageRef = useRef(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -66,9 +69,19 @@ export default function ProductPage() {
   const selectedOption =
     findWeightOption(product, selectedGrams) || weightOptions[0] || null;
 
-  const handleAddToCart = () => {
-    if (!selectedOption) return;
-    addItem(product.id, qty, { weightGrams: selectedOption.grams });
+  const handleAddToCart = async (event) => {
+    if (!selectedOption || !product) return;
+    const sourceElement =
+      galleryImageRef.current?.querySelector('img') ?? galleryImageRef.current;
+    const fly = buildFlyPayload({
+      imageSrc: getProductImage(product),
+      sourceElement,
+      event,
+    });
+    await addItem(product.id, qty, {
+      weightGrams: selectedOption.grams,
+      ...(fly ? { fly } : {}),
+    });
   };
 
   const handleBuyNow = async () => {
@@ -93,7 +106,13 @@ export default function ProductPage() {
         <div className="flex items-center justify-between gap-3">
           <BackToShopLink />
           <div className="flex items-center gap-2 md:hidden">
-            <WishlistButton productId={product.id} productName={product.name} variant="toolbar" />
+            <WishlistButton
+              productId={product.id}
+              productName={product.name}
+              variant="toolbar"
+              imageSrc={getProductImage(product)}
+              flySourceRef={galleryImageRef}
+            />
             <button
               type="button"
               onClick={handleShare}
@@ -108,7 +127,7 @@ export default function ProductPage() {
         <div className="product-detail-hero mt-4 grid w-full grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-5 xl:gap-x-8">
           <div className="product-detail-gallery lg:sticky lg:top-[5.25rem]">
             <div className="product-detail-gallery__frame">
-              <div className="product-detail-gallery__canvas">
+              <div className="product-detail-gallery__canvas" ref={galleryImageRef}>
                 <ProductVisual product={product} hoverZoom compactMedia />
               </div>
             </div>
@@ -124,8 +143,8 @@ export default function ProductPage() {
             <h1 className="font-heading font-semibold text-primary">{product.name}</h1>
 
             {product.rating > 0 && (
-              <div className="product-detail-section flex flex-wrap items-center gap-2 text-[0.75rem] text-muted">
-                <StarRating rating={product.rating} total={5} size="sm" />
+              <div className="product-detail-section product-detail-rating flex flex-wrap items-center gap-2 text-muted">
+                <StarRating rating={product.rating} total={5} size="md" />
                 <span className="font-medium text-primary">{product.rating}</span>
                 <span>({product.review_count})</span>
               </div>
@@ -136,12 +155,12 @@ export default function ProductPage() {
                 {formatPrice(selectedOption?.price ?? product.price)}
               </span>
               {(selectedOption?.compare_at_price ?? product.compare_at_price) && (
-                <span className="text-sm text-muted line-through">
+                <span className="product-detail-meta text-muted line-through">
                   {formatPrice(selectedOption?.compare_at_price ?? product.compare_at_price)}
                 </span>
               )}
               {selectedOption && (
-                <span className="text-[0.75rem] text-muted">{selectedOption.grams}g</span>
+                <span className="product-detail-meta text-muted">{selectedOption.grams}g</span>
               )}
             </div>
 
@@ -154,7 +173,7 @@ export default function ProductPage() {
                 {(product.tags || []).slice(0, 4).map((tag) => (
                   <span
                     key={tag}
-                    className="label-chip bg-secondary/12 px-2 py-0.5 text-[0.65rem] font-semibold text-secondary"
+                    className="label-chip bg-secondary/12 px-2.5 py-1 text-xs font-semibold text-secondary sm:text-sm"
                   >
                     {tag}
                   </span>
@@ -183,7 +202,7 @@ export default function ProductPage() {
                   >
                     −
                   </button>
-                  <span className="flex w-9 items-center justify-center text-sm font-semibold">{qty}</span>
+                  <span className="flex w-10 items-center justify-center text-base font-semibold">{qty}</span>
                   <button
                     type="button"
                     onClick={() => setQty(Math.min(99, qty + 1))}
@@ -202,7 +221,7 @@ export default function ProductPage() {
                   disabled={cartLoading || !selectedOption}
                   className={BTN_PRIMARY}
                 >
-                  <CartIcon className="h-4 w-4 shrink-0" />
+                  <CartIcon className="h-[1.125rem] w-[1.125rem] shrink-0" />
                   <span>Add to cart</span>
                 </button>
                 <button
@@ -211,13 +230,15 @@ export default function ProductPage() {
                   disabled={cartLoading || !selectedOption}
                   className={BTN_OUTLINE}
                 >
-                  <BuyNowIcon className="h-4 w-4 shrink-0" />
+                  <BuyNowIcon className="h-[1.125rem] w-[1.125rem] shrink-0" />
                   <span>Buy now</span>
                 </button>
                 <WishlistButton
                   productId={product.id}
                   productName={product.name}
                   variant="toolbar"
+                  imageSrc={getProductImage(product)}
+                  flySourceRef={galleryImageRef}
                 />
                 <button
                   type="button"
@@ -231,7 +252,7 @@ export default function ProductPage() {
               </div>
             </div>
 
-            <ul className="product-detail-section flex w-full flex-wrap gap-x-4 gap-y-2 text-[0.6875rem] leading-relaxed text-muted">
+            <ul className="product-detail-section product-detail-trust flex w-full flex-wrap gap-x-4 gap-y-2 leading-relaxed text-muted">
               <li>In stock · {product.stock} left</li>
               <li>Free shipping over ₹999</li>
               <li>Made in India</li>

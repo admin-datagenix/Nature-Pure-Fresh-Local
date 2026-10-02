@@ -7,6 +7,7 @@ import {
   syncSelectionWithCart,
 } from '../utils/cartSelection';
 import { notifyError, notifySuccess } from '../utils/notify';
+import { startCartFly } from '../utils/flyToCart';
 
 const CartContext = createContext(null);
 
@@ -65,9 +66,12 @@ export function CartProvider({ children }) {
   }, []);
 
   const addItem = useCallback(async (productId, quantity = 1, options = {}) => {
+    const { fly, ...cartOptions } = options;
+    const flew = fly ? startCartFly(fly) : false;
+
     setLoading(true);
     try {
-      const res = await api.addToCart(productId, quantity, options);
+      const res = await api.addToCart(productId, quantity, cartOptions);
       setCart(res.data);
       setSelectedIds((prev) => {
         if (prev.includes(productId)) return prev;
@@ -75,11 +79,13 @@ export function CartProvider({ children }) {
         saveStoredSelection(next);
         return next;
       });
-      const line = res.data.items.find((i) => i.product_id === productId);
-      const label = line?.name?.replace(/^Freeze Dried /i, '') || 'Item';
-      notifySuccess(
-        quantity > 1 ? `Added ${quantity} × ${label} to cart` : `Added ${label} to cart`
-      );
+      if (!flew) {
+        const line = res.data.items.find((i) => i.product_id === productId);
+        const label = line?.name?.replace(/^Freeze Dried /i, '') || 'Item';
+        notifySuccess(
+          quantity > 1 ? `Added ${quantity} × ${label} to cart` : `Added ${label} to cart`
+        );
+      }
       return res.data;
     } catch (err) {
       notifyError(err.message || 'Could not add to cart');

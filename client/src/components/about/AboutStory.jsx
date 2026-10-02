@@ -25,7 +25,7 @@ export default function AboutStory() {
             <Reveal delay={100}>
               <div className="mt-6 rounded-xl border border-sage/60 bg-white px-5 py-5 shadow-[0_8px_24px_rgba(41,70,51,0.06)]">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-secondary">Our mission is simple</p>
-                <p className="mt-2 font-heading text-lg font-semibold leading-snug text-primary md:text-xl">
+                <p className="mt-2 font-heading text-lg font-semibold leading-snug text-primary md:text-[1.1675rem] md:whitespace-nowrap">
                   {ABOUT_MISSION_LINE}
                 </p>
               </div>
