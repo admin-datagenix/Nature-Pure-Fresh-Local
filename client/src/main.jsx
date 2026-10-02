@@ -5,6 +5,7 @@ import App from './App';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider } from './context/AuthContext';
+import { SiteConfigProvider } from './context/SiteConfigContext';
 import 'react-toastify/dist/ReactToastify.css';
 import './index.css';
 import AppToastContainer from './components/ui/AppToastContainer';
@@ -15,14 +16,16 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <WishlistProvider>
-          <CartProvider>
-            <App />
+        <SiteConfigProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <App />
             <CartFlyLayer />
             <AppToastContainer />
             <WhatsAppFab />
-          </CartProvider>
-        </WishlistProvider>
+            </CartProvider>
+          </WishlistProvider>
+        </SiteConfigProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>

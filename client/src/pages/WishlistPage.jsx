@@ -3,16 +3,13 @@ import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useWishlist } from '../context/WishlistContext';
 import ProductCard from '../components/shop/ProductCard';
-import ShopViewToggle from '../components/shop/ShopViewToggle';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import { PRODUCT_GRID_SHOP_CLASS, PRODUCT_LIST_SHOP_CLASS } from '../utils/productLayout';
+import { PRODUCT_GRID_SHOP_CLASS } from '../utils/productLayout';
 
 export default function WishlistPage() {
   const { ids, count, clear } = useWishlist();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState('grid');
-
   useEffect(() => {
     if (!ids.length) {
       setProducts([]);
@@ -43,8 +40,6 @@ export default function WishlistPage() {
     };
   }, [ids]);
 
-  const listClass = view === 'list' ? PRODUCT_LIST_SHOP_CLASS : PRODUCT_GRID_SHOP_CLASS;
-
   if (loading && count > 0) return <LoadingSpinner />;
 
   if (count === 0) {
@@ -72,7 +67,6 @@ export default function WishlistPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <ShopViewToggle view={view} onChange={setView} />
           <button
             type="button"
             onClick={clear}
@@ -83,9 +77,9 @@ export default function WishlistPage() {
         </div>
       </div>
 
-      <div className={listClass}>
+      <div className={PRODUCT_GRID_SHOP_CLASS}>
         {products.map((product) => (
-          <ProductCard key={product.id} product={product} layout={view} />
+          <ProductCard key={product.id} product={product} layout="grid" />
         ))}
       </div>
 

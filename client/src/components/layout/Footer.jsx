@@ -1,37 +1,16 @@
 import { Link } from 'react-router-dom';
-import {
-  BRAND_NAME,
-  BRAND_EMAIL,
-  BRAND_PHONE,
-  BRAND_PHONE_RAW,
-  BRAND_ADDRESS_FULL,
-  COMPANY_NAME,
-  CATALOG_PDF,
-  BRAND_LOGO_NAVBAR,
-} from '../../data/brand';
 import BrandLogo from '../ui/BrandLogo';
 import useCategoryTree from '../../hooks/useCategoryTree';
-
-const FOOTER_STATIC = {
-  Learn: [
-    { to: '/about', label: 'About Us' },
-    { to: '/about#process', label: 'Our Process' },
-    { to: '/about#recipes', label: 'Recipes' },
-  ],
-  Support: [
-    { to: '/contact', label: 'Contact' },
-    { to: '/return-policy', label: 'Return Policy' },
-    { to: '/refund-policy', label: 'Refund Policy' },
-    { to: '/about#shipping', label: 'Shipping Policy' },
-  ],
-};
+import { useSiteConfig } from '../../context/SiteConfigContext';
 
 export default function Footer() {
   const { categories } = useCategoryTree();
+  const { brand, contact, assets, catalogPdfs, navigation } = useSiteConfig();
+  const footerLinks = navigation?.footer || { Learn: [], Support: [] };
 
   const footerSections = {
     Shop: [{ to: '/shop', label: 'All Products' }, ...categories.map((c) => ({ to: `/shop/${c.slug}`, label: c.name }))],
-    ...FOOTER_STATIC,
+    ...footerLinks,
   };
 
   return (
@@ -42,28 +21,28 @@ export default function Footer() {
             <div className="mb-3 inline-flex rounded-xl bg-white p-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.12)]">
               <BrandLogo
                 logoOnly
-                src={BRAND_LOGO_NAVBAR}
+                src={assets?.logoNavbar}
                 className="mb-0"
                 imageClassName="h-10 w-auto max-w-[min(100%,15rem)] object-contain object-left sm:h-11 sm:max-w-[17rem]"
               />
             </div>
-            <p className="mb-4 max-w-xs text-xs leading-relaxed opacity-65">{BRAND_ADDRESS_FULL}</p>
+            <p className="mb-4 max-w-xs text-xs leading-relaxed opacity-65">{contact?.addressFull}</p>
 
             <div className="mb-4 space-y-1 text-sm">
-              <a href={`mailto:${BRAND_EMAIL}`} className="block opacity-80 transition hover:opacity-100">
-                {BRAND_EMAIL}
+              <a href={`mailto:${contact?.email}`} className="block opacity-80 transition hover:opacity-100">
+                {contact?.email}
               </a>
               <a
-                href={`tel:+91${BRAND_PHONE_RAW}`}
+                href={`tel:+91${contact?.phoneRaw}`}
                 className="block opacity-80 transition hover:opacity-100"
               >
-                {BRAND_PHONE}
+                {contact?.phone}
               </a>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
               <a
-                href={CATALOG_PDF.snacks}
+                href={catalogPdfs?.snacks}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full border border-white/20 px-3 py-1 text-xs opacity-80 transition hover:bg-white/10 hover:opacity-100"
@@ -71,7 +50,7 @@ export default function Footer() {
                 Snacks Catalog
               </a>
               <a
-                href={CATALOG_PDF.powder}
+                href={catalogPdfs?.powder}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-full border border-white/20 px-3 py-1 text-xs opacity-80 transition hover:bg-white/10 hover:opacity-100"
@@ -99,7 +78,7 @@ export default function Footer() {
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-5 text-xs opacity-60">
           <p>
-            © {new Date().getFullYear()} {COMPANY_NAME} ({BRAND_NAME}). Made in India 🇮🇳
+            © {new Date().getFullYear()} {brand?.companyName} ({brand?.name}). Made in India 🇮🇳
           </p>
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             <Link to="/return-policy" className="transition hover:opacity-100">

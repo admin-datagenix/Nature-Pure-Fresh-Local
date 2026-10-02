@@ -1,11 +1,8 @@
 import Reveal from '../ui/Reveal';
-import {
-  CERTIFICATIONS_INTRO,
-  CERTIFICATION_LOGOS,
-} from '../../data/certifications';
-import { ABOUT_QUALITY_IMAGE, BRAND_NAME } from '../../data/brand';
-import { TRUST_BADGE_FEATURES } from '../../utils/helpers';
+import { buildAboutPage } from '../../api/mock/cms/aboutPage';
 import BenefitFeatureIcon from '../ui/BenefitFeatureIcon';
+
+const FALLBACK = buildAboutPage().certifications;
 
 function LogoTile({ logo }) {
   return (
@@ -21,14 +18,18 @@ function LogoTile({ logo }) {
   );
 }
 
-export default function AboutCertifications() {
+export default function AboutCertifications({ content }) {
+  const data = content || FALLBACK;
+  const logos = data.logos || [];
+  const trustBadges = data.trustBadges || [];
+
   return (
     <section className="border-t border-sage/45 bg-cream-dark/50 py-8 md:py-10" id="certifications">
       <div className="site-container">
         <Reveal className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">From farm to global quality</p>
-          <h2 className="mt-2 font-heading text-3xl font-semibold text-primary md:text-4xl">Our Certifications</h2>
-          <p className="mt-4 text-sm leading-relaxed text-muted md:text-base">{CERTIFICATIONS_INTRO}</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">{data.eyebrow}</p>
+          <h2 className="mt-2 font-heading text-3xl font-semibold text-primary md:text-4xl">{data.title}</h2>
+          <p className="mt-4 text-sm leading-relaxed text-muted md:text-base">{data.intro}</p>
         </Reveal>
 
         <Reveal delay={60} className="mt-6">
@@ -36,16 +37,16 @@ export default function AboutCertifications() {
             <p className="mb-5 text-center text-sm font-medium text-muted">
               Official marks &amp; quality badges — as shown on{' '}
               <a
-                href="https://naturepurefresh.com/"
+                href={data.websiteNote?.href}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary underline-offset-2 hover:underline"
               >
-                naturepurefresh.com
+                {data.websiteNote?.label}
               </a>
             </p>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5 md:gap-6">
-              {CERTIFICATION_LOGOS.map((logo) => (
+              {logos.map((logo) => (
                 <LogoTile key={logo.id} logo={logo} />
               ))}
             </div>
@@ -60,8 +61,8 @@ export default function AboutCertifications() {
             <div className="mx-auto w-full max-w-md lg:flex lg:h-full lg:items-center xl:max-w-[30rem]">
               <div className="w-full overflow-hidden rounded-[3rem]">
                 <img
-                  src={ABOUT_QUALITY_IMAGE}
-                  alt={`${BRAND_NAME} freeze-dried fruit quality`}
+                  src={data.qualityImage}
+                  alt={data.qualityImageAlt}
                   loading="lazy"
                   decoding="async"
                   className="block h-auto w-full max-h-[34rem] sm:max-h-[36rem] lg:max-h-[min(100%,38rem)]"
@@ -80,7 +81,7 @@ export default function AboutCertifications() {
               role="list"
               aria-label="Product quality highlights"
             >
-              {TRUST_BADGE_FEATURES.map((item) => (
+              {trustBadges.map((item) => (
                 <article
                   key={item.title}
                   role="listitem"

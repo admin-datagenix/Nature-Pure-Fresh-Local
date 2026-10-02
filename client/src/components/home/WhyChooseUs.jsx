@@ -1,28 +1,27 @@
-import { BRAND_NAME } from '../../data/brand';
-import {
-  WHY_CHOOSE_BENEFITS,
-  WHY_CHOOSE_LIFESTYLE,
-  WHY_CHOOSE_SUBTITLE,
-} from '../../data/whyChooseBenefits';
+import { buildHomePage } from '../../api/mock/cms/homePage';
 import WhyChooseBenefitIcon from '../ui/WhyChooseBenefitIcon';
 import Reveal from '../ui/Reveal';
 
-export default function WhyChooseUs() {
+const FALLBACK = buildHomePage().whyChooseUs;
+
+export default function WhyChooseUs({ content }) {
+  const data = content || FALLBACK;
+  const benefits = data.benefits || [];
+  const lifestyle = data.lifestyle || [];
+
   return (
     <section className="border-t border-sage/40 bg-cream py-14 md:py-16">
       <div className="site-container">
         <Reveal variant="blur" className="mb-8 text-center md:mb-10">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">
-            Benefits you can trust
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-secondary">{data.eyebrow}</p>
           <h2 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-primary md:text-4xl">
-            Why Choose {BRAND_NAME}
+            {data.title}
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-base text-muted md:text-lg">{WHY_CHOOSE_SUBTITLE}</p>
+          <p className="mx-auto mt-3 max-w-2xl text-base text-muted md:text-lg">{data.subtitle}</p>
         </Reveal>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:gap-5 xl:grid-cols-2 xl:gap-x-10">
-          {WHY_CHOOSE_BENEFITS.map((item, i) => (
+          {benefits.map((item, i) => (
             <Reveal key={item.id} variant="up" delay={i * 40}>
               <article
                 className="neo-card flex h-full gap-3 rounded-2xl p-4 transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(41,70,51,0.09)] sm:gap-4 sm:p-5"
@@ -46,7 +45,7 @@ export default function WhyChooseUs() {
 
         <Reveal delay={120} className="mt-10 md:mt-12">
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-            {WHY_CHOOSE_LIFESTYLE.map((tile) => (
+            {lifestyle.map((tile) => (
               <figure
                 key={tile.id}
                 className="group relative overflow-hidden rounded-2xl shadow-[0_10px_28px_rgba(41,70,51,0.12)] sm:rounded-3xl"

@@ -5,13 +5,31 @@ import { api } from '../api/client';
 import { formatIndianPhone } from '../components/auth/AuthForm';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import NeoSelect from '../components/ui/NeoSelect';
-import { formatPrice } from '../utils/helpers';
-import { getCartItemImage } from '../data/productImages';
 import { cn } from '../lib/cn';
-import { BRAND_EMAIL, BRAND_PHONE } from '../data/brand';
 import AccountTrustBar from '../components/account/AccountTrustBar';
+import AccountOrdersPanel from '../components/account/AccountOrdersPanel';
+import OrderModalShell from '../components/orders/OrderModalShell';
+import {
+  formatAddressLines,
+  hideAddressId,
+  loadHiddenAddressIds,
+  loadStoredAddresses,
+  persistAddress,
+  removeStoredAddress,
+} from '../utils/savedAddresses';
 
-const GENDER_STORAGE_PREFIX = 'npf_profile_gender_';
+function DeleteAddressIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path d="M4 7h16M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2M10 11v6M14 11v6M6 7l1 12a1 1 0 001 1h8a1 1 0 001-1l1-12" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function closeAddAddressModal(setShowAddAddress, setAddressActionError) {
+  setShowAddAddress(false);
+  setAddressActionError(null);
+}
 
 function splitFullName(full) {
   const parts = String(full || '')
@@ -23,32 +41,13 @@ function splitFullName(full) {
   return { firstName: parts[0], lastName: parts.slice(1).join(' ') };
 }
 
-function loadStoredGender(userId) {
-  if (!userId) return '';
-  try {
-    return localStorage.getItem(`${GENDER_STORAGE_PREFIX}${userId}`) || '';
-  } catch {
-    return '';
-  }
-}
-
-function storeGender(userId, value) {
-  if (!userId) return;
-  try {
-    if (value) localStorage.setItem(`${GENDER_STORAGE_PREFIX}${userId}`, value);
-    else localStorage.removeItem(`${GENDER_STORAGE_PREFIX}${userId}`);
-  } catch {
-    /* ignore */
-  }
-}
-
 function ProfileFieldLabel({ children }) {
-  return <span className="mb-1 block text-xs font-medium text-primary">{children}</span>;
+  return <span className="account-field-label mb-1 block">{children}</span>;
 }
 
 /** Same inset fields as NeoSelect / checkout address form */
 function profileInputClass(extra = '') {
-  return cn('neo-input px-3 py-2 text-sm', extra);
+  return cn('account-field-input neo-input px-3 py-2 text-sm', extra);
 }
 
 const MENU = [
@@ -56,7 +55,6 @@ const MENU = [
   { id: 'orders', label: 'My Orders' },
   { id: 'addresses', label: 'Manage Address' },
   { id: 'password', label: 'Password Manager' },
-  { id: 'help', label: 'Help' },
 ];
 
 
@@ -64,74 +62,40 @@ function isPlaceholderMobileEmail(email) {
   return /@mobile\.naturepure\.in$/i.test(String(email || '').trim());
 }
 
-function formatOrderDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('en-IN', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-}
-
-function formatPaymentMethod(method) {
-  if (!method) return '—';
-  if (method.toLowerCase() === 'cod') return 'Cash on delivery';
-  if (method === 'upi') return 'UPI';
-  if (method === 'card') return 'Card';
-  return String(method).replace(/_/g, ' ');
-}
-
-function formatProductName(name) {
-  return (name || '').replace(/^Freeze Dried /i, '');
-}
-
-function getOrderStatusMeta(status) {
-  const s = String(status || 'confirmed').toLowerCase();
-  if (s.includes('deliver')) {
-    return {
-      badge: 'Delivered',
-      badgeClass: 'bg-secondary/15 text-secondary',
-      message: 'Your order has been delivered.',
-      primaryAction: 'Add review',
-    };
-  }
-  if (s.includes('ship') || s.includes('transit')) {
-    return {
-      badge: 'In transit',
-      badgeClass: 'bg-mango/30 text-primary',
-      message: 'Your order is on the way.',
-      primaryAction: 'Track order',
-    };
-  }
-  return {
-    badge: 'Accepted',
-    badgeClass: 'bg-mango/25 text-primary',
-    message: 'Your order has been accepted.',
-    primaryAction: 'Track order',
-  };
-}
-
-function deliveryLabel(order) {
-  const meta = getOrderStatusMeta(order.status);
-  if (meta.badge === 'Delivered') {
-    return `Delivered ${formatOrderDate(order.estimated_delivery || order.created_at)}`;
-  }
-  return `Est. delivery ${formatOrderDate(order.estimated_delivery)}`;
-}
-
-function collectSavedAddresses(user, orders) {
+function collectSavedAddresses(user, orders, stored = []) {
   const seen = new Set();
   const list = [];
 
-  const add = (label, lines, isDefault = false) => {
-    const key = lines.join('|').toLowerCase();
+  const push = (entry) => {
+    const key = entry.lines.join('|').toLowerCase();
     if (!key || seen.has(key)) return;
     seen.add(key);
-    list.push({ id: key, label, lines, isDefault });
+    list.push(entry);
   };
 
   if (user?.address) {
-    add('Home', [user.address], true);
+    push({
+      id: 'primary',
+      label: 'Primary address',
+      lines: [user.address],
+      isDefault: true,
+      source: 'primary',
+      storageId: 'primary',
+    });
+  }
+
+  for (const row of stored) {
+    const lines = [...formatAddressLines(row)];
+    if (row.name) lines.unshift(row.name);
+    if (row.phone) lines.push(row.phone);
+    push({
+      id: row.id,
+      label: row.label || 'Saved address',
+      lines,
+      isDefault: false,
+      source: 'stored',
+      storageId: row.id,
+    });
   }
 
   for (const order of orders) {
@@ -143,90 +107,21 @@ function collectSavedAddresses(user, orders) {
       [s.city, s.state, s.pincode].filter(Boolean).join(', '),
       s.phone ? s.phone : null,
     ].filter(Boolean);
-    add(`Order ${order.id}`, lines);
+    push({
+      id: `order-${order.id}`,
+      label: `Order ${order.id}`,
+      lines,
+      isDefault: false,
+      source: 'order',
+      storageId: null,
+    });
   }
 
   return list;
 }
 
-function AccountOrderCard({ order }) {
-  const statusMeta = getOrderStatusMeta(order.status);
-
-  return (
-    <article className="overflow-hidden rounded-xl border border-sage/50 bg-white shadow-[0_4px_16px_rgba(41,70,51,0.05)]">
-      <div className="account-order-card__bar grid grid-cols-2 gap-3 bg-secondary/20 px-4 py-3 text-xs sm:grid-cols-4 md:px-5 md:text-sm">
-        <div>
-          <p className="font-semibold uppercase tracking-wide text-primary/70">Order ID</p>
-          <p className="mt-0.5 font-semibold text-primary">{order.id}</p>
-        </div>
-        <div>
-          <p className="font-semibold uppercase tracking-wide text-primary/70">Total payment</p>
-          <p className="mt-0.5 font-semibold text-primary">{formatPrice(order.total)}</p>
-        </div>
-        <div>
-          <p className="font-semibold uppercase tracking-wide text-primary/70">Payment method</p>
-          <p className="mt-0.5 font-medium text-primary">{formatPaymentMethod(order.payment_method)}</p>
-        </div>
-        <div>
-          <p className="font-semibold uppercase tracking-wide text-primary/70">Delivery</p>
-          <p className="mt-0.5 font-medium text-primary">{deliveryLabel(order)}</p>
-        </div>
-      </div>
-
-      <ul className="divide-y divide-sage/35 px-4 md:px-5">
-        {(order.items || []).map((item) => (
-          <li key={item.id || item.product_id} className="flex items-center gap-3 py-3">
-            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-sage/45 bg-cream p-1">
-              <img src={getCartItemImage(item)} alt="" className="max-h-full max-w-full object-contain" />
-            </div>
-            <div className="min-w-0">
-              <p className="font-heading text-sm font-semibold text-primary">{formatProductName(item.name)}</p>
-              <p className="text-xs text-muted">{item.category_name || 'NaturePure Fresh'}</p>
-            </div>
-          </li>
-        ))}
-      </ul>
-
-      <div className="border-t border-sage/40 px-4 py-3 md:px-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={cn('label-chip px-2.5 py-1 text-xs font-semibold', statusMeta.badgeClass)}>
-            {statusMeta.badge}
-          </span>
-          <span className="text-sm text-muted">{statusMeta.message}</span>
-        </div>
-
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          {statusMeta.primaryAction === 'Track order' ? (
-            <Link
-              to={`/track-order/${order.id}`}
-              state={{ returnTo: '/account' }}
-              className="neo-btn inline-flex min-h-9 items-center rounded-md px-4 py-2 text-xs font-semibold sm:text-sm"
-            >
-              Track order
-            </Link>
-          ) : (
-            <button
-              type="button"
-              disabled
-              className="neo-btn inline-flex min-h-9 cursor-not-allowed items-center rounded-md px-4 py-2 text-xs font-semibold opacity-55 sm:text-sm"
-            >
-              {statusMeta.primaryAction}
-            </button>
-          )}
-          <Link
-            to={`/order-confirmation/${order.id}`}
-            className="inline-flex min-h-9 items-center rounded-md border border-primary bg-white px-4 py-2 text-xs font-semibold text-primary transition hover:bg-cream sm:text-sm"
-          >
-            View details
-          </Link>
-        </div>
-      </div>
-    </article>
-  );
-}
-
 export default function AccountPage() {
-  const { user, loading, authLoading, logout, isAuthenticated, refreshUser } = useAuth();
+  const { user, loading, isAuthenticated, refreshUser } = useAuth();
   const location = useLocation();
   const [section, setSection] = useState('orders');
   const [orderSort, setOrderSort] = useState('all');
@@ -237,13 +132,28 @@ export default function AccountPage() {
     lastName: '',
     email: '',
     phone: '',
-    gender: '',
     address: '',
   });
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMessage, setProfileMessage] = useState(null);
   const [profileError, setProfileError] = useState(null);
+  const [passwordForm, setPasswordForm] = useState({ newPassword: '', confirmPassword: '' });
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState(null);
+  const [passwordError, setPasswordError] = useState(null);
+  const [storedAddresses, setStoredAddresses] = useState(() => loadStoredAddresses());
+  const [showAddAddress, setShowAddAddress] = useState(false);
+  const [newAddressForm, setNewAddressForm] = useState({
+    label: 'Home',
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+  });
+  const [addressActionError, setAddressActionError] = useState(null);
+  const [addressDeletingId, setAddressDeletingId] = useState(null);
+  const [hiddenAddressIds, setHiddenAddressIds] = useState(() => loadHiddenAddressIds());
 
   useEffect(() => {
     if (!user) return;
@@ -253,7 +163,6 @@ export default function AccountPage() {
       lastName,
       email: isPlaceholderMobileEmail(user.email) ? '' : user.email || '',
       phone: user.phone || '',
-      gender: loadStoredGender(user.id),
       address: user.address || '',
     });
   }, [user]);
@@ -273,20 +182,12 @@ export default function AccountPage() {
       .finally(() => setOrdersLoading(false));
   }, [isAuthenticated]);
 
-  const filteredOrders = useMemo(() => {
-    if (orderSort === 'all') return orders;
-    return orders.filter((o) => {
-      const s = String(o.status || '').toLowerCase();
-      if (orderSort === 'delivered') return s.includes('deliver');
-      if (orderSort === 'confirmed') return !s.includes('deliver');
-      return true;
-    });
-  }, [orders, orderSort]);
 
-  const savedAddresses = useMemo(
-    () => (user ? collectSavedAddresses(user, orders) : []),
-    [user, orders]
-  );
+  const savedAddresses = useMemo(() => {
+    if (!user) return [];
+    const hidden = new Set(hiddenAddressIds);
+    return collectSavedAddresses(user, orders, storedAddresses).filter((addr) => !hidden.has(addr.id));
+  }, [user, orders, storedAddresses, hiddenAddressIds]);
 
   if (loading) return <LoadingSpinner />;
 
@@ -306,7 +207,6 @@ export default function AccountPage() {
     const name = [profileForm.firstName, profileForm.lastName].filter(Boolean).join(' ').trim();
     try {
       await api.updateProfile({ name, address: profileForm.address });
-      storeGender(user.id, profileForm.gender);
       await refreshUser();
       setProfileMessage('Profile updated successfully.');
     } catch (err) {
@@ -327,19 +227,92 @@ export default function AccountPage() {
     });
   };
 
+  const handleAddAddress = (e) => {
+    e.preventDefault();
+    setAddressActionError(null);
+    const trimmed = newAddressForm.address.trim();
+    if (trimmed.length < 5) {
+      setAddressActionError('Please enter a complete street address.');
+      return;
+    }
+    const next = persistAddress({
+      label: newAddressForm.label.trim() || 'Home',
+      name: user.name || '',
+      phone: user.phone || '',
+      email: user.email || '',
+      address: trimmed,
+      city: newAddressForm.city.trim(),
+      state: newAddressForm.state.trim(),
+      pincode: newAddressForm.pincode.trim(),
+    });
+    setStoredAddresses(next);
+    setNewAddressForm({ label: 'Home', address: '', city: '', state: '', pincode: '' });
+    setShowAddAddress(false);
+  };
+
+  const handleDeleteAddress = async (addr) => {
+    setAddressActionError(null);
+    setAddressDeletingId(addr.id);
+    try {
+      if (addr.source === 'primary') {
+        const name = [profileForm.firstName, profileForm.lastName].filter(Boolean).join(' ').trim() || user.name;
+        await api.updateProfile({ name, address: '' });
+        await refreshUser();
+        setProfileForm((f) => ({ ...f, address: '' }));
+      } else if (addr.source === 'stored' && addr.storageId) {
+        setStoredAddresses(removeStoredAddress(addr.storageId));
+      } else if (addr.source === 'order') {
+        setHiddenAddressIds(hideAddressId(addr.id));
+      }
+    } catch (err) {
+      setAddressActionError(err.message || 'Could not delete address');
+    } finally {
+      setAddressDeletingId(null);
+    }
+  };
+
+  const handlePasswordSave = async (e) => {
+    e.preventDefault();
+    setPasswordSaving(true);
+    setPasswordMessage(null);
+    setPasswordError(null);
+
+    const { newPassword, confirmPassword } = passwordForm;
+    if (newPassword.length < 6) {
+      setPasswordError('Password must be at least 6 characters.');
+      setPasswordSaving(false);
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match.');
+      setPasswordSaving(false);
+      return;
+    }
+
+    try {
+      await api.changePassword({ password: newPassword });
+      setPasswordForm({ newPassword: '', confirmPassword: '' });
+      setPasswordMessage('Password updated successfully.');
+    } catch (err) {
+      setPasswordError(err.message || 'Could not update password');
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
+
   const menuRowClass = (id) =>
     cn(
-      'mx-2 block w-[calc(100%-1rem)] rounded-lg px-4 py-3 text-left text-sm font-medium transition',
+      'block w-full rounded-lg px-2.5 py-2.5 text-left text-xs font-medium transition sm:px-3 sm:py-2.5 sm:text-sm lg:mx-2 lg:w-[calc(100%-1rem)] lg:px-4 lg:py-3',
       section === id
         ? 'bg-secondary font-semibold text-white shadow-[0_4px_12px_rgba(61,96,73,0.25)]'
         : 'text-primary/80 hover:bg-cream'
     );
 
   const menuLinkRowClass =
-    'mx-2 block w-[calc(100%-1rem)] rounded-lg px-4 py-3 text-left text-sm font-medium text-primary/80 transition hover:bg-cream';
+    'block w-full rounded-lg px-2.5 py-2.5 text-left text-xs font-medium text-primary/80 transition hover:bg-cream sm:px-3 sm:py-2.5 sm:text-sm lg:mx-2 lg:w-[calc(100%-1rem)] lg:px-4 lg:py-3';
 
   return (
-    <div className="min-h-[70vh] bg-cream pb-12">
+    <div className="account-page min-h-[70vh] bg-cream pb-12">
       <header className="account-page-top border-b border-sage/45 bg-white py-5 text-center md:py-6">
         <div className="site-container">
           <h1 className="font-heading text-2xl font-semibold text-primary md:text-3xl">My Account</h1>
@@ -353,73 +326,31 @@ export default function AccountPage() {
         </div>
       </header>
 
-      <div className="site-container grid gap-5 py-5 lg:grid-cols-[minmax(0,240px)_1fr] lg:gap-6">
-        <aside className="lg:sticky lg:top-24 lg:self-start">
+      <div className="site-container grid grid-cols-[minmax(0,7.75rem)_minmax(0,1fr)] gap-3 py-5 sm:grid-cols-[minmax(0,10.5rem)_1fr] sm:gap-4 lg:grid-cols-[minmax(0,240px)_1fr] lg:gap-6">
+        <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
           <nav
-            className="space-y-0.5 overflow-hidden rounded-xl border border-sage/50 bg-white py-2 shadow-[0_4px_16px_rgba(41,70,51,0.05)]"
+            className="space-y-0.5 overflow-hidden rounded-xl border border-sage/50 bg-white py-1.5 shadow-[0_4px_16px_rgba(41,70,51,0.05)] sm:py-2"
             aria-label="Account menu"
           >
             {MENU.map((item) => (
               <button key={item.id} type="button" onClick={() => setSection(item.id)} className={menuRowClass(item.id)}>
-                {item.label}
+                <span className="block leading-snug">{item.label}</span>
               </button>
             ))}
             <Link to="/wishlist" className={menuLinkRowClass}>
               Wishlist
             </Link>
-            <button
-              type="button"
-              onClick={logout}
-              disabled={authLoading}
-              className="mx-2 mt-1 block w-[calc(100%-1rem)] rounded-lg px-4 py-3 text-left text-sm font-semibold text-primary/80 transition hover:bg-cream disabled:opacity-50"
-            >
-              Logout
-            </button>
           </nav>
         </aside>
 
         <main className="min-w-0">
           {section === 'orders' && (
-            <div>
-              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                <h2 className="font-heading text-lg font-semibold text-primary md:text-xl">
-                  Orders ({filteredOrders.length})
-                </h2>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted">Sort by:</span>
-                  <NeoSelect
-                    value={orderSort}
-                    onChange={(e) => setOrderSort(e.target.value)}
-                    wrapperClassName="min-w-[8.5rem]"
-                    className="px-4 py-2.5 text-sm"
-                    aria-label="Filter orders"
-                  >
-                    <option value="all">All</option>
-                    <option value="confirmed">Accepted</option>
-                    <option value="delivered">Delivered</option>
-                  </NeoSelect>
-                </div>
-              </div>
-
-              {ordersLoading ? (
-                <p className="text-sm text-muted">Loading orders…</p>
-              ) : filteredOrders.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-sage/50 bg-white py-12 text-center">
-                  <p className="text-sm text-muted">No orders in this list.</p>
-                  <Link to="/shop" className="neo-btn mt-4 inline-flex px-6 py-2.5 text-sm font-semibold">
-                    Shop now
-                  </Link>
-                </div>
-              ) : (
-                <ul className="space-y-5">
-                  {filteredOrders.map((order) => (
-                    <li key={order.id}>
-                      <AccountOrderCard order={order} />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            <AccountOrdersPanel
+              orders={orders}
+              loading={ordersLoading}
+              activeTab={orderSort}
+              onTabChange={setOrderSort}
+            />
           )}
 
           {section === 'profile' && (
@@ -510,23 +441,6 @@ export default function AccountPage() {
                         </label>
                       </div>
 
-                      <label className="relative z-20 block">
-                        <ProfileFieldLabel>Gender</ProfileFieldLabel>
-                        <NeoSelect
-                          value={profileForm.gender}
-                          onChange={(e) => setProfileForm((f) => ({ ...f, gender: e.target.value }))}
-                          className={profileInputClass()}
-                          placeholder="Select gender"
-                          menuPlacement="auto"
-                        >
-                          <option value="">Select gender</option>
-                          <option value="female">Female</option>
-                          <option value="male">Male</option>
-                          <option value="other">Other</option>
-                          <option value="prefer_not">Prefer not to say</option>
-                        </NeoSelect>
-                      </label>
-
                       <label className="block">
                         <ProfileFieldLabel>Delivery address</ProfileFieldLabel>
                         <textarea
@@ -563,28 +477,151 @@ export default function AccountPage() {
           )}
 
           {section === 'addresses' && (
-            <div className="rounded-xl border border-sage/50 bg-white p-5 md:p-6">
-              <h2 className="font-heading text-lg font-semibold text-primary md:text-xl">Manage Address</h2>
+            <div className="rounded-xl border border-sage/50 bg-white p-4 sm:p-5 md:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <h2 className="font-heading text-base font-semibold text-primary sm:text-lg md:text-xl">
+                  Manage Address
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAddressActionError(null);
+                    setShowAddAddress(true);
+                  }}
+                  className="neo-btn inline-flex min-h-9 px-4 py-2 text-xs font-semibold sm:text-sm"
+                >
+                  Add address
+                </button>
+              </div>
+
+              {showAddAddress && (
+                <OrderModalShell
+                  titleId="add-address-title"
+                  onDismiss={() => closeAddAddressModal(setShowAddAddress, setAddressActionError)}
+                  wide
+                  className="max-w-md sm:max-w-lg"
+                >
+                  <div className="flex items-center justify-between gap-3 border-b border-sage/40 px-4 py-3 sm:px-5">
+                    <h2 id="add-address-title" className="font-heading text-lg font-semibold text-primary">
+                      Add address
+                    </h2>
+                    <button
+                      type="button"
+                      onClick={() => closeAddAddressModal(setShowAddAddress, setAddressActionError)}
+                      className="rounded-full p-2 text-primary/70 transition hover:bg-cream hover:text-primary"
+                      aria-label="Close"
+                    >
+                      <span className="text-xl leading-none">&times;</span>
+                    </button>
+                  </div>
+                  <form
+                    onSubmit={handleAddAddress}
+                    className="max-h-[min(70vh,28rem)] space-y-3 overflow-y-auto px-4 py-4 sm:px-5 sm:py-5"
+                  >
+                    <label className="block">
+                      <ProfileFieldLabel>Label</ProfileFieldLabel>
+                      <input
+                        type="text"
+                        value={newAddressForm.label}
+                        onChange={(e) => setNewAddressForm((f) => ({ ...f, label: e.target.value }))}
+                        className={profileInputClass()}
+                        placeholder="Home, Office…"
+                      />
+                    </label>
+                    <label className="block">
+                      <ProfileFieldLabel>Street address</ProfileFieldLabel>
+                      <textarea
+                        value={newAddressForm.address}
+                        onChange={(e) => setNewAddressForm((f) => ({ ...f, address: e.target.value }))}
+                        rows={3}
+                        className={cn(profileInputClass(), 'neo-textarea min-h-[4.5rem] resize-y')}
+                        placeholder="Flat / house, street, area"
+                        required
+                      />
+                    </label>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      <label className="block sm:col-span-1">
+                        <ProfileFieldLabel>City</ProfileFieldLabel>
+                        <input
+                          type="text"
+                          value={newAddressForm.city}
+                          onChange={(e) => setNewAddressForm((f) => ({ ...f, city: e.target.value }))}
+                          className={profileInputClass()}
+                          placeholder="City"
+                        />
+                      </label>
+                      <label className="block sm:col-span-1">
+                        <ProfileFieldLabel>State</ProfileFieldLabel>
+                        <input
+                          type="text"
+                          value={newAddressForm.state}
+                          onChange={(e) => setNewAddressForm((f) => ({ ...f, state: e.target.value }))}
+                          className={profileInputClass()}
+                          placeholder="State"
+                        />
+                      </label>
+                      <label className="block sm:col-span-1">
+                        <ProfileFieldLabel>PIN</ProfileFieldLabel>
+                        <input
+                          type="text"
+                          value={newAddressForm.pincode}
+                          onChange={(e) => setNewAddressForm((f) => ({ ...f, pincode: e.target.value }))}
+                          className={profileInputClass()}
+                          placeholder="PIN code"
+                          inputMode="numeric"
+                        />
+                      </label>
+                    </div>
+                    {addressActionError && (
+                      <p className="rounded-lg bg-strawberry/10 px-3 py-2 text-sm text-strawberry">{addressActionError}</p>
+                    )}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <button type="submit" className="neo-btn flex-1 px-5 py-2.5 text-sm font-semibold sm:flex-none">
+                        Save address
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => closeAddAddressModal(setShowAddAddress, setAddressActionError)}
+                        className="inline-flex min-h-10 flex-1 items-center justify-center rounded-md border border-sage/60 bg-white px-5 py-2.5 text-sm font-semibold text-primary sm:flex-none"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                </OrderModalShell>
+              )}
+
+              {addressActionError && !showAddAddress && (
+                <p className="mt-3 rounded-lg bg-strawberry/10 px-3 py-2 text-sm text-strawberry">{addressActionError}</p>
+              )}
+
               {savedAddresses.length === 0 ? (
-                <p className="mt-4 text-sm text-muted">
-                  No saved addresses.{' '}
-                  <button type="button" onClick={() => setSection('profile')} className="font-semibold text-primary underline">
-                    Add in Personal Information
-                  </button>
-                </p>
+                <p className="mt-4 text-sm text-muted">No saved addresses yet. Tap Add address to create one.</p>
               ) : (
                 <ul className="mt-4 grid gap-3 sm:grid-cols-2">
                   {savedAddresses.map((addr) => (
                     <li key={addr.id} className="rounded-lg border border-sage/45 bg-cream/35 p-4 text-sm">
-                      <p className="font-semibold text-primary">
-                        {addr.label}
-                        {addr.isDefault && (
-                          <span className="label-chip ml-2 bg-primary/10 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase text-primary">
-                            Default
-                          </span>
-                        )}
-                      </p>
-                      <p className="mt-1.5 text-muted">{addr.lines.join(', ')}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="min-w-0 font-semibold text-primary">
+                          {addr.label}
+                          {addr.isDefault && (
+                            <span className="label-chip ml-2 bg-primary/10 px-1.5 py-0.5 text-[0.6rem] font-bold uppercase text-primary">
+                              Primary address
+                            </span>
+                          )}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAddress(addr)}
+                          disabled={addressDeletingId === addr.id}
+                          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-strawberry/35 bg-white text-strawberry transition hover:bg-strawberry/10 disabled:opacity-45"
+                          aria-label={`Delete ${addr.label}`}
+                          title="Delete address"
+                        >
+                          <DeleteAddressIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <p className="account-address-body mt-1.5 leading-relaxed">{addr.lines.join(', ')}</p>
                     </li>
                   ))}
                 </ul>
@@ -593,71 +630,63 @@ export default function AccountPage() {
           )}
 
           {section === 'password' && (
-            <div className="rounded-xl border border-sage/50 bg-white p-5 md:p-6">
-              <h2 className="font-heading text-lg font-semibold text-primary md:text-xl">Password Manager</h2>
+            <div className="rounded-xl border border-sage/50 bg-white p-4 sm:p-5 md:p-6">
+              <h2 className="font-heading text-base font-semibold text-primary sm:text-lg md:text-xl">
+                Password Manager
+              </h2>
               {mobileOnlyAccount ? (
                 <p className="mt-3 text-sm text-muted">
-                  Your account uses mobile OTP sign-in. No password is required.
+                  Your account uses mobile OTP sign-in. Set a password below to also sign in with email later.
                 </p>
               ) : (
-                <>
-                  <p className="mt-3 text-sm text-muted">Reset your password using the email linked to this account.</p>
-                  <Link
-                    to="/forgot-password"
-                    className="neo-btn mt-4 inline-flex px-6 py-2.5 text-sm font-semibold"
-                  >
-                    Reset password
-                  </Link>
-                </>
+                <p className="mt-2 text-sm text-muted">Create a new password for your account.</p>
               )}
-            </div>
-          )}
 
-          {section === 'help' && (
-            <div className="rounded-xl border border-sage/50 bg-white p-5 md:p-6">
-              <h2 className="font-heading text-lg font-semibold text-primary md:text-xl">Help</h2>
-              <p className="mt-2 text-sm text-muted">Customer support for orders, delivery, and products.</p>
-              <ul className="mt-4 space-y-2 text-sm">
-                <li>
-                  <a href={`tel:${BRAND_PHONE.replace(/\s/g, '')}`} className="font-medium text-primary hover:underline">
-                    {BRAND_PHONE}
-                  </a>
-                </li>
-                <li>
-                  <a href={`mailto:${BRAND_EMAIL}`} className="font-medium text-primary hover:underline">
-                    {BRAND_EMAIL}
-                  </a>
-                </li>
-                <li className="text-muted">Mon–Sat, 9 AM – 6 PM IST</li>
-              </ul>
-              <Link to="/contact" className="neo-btn mt-5 inline-flex px-5 py-2.5 text-sm font-semibold">
-                Contact us
-              </Link>
+              <form onSubmit={handlePasswordSave} className="mt-4 max-w-md space-y-3">
+                <label className="block">
+                  <ProfileFieldLabel>New password</ProfileFieldLabel>
+                  <input
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm((f) => ({ ...f, newPassword: e.target.value }))}
+                    className={profileInputClass()}
+                    placeholder="Enter new password"
+                    autoComplete="new-password"
+                    minLength={6}
+                    required
+                  />
+                </label>
+                <label className="block">
+                  <ProfileFieldLabel>Confirm password</ProfileFieldLabel>
+                  <input
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm((f) => ({ ...f, confirmPassword: e.target.value }))}
+                    className={profileInputClass()}
+                    placeholder="Confirm new password"
+                    autoComplete="new-password"
+                    minLength={6}
+                    required
+                  />
+                </label>
 
-              <details className="account-help-cancel mt-6 rounded-lg border border-sage/40 bg-cream/30 px-4 py-3 text-sm">
-                <summary className="cursor-pointer list-none text-muted [&::-webkit-details-marker]:hidden">
-                  <span className="text-xs font-medium text-primary/80">Order cancellation policy</span>
-                </summary>
-                <p className="mt-3 leading-relaxed text-muted">
-                  Orders ship within 12 hours of placement. To cancel or change an order, contact us within that window
-                  with your order ID — we do not offer instant self-cancel from the app. See our{' '}
-                  <Link to="/refund-policy" className="text-primary underline">
-                    refund policy
-                  </Link>{' '}
-                  for full terms.
-                </p>
-                <p className="mt-2 text-xs text-muted">
-                  Call{' '}
-                  <a href={`tel:${BRAND_PHONE.replace(/\s/g, '')}`} className="text-primary underline">
-                    {BRAND_PHONE}
-                  </a>{' '}
-                  or{' '}
-                  <Link to="/contact" className="text-primary underline">
-                    write to support
-                  </Link>
-                  .
-                </p>
-              </details>
+                {passwordError && (
+                  <p className="rounded-lg bg-strawberry/10 px-3 py-2 text-sm text-strawberry">{passwordError}</p>
+                )}
+                {passwordMessage && (
+                  <p className="rounded-lg bg-secondary/10 px-3 py-2 text-sm font-medium text-secondary">
+                    {passwordMessage}
+                  </p>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={passwordSaving}
+                  className="neo-btn px-6 py-2.5 text-sm font-semibold disabled:opacity-60"
+                >
+                  {passwordSaving ? 'Saving…' : 'Create new password'}
+                </button>
+              </form>
             </div>
           )}
 
