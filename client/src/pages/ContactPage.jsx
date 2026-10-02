@@ -71,11 +71,11 @@ export default function ContactPage() {
               className="rounded-[1.25rem] border border-sage/55 bg-white p-6 shadow-[0_8px_28px_rgba(41,70,51,0.06)] md:p-8"
             >
               <h2 className="font-heading text-xl font-semibold text-primary">Send a message</h2>
-              <p className="mt-1 text-sm text-muted">Fields marked with * are required.</p>
+              {/* <p className="mt-1 text-sm text-muted">Fields marked with * are required.</p> */}
 
               <div className="mt-6 space-y-4">
                 <label className="block">
-                  <span className="text-sm font-medium text-primary">Full name *</span>
+                  <span className="text-sm font-medium text-primary">Full name</span>
                   <input
                     type="text"
                     name="name"
@@ -89,7 +89,7 @@ export default function ContactPage() {
                 </label>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="block">
-                    <span className="text-sm font-medium text-primary">Email *</span>
+                    <span className="text-sm font-medium text-primary">Email</span>
                     <input
                       type="email"
                       name="email"
@@ -115,7 +115,7 @@ export default function ContactPage() {
                   </label>
                 </div>
                 <label className="block">
-                  <span className="text-sm font-medium text-primary">Subject *</span>
+                  <span className="text-sm font-medium text-primary">Subject </span>
                   <NeoSelect
                     name="subject"
                     required
@@ -132,7 +132,7 @@ export default function ContactPage() {
                   </NeoSelect>
                 </label>
                 <label className="block">
-                  <span className="text-sm font-medium text-primary">Message *</span>
+                  <span className="text-sm font-medium text-primary">Message</span>
                   <textarea
                     name="message"
                     required

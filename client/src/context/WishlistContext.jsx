@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { loadWishlistIds, saveWishlistIds } from '../utils/wishlistStorage';
 import { notifySuccess } from '../utils/notify';
+import { startWishlistFly } from '../utils/flyToCart';
 
 const WishlistContext = createContext(null);
 
@@ -15,13 +16,19 @@ export function WishlistProvider({ children }) {
 
   const isWishlisted = useCallback((productId) => idSet.has(productId), [idSet]);
 
-  const add = useCallback((productId, label) => {
+  const add = useCallback((productId, label, options = {}) => {
     if (!productId) return;
+    const { fly } = options;
+    const flew = fly ? startWishlistFly(fly) : false;
+
     setIds((prev) => {
       if (prev.includes(productId)) return prev;
       return [...prev, productId];
     });
-    notifySuccess(label ? `${label} saved to wishlist` : 'Added to wishlist');
+
+    if (!flew) {
+      notifySuccess(label ? `${label} saved to wishlist` : 'Added to wishlist');
+    }
   }, []);
 
   const remove = useCallback((productId, label) => {
@@ -31,12 +38,12 @@ export function WishlistProvider({ children }) {
   }, []);
 
   const toggle = useCallback(
-    (productId, label) => {
+    (productId, label, options = {}) => {
       if (!productId) return;
       if (idSet.has(productId)) {
         remove(productId, label);
       } else {
-        add(productId, label);
+        add(productId, label, options);
       }
     },
     [add, remove, idSet]

@@ -1,6 +1,7 @@
 import { cn } from '../../lib/cn';
 import { useWishlist } from '../../context/WishlistContext';
 import { HeartIcon } from '../ui/CommerceIcons';
+import { buildFlyPayload } from '../../utils/flyToCart';
 
 export default function WishlistButton({
   productId,
@@ -8,6 +9,8 @@ export default function WishlistButton({
   className,
   iconClassName,
   variant = 'floating',
+  imageSrc,
+  flySourceRef,
 }) {
   const { isWishlisted, toggle } = useWishlist();
   const active = isWishlisted(productId);
@@ -16,7 +19,21 @@ export default function WishlistButton({
   const handleClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    toggle(productId, label);
+
+    if (active) {
+      toggle(productId, label);
+      return;
+    }
+
+    const fly = imageSrc
+      ? buildFlyPayload({
+          imageSrc,
+          sourceElement: flySourceRef?.current ?? e.currentTarget,
+          event: e,
+        })
+      : null;
+
+    toggle(productId, label, fly ? { fly } : {});
   };
 
   return (
