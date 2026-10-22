@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import ProductCard, { ProductCardSkeleton } from '../components/shop/ProductCard';
 import ShopFilters from '../components/shop/ShopFilters';
@@ -12,6 +12,8 @@ import useCategoryTree from '../hooks/useCategoryTree';
 import { useShopPageConfig } from '../hooks/useCmsPages';
 import { PRODUCT_GRID_SHOP_CLASS } from '../utils/productLayout';
 import { applyOutOfStockListingFilter } from '../utils/stockDisplay';
+import { USE_LIVE_CATALOG, USE_LIVE_CATEGORIES } from '../api/config';
+import { findCategoryRecord } from '../utils/categoryRoute';
 
 const FALLBACK_SHOP = buildShopPage();
 
@@ -24,15 +26,18 @@ export default function ShopPage() {
   const shopBanners = shop.banners || FALLBACK_SHOP.banners;
 
   const { category } = useParams();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { categories } = useCategoryTree();
   const loadMoreRef = useRef(null);
+  const [searchFieldKey, setSearchFieldKey] = useState(0);
 
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [categoryDetail, setCategoryDetail] = useState(null);
   const page = parseInt(searchParams.get('page') || '1', 10);
   const sort = searchParams.get('sort') || 'bestseller';
   const search = searchParams.get('q') || '';
@@ -65,7 +70,7 @@ export default function ShopPage() {
         .getProducts(fetchParams)
         .then((res) => {
           let list = res.data || res.products || [];
-          if (!list.length) {
+          if (!list.length && !USE_LIVE_CATALOG) {
             list = filterFallbackProducts({ category, limit: pageSize });
           }
           list = applyOutOfStockListingFilter(list, stock);
@@ -73,6 +78,11 @@ export default function ShopPage() {
           setPagination(res.pagination);
         })
         .catch(() => {
+          if (USE_LIVE_CATALOG) {
+            setProducts((prev) => (isAppend ? prev : []));
+            setPagination(null);
+            return;
+          }
           const fallback = applyOutOfStockListingFilter(
             filterFallbackProducts({ category, limit: pageSize }),
             stock
@@ -93,6 +103,26 @@ export default function ShopPage() {
   }, [loadProducts, page]);
 
   useEffect(() => {
+    setCategoryDetail(null);
+    if (!category || !USE_LIVE_CATEGORIES) return undefined;
+
+    const fromTree = findCategoryRecord(categories, category);
+    if (fromTree?.description?.trim() && fromTree?.banner_image) return undefined;
+
+    let active = true;
+    api
+      .getCategory(category)
+      .then((res) => {
+        if (active && res?.data) setCategoryDetail(res.data);
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, [category, categories]);
+
+  useEffect(() => {
     if (paginationMode !== 'infinite' || !pagination?.hasMore || loading || loadingMore) {
       return undefined;
     }
@@ -111,10 +141,15 @@ export default function ShopPage() {
     return () => observer.disconnect();
   }, [pagination, loading, loadingMore, page]);
 
+  const clearAllShopFilters = useCallback(() => {
+    setSelectedProductId(null);
+    setSearchFieldKey((k) => k + 1);
+    navigate({ pathname: '/shop', search: '' }, { replace: true });
+  }, [navigate]);
+
   const updateFilterParam = (key, value) => {
     if (key === 'reset') {
-      setSearchParams({});
-      setSelectedProductId(null);
+      clearAllShopFilters();
       return;
     }
     const params = new URLSearchParams(searchParams);
@@ -137,45 +172,78 @@ export default function ShopPage() {
   };
 
   const listClass = PRODUCT_GRID_SHOP_CLASS;
-  const categoryRecord = category ? categories.find((c) => c.slug === category) : null;
+  const categoryRecord = useMemo(() => {
+    if (!category) return null;
+    return findCategoryRecord(categories, category) || categoryDetail;
+  }, [category, categories, categoryDetail]);
   const categoryTitle = categoryRecord?.name || (category ? 'Shop' : 'All Products');
-  const categoryBannerSrc = category
-    ? shopBanners.byCategory?.[category] ?? null
-    : shopBanners.all;
-  const categoryBannerFallback = category ? shopBanners.fallbacks?.[category] : undefined;
+  const categoryDescription = categoryRecord?.description?.trim() || '';
+  const useAdminCategoryContent = USE_LIVE_CATEGORIES;
+  const categoryBannerSrc = useAdminCategoryContent
+    ? category
+      ? categoryRecord?.banner_image || null
+      : null
+    : category
+      ? shopBanners.byCategory?.[category] ?? null
+      : shopBanners.all;
+  const categoryBannerFallback =
+    category && !useAdminCategoryContent ? shopBanners.fallbacks?.[category] : undefined;
+
+  const liveCategoryTextHeader =
+    useAdminCategoryContent && category ? (
+      <div
+        className={
+          categoryBannerSrc
+            ? 'mb-8 border-b border-sage/40 py-8 md:py-10'
+            : 'mb-10 border-b border-sage/40 bg-cream-dark/60 py-10 md:py-12'
+        }
+      >
+        <div className="site-container max-w-3xl">
+          <h1 className="font-heading text-3xl font-semibold text-primary md:text-4xl">{categoryTitle}</h1>
+          {categoryDescription ? (
+            <p className="mt-4 text-base leading-relaxed text-muted md:text-lg">{categoryDescription}</p>
+          ) : null}
+        </div>
+      </div>
+    ) : null;
 
   return (
     <div className="pb-16">
-      {categoryBannerSrc ? (
+      {useAdminCategoryContent && category ? (
+        <>
+          {categoryBannerSrc ? (
+            <InsetCategoryBanner src={categoryBannerSrc} title={categoryTitle} />
+          ) : null}
+          {liveCategoryTextHeader}
+        </>
+      ) : categoryBannerSrc ? (
         <InsetCategoryBanner
           src={categoryBannerSrc}
           title={categoryTitle}
           imageFallback={categoryBannerFallback}
         />
-      ) : (
-        <div className="mb-10 bg-primary py-12 text-center text-white">
-          <div className="site-container">
-            <h1 className="font-heading text-3xl font-semibold">{categoryTitle}</h1>
-            <p className="mt-2 opacity-80">Premium freeze-dried fruits — 100% natural, no added sugar</p>
+      ) : category ? (
+        <div className="mb-10 border-b border-sage/40 bg-cream-dark/60 py-10 md:py-12">
+          <div className="site-container max-w-3xl">
+            <h1 className="font-heading text-3xl font-semibold text-primary md:text-4xl">{categoryTitle}</h1>
+            {categoryDescription ? (
+              <p className="mt-4 text-base leading-relaxed text-muted md:text-lg">{categoryDescription}</p>
+            ) : null}
           </div>
         </div>
+      ) : (
+        <InsetCategoryBanner src={shopBanners.all} title={categoryTitle} />
       )}
 
       <div className="site-container">
-        <details className="mb-6 rounded-[1.25rem] border border-sage/55 bg-white md:hidden">
-          <summary className="cursor-pointer list-none px-4 py-3.5 font-heading text-sm font-semibold text-primary [&::-webkit-details-marker]:hidden">
-            Filters & categories
-          </summary>
-          <div className="border-t border-sage/40 px-2 pb-2">
-            <ShopFilters
-              categories={categories}
-              routeCategory={category}
-              searchParams={searchParams}
-              onUpdateParams={updateFilterParam}
-              className="border-0 shadow-none"
-            />
-          </div>
-        </details>
+        <ShopFilters
+          variant="mobile"
+          categories={categories}
+          routeCategory={category}
+          searchParams={searchParams}
+          onUpdateParams={updateFilterParam}
+          className="mb-6 md:hidden"
+        />
 
         <div className="grid gap-8 lg:grid-cols-[280px_1fr] lg:gap-10">
           <ShopFilters
@@ -190,6 +258,7 @@ export default function ShopPage() {
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="min-w-0 flex-1">
                 <input
+                  key={`shop-search-${searchFieldKey}`}
                   type="search"
                   placeholder="Search products..."
                   defaultValue={search}

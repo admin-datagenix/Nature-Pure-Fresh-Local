@@ -1,6 +1,7 @@
 import { COMPANY_NAME, BRAND_NAME } from './brand';
 
-export const ABOUT_SUBHEADING = 'Online Sports Nutrition and Natural Dietetics.';
+export const ABOUT_SUBHEADING =
+  'Premium freeze-dried fruit snacks and powders — from Indian orchards to your table.';
 
 export const ABOUT_MISSION_LINE = 'To deliver pure, safe, and high-quality agro products globally.';
 

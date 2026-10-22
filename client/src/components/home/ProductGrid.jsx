@@ -4,17 +4,23 @@ import { api } from '../../api/client';
 import ProductCard, { ProductCardSkeleton } from '../shop/ProductCard';
 import { filterFallbackProducts } from '../../data/fallbackProducts';
 import { PRODUCT_GRID_CLASS } from '../../utils/productLayout';
+import { isOutOfStock } from '../../utils/stockDisplay';
 import Reveal from '../ui/Reveal';
+
+function inStockBestsellers(list, max) {
+  return (list || []).filter((p) => !isOutOfStock(p)).slice(0, max);
+}
 
 export default function ProductGrid({
   title = 'Best Seller',
-  subtitle = 'Our most-loved freeze-dried fruits, rated by thousands of happy snackers',
   limit = 4,
   shopLink = '/shop',
   shopLinkLabel = 'View all',
   selectable = true,
 }) {
-  const [products, setProducts] = useState(() => filterFallbackProducts({ category: 'all', limit }));
+  const [products, setProducts] = useState(() =>
+    inStockBestsellers(filterFallbackProducts({ category: 'all', limit: limit * 2 }), limit)
+  );
   const [loading, setLoading] = useState(true);
   const [selectedProductId, setSelectedProductId] = useState(null);
 
@@ -24,14 +30,17 @@ export default function ProductGrid({
 
   useEffect(() => {
     let cancelled = false;
-    const fallback = filterFallbackProducts({ category: 'all', limit });
+    const fallback = inStockBestsellers(
+      filterFallbackProducts({ category: 'all', limit: limit * 2 }),
+      limit
+    );
 
     async function load() {
       setLoading(true);
       try {
         const res = await api.getBestsellers(limit);
         if (cancelled) return;
-        const list = (res.data || res.products || []).slice(0, limit);
+        const list = inStockBestsellers(res.data || res.products || [], limit);
         setProducts(list.length ? list : fallback);
       } catch {
         if (!cancelled) setProducts(fallback);
@@ -45,23 +54,20 @@ export default function ProductGrid({
   }, [limit]);
 
   return (
-    <section className="pb-16 md:pb-20">
+    <section className="pb-12 pt-1 md:pb-20 md:pt-0">
       <div className="site-container">
-        <Reveal variant="scale" className="mb-8 flex items-end justify-between gap-4">
-          <div>
-            <h2 className="font-heading text-3xl font-semibold tracking-tight text-primary md:text-[2rem]">
+        <Reveal variant="scale" className="mb-4 md:mb-8">
+          <div className="flex items-start justify-between gap-3">
+            <h2 className="min-w-0 flex-1 font-heading text-2xl font-semibold tracking-tight text-primary sm:text-3xl md:text-[2rem]">
               {title}
             </h2>
-            {subtitle && (
-              <p className="mt-2 max-w-xl text-base text-muted">{subtitle}</p>
-            )}
+            <Link
+              to={shopLink}
+              className="inline-flex shrink-0 items-center gap-1 pt-1 text-sm font-medium text-muted underline underline-offset-2 decoration-muted/60 transition hover:text-primary hover:decoration-primary"
+            >
+              {shopLinkLabel} <span aria-hidden="true">→</span>
+            </Link>
           </div>
-          <Link
-            to={shopLink}
-            className="hidden shrink-0 text-sm font-medium text-muted transition hover:text-primary sm:inline-flex sm:items-center sm:gap-1"
-          >
-            {shopLinkLabel} <span aria-hidden="true">→</span>
-          </Link>
         </Reveal>
 
         {loading ? (
@@ -85,11 +91,6 @@ export default function ProductGrid({
           </div>
         )}
 
-        <div className="mt-8 text-center sm:hidden">
-          <Link to={shopLink} className="text-sm font-medium text-muted hover:text-primary">
-            {shopLinkLabel} →
-          </Link>
-        </div>
       </div>
     </section>
   );

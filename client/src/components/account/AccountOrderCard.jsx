@@ -4,8 +4,10 @@ import { formatPrice } from '../../utils/helpers';
 import { getCartItemImage } from '../../data/productImages';
 import { cn } from '../../lib/cn';
 import StarRating from '../ui/StarRating';
+import { shouldShowProductRatings } from '../../utils/helpers';
 import CompactOrderTrackStepper from '../orders/CompactOrderTrackStepper';
 import { buildOrderTrackingSteps } from '../../utils/orderTracking';
+import { STORE_SETTINGS } from '../../config/storeSettings';
 import { downloadOrderInvoicePdf } from '../../utils/orderInvoicePdf';
 import {
   formatOrderDate,
@@ -181,9 +183,7 @@ export default function AccountOrderCard({ order, highlightActive = false }) {
   const delivered = isOrderDelivered(order);
   const placedLabel = formatOrderPlacedLabel(order.created_at);
 
-  const onDownloadInvoice = () => {
-    downloadOrderInvoicePdf(order, formatPrice);
-  };
+  const showInvoice = STORE_SETTINGS.showDownloadInvoice !== false;
 
   return (
     <article
@@ -216,13 +216,15 @@ export default function AccountOrderCard({ order, highlightActive = false }) {
               Shop again
             </Link>
           )}
-          <button
-            type="button"
-            onClick={onDownloadInvoice}
-            className="account-order-card__pill account-order-card__pill--soft"
-          >
-            Download invoice
-          </button>
+          {showInvoice ? (
+            <button
+              type="button"
+              onClick={() => downloadOrderInvoicePdf(order, formatPrice)}
+              className="account-order-card__pill account-order-card__pill--soft"
+            >
+              Download invoice
+            </button>
+          ) : null}
           <button
             type="button"
             onClick={() => setDetailsOpen((v) => !v)}
@@ -270,9 +272,15 @@ export default function AccountOrderCard({ order, highlightActive = false }) {
         <div className="account-order-card__details border-t border-sage/30 bg-cream/50 px-4 py-4 sm:px-5 sm:py-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h4 className="font-heading text-base font-semibold text-primary">Product details</h4>
-            <button type="button" onClick={onDownloadInvoice} className="neo-btn px-5 py-2 text-sm font-semibold">
-              Download invoice (PDF)
-            </button>
+            {showInvoice ? (
+              <button
+                type="button"
+                onClick={() => downloadOrderInvoicePdf(order, formatPrice)}
+                className="neo-btn px-5 py-2 text-sm font-semibold"
+              >
+                Download invoice (PDF)
+              </button>
+            ) : null}
           </div>
 
           <div className="mt-4 space-y-3">
@@ -313,7 +321,7 @@ export default function AccountOrderCard({ order, highlightActive = false }) {
               <OrderRatingPicker orderId={order.id} />
             </div>
           )}
-          {items.some((item) => item.rating > 0) && (
+          {shouldShowProductRatings() && items.some((item) => item.rating > 0) && (
             <div className="mt-2 flex items-center gap-2">
               <span className="text-xs text-muted">Product rating</span>
               <StarRating rating={items.find((i) => i.rating > 0)?.rating || 0} size="sm" />

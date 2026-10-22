@@ -25,7 +25,7 @@ export default function AccountOrdersPanel({ orders, loading, activeTab, onTabCh
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="font-heading text-xl font-semibold tracking-tight text-primary md:text-2xl">My Orders</h2>
-          <p className="mt-1 text-sm text-muted">Track packages, view details, and download invoices</p>
+          <p className="mt-1 text-sm text-muted">Track packages and view order details</p>
         </div>
         {!loading && orders.length > 0 && (
           <p className="rounded-full bg-cream px-3 py-1 text-xs font-semibold text-primary/85">

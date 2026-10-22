@@ -2,27 +2,27 @@
  * Certifications — content & logos from https://naturepurefresh.com/ (Our Certifications)
  */
 
-import madeInIndia from '../assets/certifications/made-in-india.png';
+import apedaLogo from '../assets/certifications/apeda.png';
+import makeInIndiaLion from '../assets/certifications/make-in-india-lion.png';
 import pureNatural100 from '../assets/certifications/pure-natural-100.png';
-import certFssai from '../assets/certifications/cert-fssai.jpg';
-import certHalal from '../assets/certifications/halal.jpg';
+import certMsme from '../assets/certifications/msme.png';
+import startupIndiaLogo from '../assets/certifications/startup-india.png';
 import certExport from '../assets/certifications/cert-export.jpg';
-import certQuality1 from '../assets/certifications/cert-quality-1.jpeg';
+import certFssaiLogo from '../assets/certifications/cert-quality-1.jpeg';
 import certQuality2 from '../assets/certifications/cert-quality-2.jpeg';
-import certQuality3 from '../assets/certifications/cert-quality-3.jpeg';
 
 export const CERTIFICATIONS_INTRO =
   'We maintain strict quality control from farm to pack, with certifications and standards that support safe, export-ready agro products for customers in India and abroad.';
 
 /** Logo strip — same assets as naturepurefresh.com certification row */
 export const CERTIFICATION_LOGOS = [
-  { id: 'made-in-india', alt: 'Made in India', src: madeInIndia },
+  { id: 'apeda', alt: 'APEDA — Agricultural and Processed Food Products Export Development Authority', src: apedaLogo },
+  { id: 'make-in-india', alt: 'Make in India', src: makeInIndiaLion },
   { id: 'pure-natural', alt: '100% Pure Natural Organic', src: pureNatural100 },
-  { id: 'quality-1', alt: 'Quality certification', src: certQuality1 },
-  { id: 'quality-2', alt: 'Quality certification', src: certQuality2 },
-  { id: 'quality-3', alt: 'Quality certification', src: certQuality3 },
-  { id: 'fssai', alt: 'FSSAI certification', src: certFssai },
-  { id: 'halal', alt: 'Halal certification', src: certHalal },
+  { id: 'startup-india', alt: 'Startup India — DPIIT', src: startupIndiaLogo },
+  { id: 'quality-2', alt: 'Import Export Code (IEC)', src: certQuality2 },
+  { id: 'fssai', alt: 'FSSAI licence', src: certFssaiLogo },
+  { id: 'msme', alt: 'Ministry of Micro, Small and Medium Enterprises (MSME), Government of India', src: certMsme },
   { id: 'export', alt: 'Export / global certification', src: certExport },
 ];
 
@@ -31,19 +31,27 @@ export const BRAND_CERTIFICATIONS = [
     id: 'fssai',
     title: 'FSSAI Certified',
     description: 'Food safety compliance for manufacturing and sale of fruit snacks and powders in India.',
-    image: certFssai,
+    image: certFssaiLogo,
   },
   {
-    id: 'halal',
-    title: 'Halal Certified',
-    description: 'Halal-certified processing for customers who require certified halal products.',
-    image: certHalal,
+    id: 'msme',
+    title: 'MSME / Udyam Registered',
+    description:
+      'Registered with the Ministry of MSME under Udyam for micro, small and medium enterprise recognition in India.',
+    image: certMsme,
   },
   {
-    id: 'made-in-india',
-    title: 'Made in India',
-    description: 'Proudly manufactured in Miraj, Maharashtra — supporting Indian agriculture and local farmers.',
-    image: madeInIndia,
+    id: 'apeda',
+    title: 'APEDA Registered',
+    description:
+      'Registered with APEDA for export promotion of agricultural and processed food products from India.',
+    image: apedaLogo,
+  },
+  {
+    id: 'make-in-india',
+    title: 'Make in India',
+    description: 'Proudly manufactured in India under the national Make in India initiative.',
+    image: makeInIndiaLion,
   },
   {
     id: 'natural',
@@ -58,10 +66,10 @@ export const BRAND_CERTIFICATIONS = [
     image: certExport,
   },
   {
-    id: 'quality',
-    title: 'Strict Quality Control',
-    description: 'Monitored selection, processing, and batch checks before products reach our customers.',
-    image: certQuality1,
+    id: 'startup-india',
+    title: 'Startup India',
+    description: 'Recognized under the Startup India initiative for innovation and domestic manufacturing.',
+    image: startupIndiaLogo,
   },
 ];
 

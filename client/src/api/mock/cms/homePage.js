@@ -4,11 +4,11 @@ import {
   BRAND_TAGLINE,
   CHUNKS_CATEGORY_BANNER,
   CHUNKS_CATEGORY_BANNER_FALLBACK,
+  POWDER_CATEGORY_BANNER,
+  POWDER_CATEGORY_BANNER_FALLBACK,
   HERO_BANNER_SLIDE_INTERVAL_MS,
   HERO_BANNER_SLIDES,
   HERO_BANNER_TRANSITION_MS,
-  POWDER_CATEGORY_BANNER,
-  POWDER_CATEGORY_BANNER_FALLBACK,
 } from '../../../data/brand.js';
 import {
   WHY_CHOOSE_BENEFITS,
@@ -28,7 +28,7 @@ export function buildHomePage() {
       companyName: COMPANY_NAME,
       titlePrimary: taglinePrimary,
       titleAccent: taglineAccent,
-      description: `Premium freeze-dried fruit snacks & powders from ${BRAND_NAME}. 100% real fruit, zero added sugar, no preservatives — crafted in Miraj, Maharashtra.`,
+      description: `Premium freeze-dried fruit snacks & powders from ${BRAND_NAME}. 100% real fruit, zero added sugar, no preservatives — crafted in Maharashtra, India.`,
       primaryCta: { to: '/shop', label: 'Shop Collection' },
       secondaryCta: { to: '/contact', label: 'Contact Us' },
       banner: {
@@ -43,9 +43,9 @@ export function buildHomePage() {
       cards: [
         {
           slug: 'fruit-snacks',
-          label: 'Chunks/Slices',
+          label: 'Fruit Slices',
           eyebrow: 'Freeze-dried snacks',
-          subline: 'Crunchy fruit slices & cubes · real fruit · no added sugar',
+          subline: 'Crunchy fruit slices · real fruit · no added sugar',
           image: CHUNKS_CATEGORY_BANNER,
           imageFallback: CHUNKS_CATEGORY_BANNER_FALLBACK,
           imageWidth: 'w-[50%] sm:w-[48%] md:w-[46%]',
@@ -55,9 +55,9 @@ export function buildHomePage() {
         },
         {
           slug: 'baking-essentials',
-          label: 'Powder',
+          label: 'Fruit Powder',
           eyebrow: 'Fruit powders',
-          subline: '100% fruit for smoothies, baking & everyday nutrition · 16 flavours',
+          subline: 'Chiku, banana & guava · 20g packs',
           image: POWDER_CATEGORY_BANNER,
           imageFallback: POWDER_CATEGORY_BANNER_FALLBACK,
           imageWidth: 'w-[50%] sm:w-[48%] md:w-[46%]',

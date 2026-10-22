@@ -41,7 +41,5 @@ client/public/catalog/Naturepure-fresh-Powder/
 # --- Internal project docs (not for the repo) ---
 docs/
 
-# --- Unused duplicate / backup assets (not referenced in app code) ---
-client/public/hero/all-products-1.svg
-client/public/about/about-banner1.svg
-client/public/favicon 1.svg
+# --- Archived public assets (moved by scripts/prune-public-images.mjs) ---
+client/unused-public-assets/

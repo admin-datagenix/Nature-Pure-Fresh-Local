@@ -18,6 +18,14 @@ export const STORE_SETTINGS = {
   lowStockThreshold: 5,
   /** Max product thumbnails in shop low-stock strip. */
   lowStockShopDisplayCount: 3,
+  /** Product cards / PDP — discount badges and “% off” chips */
+  showSaleTags: false,
+  /** “Only N left” urgency chips on product imagery */
+  showLowStockBadges: false,
+  /** Star ratings on cards, PDP, cart, and checkout lines */
+  showProductRatings: false,
+  /** Account orders — PDF invoice download */
+  showDownloadInvoice: false,
 };
 
 /** API response cache TTL (ms) — category / product list */

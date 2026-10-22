@@ -38,30 +38,46 @@ export default function HeroBanner({ banner }) {
   if (!count) return null;
 
   const brandName = brand?.name || 'NaturePure Fresh';
+  const transitionMs = motionReduced ? 0 : config.transitionMs || 800;
 
   return (
-    <div className="hero-banner relative mx-auto w-full max-w-[min(100%,42rem)]">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-white/60 sm:aspect-[16/11] lg:aspect-[5/4]">
-        {slides.map((slide, i) => (
-          <img
-            key={slide.src}
-            src={slide.src}
-            alt={slide.alt || brandName}
-            className={cn(
-              'absolute inset-0 h-full w-full object-contain p-2 transition-opacity duration-700',
-              i === index ? 'opacity-100' : 'pointer-events-none opacity-0',
-              slide.blend === 'multiply' && 'mix-blend-multiply'
-            )}
-            style={{
-              transitionDuration: motionReduced ? '0ms' : `${config.transitionMs || 800}ms`,
-            }}
-            loading={i === 0 ? 'eager' : 'lazy'}
-            decoding="async"
-          />
-        ))}
+    <div className="hero-banner hero-banner-slider relative mx-auto w-full max-w-none">
+      <div className="hero-banner-viewport">
+        {slides.map((slide, i) => {
+          const active = i === index;
+          return (
+            <figure
+              key={slide.src}
+              className={cn(
+                'hero-banner-slide hero-banner-slide--motion',
+                active ? 'z-10 opacity-100' : 'z-0 opacity-0'
+              )}
+              style={{ transitionDuration: `${transitionMs}ms` }}
+              aria-hidden={!active}
+            >
+              <img
+                src={slide.src}
+                alt={active ? slide.alt || brandName : ''}
+                className={cn(
+                  'hero-banner-slide__img',
+                  slide.blend === 'multiply' && 'hero-banner-img',
+                  slide.blend === 'lighten' && 'hero-banner-img--lighten'
+                )}
+                style={
+                  slide.objectPosition
+                    ? { objectPosition: slide.objectPosition }
+                    : undefined
+                }
+                loading={i === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchPriority={i === 0 ? 'high' : 'auto'}
+              />
+            </figure>
+          );
+        })}
       </div>
       {count > 1 && (
-        <div className="mt-3 flex justify-center gap-2">
+        <div className="mt-3 flex justify-center gap-2 lg:mt-4">
           {slides.map((_, i) => (
             <button
               key={i}

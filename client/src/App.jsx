@@ -9,6 +9,7 @@ const ProductPage = lazy(() => import('./pages/ProductPage'));
 const CartPage = lazy(() => import('./pages/CartPage'));
 const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ProcessPage = lazy(() => import('./pages/ProcessPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const ReturnPolicyPage = lazy(() => import('./pages/ReturnPolicyPage'));
 const RefundPolicyPage = lazy(() => import('./pages/RefundPolicyPage'));
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/order-confirmation/:orderId" element={<OrderConfirmationPage />} />
           <Route path="/track-order/:orderId" element={<TrackOrderPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/process" element={<ProcessPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/return-policy" element={<ReturnPolicyPage />} />
           <Route path="/refund-policy" element={<RefundPolicyPage />} />

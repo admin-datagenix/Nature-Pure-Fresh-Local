@@ -5,7 +5,7 @@ export const BRAND_NAME = 'NaturePure Fresh';
 export const BRAND_TAGLINE = 'Nourishing Life, Naturally!';
 export const BRAND_SHORT_TAGLINE = 'Real Fruit. Real Crunch. Nothing Added.';
 
-export const BRAND_EMAIL = 'naturepure.in@gmail.com';
+export const BRAND_EMAIL = 'info@naturepurefresh.com';
 export const BRAND_PHONE = '+91 77679 70227';
 export const BRAND_PHONE_RAW = '7767970227';
 export const BRAND_WEBSITE = 'www.naturepurefresh.com';
@@ -20,7 +20,7 @@ export const BRAND_ADDRESS = {
 };
 
 export const BRAND_ADDRESS_FULL =
-  '116/3, 117 F-1, Shivaji Road Square Inn Apt, Near Hira Hotel, Miraj, Sangli, Maharashtra — 416410';
+  '116/3, 117 F-1, Shivaji Road Square Inn Apt, Near Hira Hotel, Miraj, Sangli, Maharashtra, India — 416410';
 
 /**
  * Map pin — Shivaji Road, near Hira Hotel, Miraj (416410).
@@ -34,34 +34,33 @@ export const BRAND_MAP_EMBED_URL =
 export const BRAND_MAP_OPEN_URL =
   `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(BRAND_MAP_QUERY)}`;
 
-/** Primary brand mark — public/brand/logo-3.png */
+/** Primary brand mark — public/brand/logo-3.png (do not overwrite via image sync) */
 export const BRAND_LOGO_PUBLIC = '/brand/logo-3.png';
 /** Intrinsic pixel size of logo-3.png (wide lockup) */
 export const BRAND_LOGO_PIXELS = { width: 4000, height: 1028 };
 /** Default logo (navbar, footer, auth, inline lockups) */
 export const BRAND_LOGO = BRAND_LOGO_PUBLIC;
 export const BRAND_LOGO_NAVBAR = BRAND_LOGO_PUBLIC;
+/** Footer lockup — public/brand/footer-logo.png (on primary background, no card) */
+export const BRAND_LOGO_FOOTER = '/brand/footer-logo.png';
+export const BRAND_LOGO_FOOTER_PIXELS = { width: 5704, height: 2044 };
 
 /** About page lockup */
 export const ABOUT_PAGE_LOGO = BRAND_LOGO_PUBLIC;
 
-/** About story section — illustration (public/about/about-img.png) */
 export const ABOUT_STORY_IMAGE = '/about/about-img.png';
 
-/** About page heading — product banner (public/about/about-banner.svg) */
-export const ABOUT_PAGE_BANNER = '/about/about-banner.svg';
+/** About page header — same ratio as shop banners (1920×700) */
+export const ABOUT_PAGE_BANNER = '/about/about-us-img.png';
 
-/** About — quality standards illustration (public/about/quality.svg) */
 export const ABOUT_QUALITY_IMAGE = '/about/quality.svg';
 
-/** Shop category heading banners (1920×700 art in public/) */
+/** Shop category heading banners (1920×700 art) */
 export const ALL_PRODUCTS_SHOP_BANNER = '/hero/all-products.svg';
 
-/** Fruit snacks / chunks — shop header (public/products/snacks/) */
 export const CHUNKS_SHOP_BANNER = '/products/snacks/chunks-banner.svg';
 export const CHUNKS_SHOP_BANNER_FALLBACK = '/products/snacks/chunks-banner-1.svg';
 
-/** Powder category shop header */
 export const POWDER_SHOP_BANNER = '/products/powder/powder-banner.svg';
 
 export const SHOP_CATEGORY_BANNERS = {
@@ -79,40 +78,28 @@ export const HERO_BANNER_SLIDE_INTERVAL_MS = 3000;
 /** Slide transition duration (ms) — keep below interval */
 export const HERO_BANNER_TRANSITION_MS = 800;
 
-export const HERO_BANNER_SLIDES = [
-  {
-    src: '/hero/Banner-img-1.svg',
-    alt: `${BRAND_NAME} freeze-dried fruit powders and snacks`,
-    blend: 'multiply',
-  },
-  {
-    src: '/hero/Banner-img-2.svg',
-    alt: `${BRAND_NAME} premium freeze-dried fruit range`,
-    blend: 'multiply',
-  },
-  {
-    src: '/hero/Banner-img-3.svg',
-    alt: `${BRAND_NAME} natural fruit products — orchard to pack`,
-    blend: 'multiply',
-  },
-  {
-    src: '/hero/Banner-img-4.svg',
-    alt: `${BRAND_NAME} natural fruit products — orchard to pack`,
-    blend: 'multiply',
-  },
+const HERO_BANNER_ALTS = [
+  `${BRAND_NAME} freeze-dried fruit powders and snacks`,
+  `${BRAND_NAME} premium freeze-dried fruit range`,
+  `${BRAND_NAME} natural fruit products — orchard to pack`,
+  `${BRAND_NAME} freeze-dried fruit chunks and variety packs`,
+  `${BRAND_NAME} wholesome fruit snacks made in India`,
 ];
 
-/** @deprecated use HERO_BANNER_SLIDES */
+/** Sequence: public/hero/Banner-img-1.svg … Banner-img-5.svg (unchanged) */
+export const HERO_BANNER_SLIDES = [1, 2, 3, 4, 5].map((n, i) => ({
+  src: `/hero/Banner-img-${n}.svg`,
+  alt: HERO_BANNER_ALTS[i] || `${BRAND_NAME} homepage banner`,
+  objectPosition: 'center bottom',
+}));
+
 export const HERO_BANNER_IMAGE = HERO_BANNER_SLIDES[0].src;
 export const HERO_BANNER_FALLBACKS = ['/hero/Banner-img-1.svg'];
 
-/** Homepage Shop By Category — chunks card art (public/products/snacks/) */
-
-export const CHUNKS_CATEGORY_BANNER = '/products/snacks/chunks-category-img.svg';
-export const CHUNKS_CATEGORY_BANNER_FALLBACK = CHUNKS_SHOP_BANNER;
-export const POWDER_CATEGORY_BANNER = '/hero/powder-category-banner.jpg';
-/** Keep JPG-only — SVG fallback showed transparent areas in category cards */
-export const POWDER_CATEGORY_BANNER_FALLBACK = '/hero/powder-category-banner.jpg';
+export const CHUNKS_CATEGORY_BANNER = '/hero/category-chunks.png';
+export const CHUNKS_CATEGORY_BANNER_FALLBACK = CHUNKS_CATEGORY_BANNER;
+export const POWDER_CATEGORY_BANNER = '/hero/category-powder.png';
+export const POWDER_CATEGORY_BANNER_FALLBACK = POWDER_CATEGORY_BANNER;
 
 export const CATALOG_PDF = {
   snacks: '/catalog/naturepure-snacks.pdf',

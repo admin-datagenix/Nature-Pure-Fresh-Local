@@ -3,6 +3,10 @@
 export function getProductWeightOptions(product) {
   if (!product) return [];
 
+  if (Array.isArray(product.weight_options) && product.weight_options.length > 0) {
+    return product.weight_options;
+  }
+
   const baseGrams = product.weight_grams || 50;
   const basePrice = product.price ?? 0;
   const baseCompare = product.compare_at_price ?? null;
@@ -15,6 +19,12 @@ export function getProductWeightOptions(product) {
     String(product.id || '').startsWith('powder')
   ) {
     sizes = [50, 100, 200];
+  } else if (
+    product.category_slug === 'fruit-snacks' ||
+    product.category_slug === 'baking-essentials'
+  ) {
+    const g = product.weight_grams || 20;
+    return [{ grams: g, price: product.price ?? 220, compare_at_price: product.compare_at_price }];
   } else {
     sizes = [30, 50, 100];
   }

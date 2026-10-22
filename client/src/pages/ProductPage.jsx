@@ -2,29 +2,32 @@ import { useEffect, useRef, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import { useCart } from '../context/CartContext';
-import { formatPrice, getBadgeClass, PRODUCT_BADGE_CHIP } from '../utils/helpers';
+import { formatPrice } from '../utils/helpers';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
-import ProductVisual from '../components/ui/ProductVisual';
-import StarRating from '../components/ui/StarRating';
 import SimilarProducts from '../components/product/SimilarProducts';
-import ProductReturnPolicy from '../components/product/ProductReturnPolicy';
-import { cn } from '../lib/cn';
+import ProductDescriptionBlock from '../components/product/ProductDescriptionBlock';
 import ProductWeightPicker from '../components/product/ProductWeightPicker';
+import ProductDetailGallery from '../components/product/detail/ProductDetailGallery';
+import ProductDetailMobileHeader from '../components/product/detail/ProductDetailMobileHeader';
+import ProductInfoSection from '../components/product/detail/ProductInfoSection';
+import QuantitySelector from '../components/product/detail/QuantitySelector';
 import { findWeightOption, getProductWeightOptions } from '../utils/productVariants';
 import { notifySuccess } from '../utils/notify';
-import { BuyNowIcon, CartIcon } from '../components/ui/CommerceIcons';
+import { isAuthRequiredError } from '../utils/authErrors';
+import { CartIcon } from '../components/ui/CommerceIcons';
+import ComingSoonButton from '../components/product/ComingSoonButton';
 import WishlistButton from '../components/wishlist/WishlistButton';
 import { getProductImage } from '../data/productImages';
 import { buildFlyPayload } from '../utils/flyToCart';
-
+import { cn } from '../lib/cn';
 const BTN_PRIMARY =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-primary bg-primary px-5 py-2.5 text-base font-semibold text-white shadow-[0_2px_8px_rgba(41,70,51,0.18)] transition hover:bg-primary-light disabled:cursor-not-allowed disabled:opacity-55';
+  'neo-btn inline-flex min-h-11 items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55';
 
 const BTN_OUTLINE =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-primary bg-white px-5 py-2.5 text-base font-semibold text-primary transition hover:bg-cream-dark disabled:cursor-not-allowed disabled:opacity-55';
+  'neo-btn-ghost inline-flex min-h-11 items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55';
 
 const BTN_ICON =
-  'inline-flex size-11 shrink-0 items-center justify-center rounded-md border border-sage/70 bg-white text-primary transition hover:border-primary/50 hover:bg-cream-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+  'inline-flex size-10 shrink-0 items-center justify-center rounded-md border border-sage/70 bg-white text-primary transition hover:border-primary/50 hover:bg-cream-dark active:scale-95';
 
 export default function ProductPage() {
   const { slug } = useParams();
@@ -35,6 +38,11 @@ export default function ProductPage() {
   const [selectedGrams, setSelectedGrams] = useState(null);
   const [loading, setLoading] = useState(true);
   const galleryImageRef = useRef(null);
+
+  useEffect(() => {
+    document.body.classList.add('product-detail-page');
+    return () => document.body.classList.remove('product-detail-page');
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -52,6 +60,7 @@ export default function ProductPage() {
   }, [slug]);
 
   const handleShare = async () => {
+    if (!product) return;
     const url = window.location.href;
     try {
       if (navigator.share) {
@@ -68,7 +77,6 @@ export default function ProductPage() {
   const weightOptions = product?.weight_options || getProductWeightOptions(product);
   const selectedOption =
     findWeightOption(product, selectedGrams) || weightOptions[0] || null;
-
   const handleAddToCart = async (event) => {
     if (!selectedOption || !product) return;
     const sourceElement =
@@ -78,16 +86,17 @@ export default function ProductPage() {
       sourceElement,
       event,
     });
-    await addItem(product.id, qty, {
-      weightGrams: selectedOption.grams,
-      ...(fly ? { fly } : {}),
-    });
-  };
-
-  const handleBuyNow = async () => {
-    if (!selectedOption) return;
-    await addItem(product.id, qty, { weightGrams: selectedOption.grams });
-    navigate('/checkout', { state: { checkoutProductIds: [product.id] } });
+    try {
+      const updated = await addItem(product.id, qty, {
+        weightGrams: selectedOption.grams,
+        variantId: selectedOption.variant_id,
+        slug: product.slug,
+        ...(fly ? { fly } : {}),
+      });
+      if (updated) navigate('/cart');
+    } catch (err) {
+      if (!isAuthRequiredError(err)) throw err;
+    }
   };
 
   if (loading) return <LoadingSpinner />;
@@ -100,185 +109,162 @@ export default function ProductPage() {
     );
   }
 
+  const purchaseDisabled = cartLoading || !selectedOption;
+
   return (
-    <div className="pb-12 pt-4 md:pt-5">
-      <div className="site-container">
-        <div className="flex items-center justify-between gap-3">
+    <div className="product-detail-page-root bg-cream pb-10 lg:pb-12 lg:pt-4">
+      <ProductDetailMobileHeader
+        className="lg:hidden"
+        product={product}
+        galleryImageRef={galleryImageRef}
+        imageSrc={getProductImage(product)}
+      />
+
+      <div className="site-container max-lg:px-0 lg:px-4">
+        <div className="hidden lg:mb-4 lg:block">
           <BackToShopLink />
-          <div className="flex items-center gap-2 md:hidden">
-            <WishlistButton
-              productId={product.id}
-              productName={product.name}
-              variant="toolbar"
-              imageSrc={getProductImage(product)}
-              flySourceRef={galleryImageRef}
-            />
-            <button
-              type="button"
-              onClick={handleShare}
-              className={BTN_ICON}
-              aria-label="Share product"
-            >
-              <ShareIcon className="h-[1.125rem] w-[1.125rem]" />
-            </button>
-          </div>
         </div>
 
-        <div className="product-detail-hero mt-4 grid w-full grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-2 lg:gap-x-6 lg:gap-y-5 xl:gap-x-8">
-          <div className="product-detail-gallery lg:sticky lg:top-[5.25rem]">
-            <div className="product-detail-gallery__frame">
-              <div className="product-detail-gallery__canvas" ref={galleryImageRef}>
-                <ProductVisual product={product} hoverZoom compactMedia />
-              </div>
-            </div>
-          </div>
+        <div className="product-detail-hero grid w-full grid-cols-1 items-start gap-2.5 max-lg:gap-3 lg:gap-6 xl:gap-8 lg:grid-cols-2">
+          <ProductDetailGallery
+            product={product}
+            imageRef={galleryImageRef}
+            className="max-lg:mx-0 lg:sticky lg:top-[5.25rem]"
+          />
 
-          <div className="product-detail-info flex flex-col items-start">
-            {product.badge && (
-              <span className={cn('mb-1', PRODUCT_BADGE_CHIP, getBadgeClass(product.badge))}>
-                {product.badge}
-              </span>
-            )}
-
-            <h1 className="font-heading font-semibold text-primary">{product.name}</h1>
-
-            {product.rating > 0 && (
-              <div className="product-detail-section product-detail-rating flex flex-wrap items-center gap-2 text-muted">
-                <StarRating rating={product.rating} total={5} size="md" />
-                <span className="font-medium text-primary">{product.rating}</span>
-                <span>({product.review_count})</span>
-              </div>
-            )}
-
-            <div className="product-detail-section flex flex-wrap items-baseline gap-x-2 gap-y-1">
-              <span className="product-detail-price font-bold text-primary">
-                {formatPrice(selectedOption?.price ?? product.price)}
-              </span>
-              {(selectedOption?.compare_at_price ?? product.compare_at_price) && (
-                <span className="product-detail-meta text-muted line-through">
-                  {formatPrice(selectedOption?.compare_at_price ?? product.compare_at_price)}
-                </span>
-              )}
-              {selectedOption && (
-                <span className="product-detail-meta text-muted">{selectedOption.grams}g</span>
-              )}
-            </div>
-
-            <p className="product-detail-section w-full leading-[1.7] text-muted">
-              {product.short_description}
-            </p>
-
-            {(product.tags || []).length > 0 && (
-              <div className="product-detail-section flex flex-wrap gap-1.5">
-                {(product.tags || []).slice(0, 4).map((tag) => (
-                  <span
-                    key={tag}
-                    className="label-chip bg-secondary/12 px-2.5 py-1 text-xs font-semibold text-secondary sm:text-sm"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <ProductWeightPicker
-              options={weightOptions}
-              value={selectedGrams}
-              onChange={setSelectedGrams}
-              className="product-detail-section !mt-0"
+          <div
+            className="flex flex-col max-lg:mx-0 max-lg:w-full max-lg:rounded-none max-lg:border-0 max-lg:border-t max-lg:border-sage/35 max-lg:bg-white max-lg:px-4 max-lg:pb-3 max-lg:pt-3 max-lg:shadow-none"
+          >
+            <ProductInfoSection
+              product={product}
+              selectedOption={selectedOption}
+              showBadgeOnImage={!!product.badge}
             />
 
-            <div className="product-detail-section flex w-full max-w-2xl flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:max-w-none">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wide text-primary sm:sr-only">
-                  Qty
-                </span>
-                <div className="neo-qty !rounded-md">
-                  <button
-                    type="button"
-                    onClick={() => setQty(Math.max(1, qty - 1))}
-                    className="w-9 text-base text-primary hover:bg-cream"
-                    aria-label="Decrease quantity"
-                  >
-                    −
-                  </button>
-                  <span className="flex w-10 items-center justify-center text-base font-semibold">{qty}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQty(Math.min(99, qty + 1))}
-                    className="w-9 text-base text-primary hover:bg-cream"
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
-                </div>
+            <div className="mt-3 lg:mt-4">
+              <div
+                className="product-detail-mobile-controls grid w-full grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 lg:hidden"
+              >
+                <ProductWeightPicker
+                  options={weightOptions}
+                  value={selectedGrams}
+                  onChange={setSelectedGrams}
+                  inline
+                  className="!mt-0 min-w-0"
+                />
+                <QuantitySelector
+                  qty={qty}
+                  onChange={setQty}
+                  disabled={cartLoading}
+                  compact
+                  className="justify-self-end"
+                />
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <ProductWeightPicker
+                options={weightOptions}
+                value={selectedGrams}
+                onChange={setSelectedGrams}
+                className="!mt-0 hidden lg:block"
+              />
+
+              <QuantitySelector
+                qty={qty}
+                onChange={setQty}
+                disabled={cartLoading}
+                className="mt-4 hidden lg:flex"
+              />
+
+              <div className="mt-2.5 grid grid-cols-2 gap-2 lg:hidden">
                 <button
                   type="button"
                   onClick={handleAddToCart}
-                  disabled={cartLoading || !selectedOption}
-                  className={BTN_PRIMARY}
+                  disabled={purchaseDisabled}
+                  className={cn(
+                    BTN_PRIMARY,
+                    'min-h-10 w-full min-w-0 whitespace-nowrap px-2 py-2 text-[0.8125rem] font-semibold'
+                  )}
                 >
-                  <CartIcon className="h-[1.125rem] w-[1.125rem] shrink-0" />
-                  <span>Add to cart</span>
+                  <CartIcon className="h-4 w-4 shrink-0" />
+                  Add to cart
                 </button>
-                <button
-                  type="button"
-                  onClick={handleBuyNow}
-                  disabled={cartLoading || !selectedOption}
-                  className={BTN_OUTLINE}
-                >
-                  <BuyNowIcon className="h-[1.125rem] w-[1.125rem] shrink-0" />
-                  <span>Buy now</span>
-                </button>
-                <WishlistButton
-                  productId={product.id}
-                  productName={product.name}
-                  variant="toolbar"
-                  imageSrc={getProductImage(product)}
-                  flySourceRef={galleryImageRef}
-                />
-                <button
-                  type="button"
-                  onClick={handleShare}
-                  className={cn(BTN_ICON, 'hidden md:inline-flex')}
-                  aria-label="Share product"
-                  title="Share"
-                >
-                  <ShareIcon className="h-[1.125rem] w-[1.125rem]" />
-                </button>
+                <ComingSoonButton compact className="w-full min-w-0" />
               </div>
             </div>
 
-            <ul className="product-detail-section product-detail-trust flex w-full flex-wrap gap-x-4 gap-y-2 leading-relaxed text-muted">
-              <li>In stock · {product.stock} left</li>
-              <li>Free shipping over ₹999</li>
-              <li>Made in India</li>
-            </ul>
+            <div className="mt-4 hidden flex-wrap items-center gap-2 lg:flex">
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={purchaseDisabled}
+                className={BTN_PRIMARY}
+              >
+                <CartIcon className="h-[1.125rem] w-[1.125rem] shrink-0" />
+                Add to cart
+              </button>
+              <ComingSoonButton />
+              <WishlistButton
+                productId={product.id}
+                productSlug={product.slug}
+                productName={product.name}
+                variant="toolbar"
+                imageSrc={getProductImage(product)}
+                flySourceRef={galleryImageRef}
+                weightGrams={selectedOption?.grams}
+                variantId={selectedOption?.variant_id}
+              />
+              <button
+                type="button"
+                onClick={handleShare}
+                className={BTN_ICON}
+                aria-label="Share product"
+                title="Share"
+              >
+                <ShareIcon className="h-[1.125rem] w-[1.125rem]" />
+              </button>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <p className="flex min-w-0 items-center gap-2 text-sm text-muted sm:text-base">
+                <TruckIcon className="h-4 w-4 shrink-0 text-secondary" aria-hidden />
+                Free shipping over {formatPrice(999)}
+              </p>
+              <button
+                type="button"
+                onClick={handleShare}
+                className={cn(
+                  BTN_ICON,
+                  'flex h-9 w-9 shrink-0 items-center justify-center p-0 lg:hidden'
+                )}
+                aria-label="Share product"
+                title="Share"
+              >
+                <ShareIcon className="h-4 w-4" />
+              </button>
+            </div>
+
           </div>
         </div>
 
-        {product.description && (
-          <div className="mt-10 border-t border-sage/40 pt-8">
-            <h2 className="font-heading text-xl font-semibold text-primary">Product description</h2>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-muted">{product.description}</p>
-          </div>
-        )}
+        <section
+          className="mt-5 border-t border-sage/35 bg-white px-4 py-5 max-lg:mx-0 lg:mt-8 lg:rounded-lg lg:border lg:border-sage/40 lg:px-6 lg:py-6"
+          aria-labelledby="product-description-heading"
+        >
+          <ProductDescriptionBlock product={product} fullText />
+        </section>
 
-        <ProductReturnPolicy />
-        <SimilarProducts product={product} limit={4} />
+        <div className="mt-6 px-4 lg:mt-8 lg:px-0">
+          <SimilarProducts product={product} limit={4} dense />
+        </div>
       </div>
 
       {product.reviews?.length > 0 && (
-        <div className="site-container py-12">
-          <h2 className="mb-5 font-heading text-xl text-primary">Customer reviews</h2>
-          <div className="flex flex-col gap-4">
+        <div className="site-container px-4 py-8 lg:px-4 lg:py-12">
+          <h2 className="mb-4 font-heading text-lg text-primary lg:text-xl">Customer reviews</h2>
+          <div className="flex flex-col gap-3">
             {product.reviews.map((r) => (
               <div key={r.id} className="rounded-md border border-sage/50 bg-white p-4">
-                <StarRating rating={r.rating} total={5} size="sm" />
-                <p className="my-2 text-sm italic">&ldquo;{r.comment}&rdquo;</p>
+                <p className="text-sm italic text-muted">&ldquo;{r.comment}&rdquo;</p>
                 <span className="text-xs text-muted">
                   — {r.user_name}
                   {r.is_verified ? ' (Verified)' : ''}
@@ -289,6 +275,17 @@ export default function ProductPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function TruckIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
+      <path d="M3 6h11v9H3V6z" strokeLinejoin="round" />
+      <path d="M14 9h4l3 3v3h-7V9z" strokeLinejoin="round" />
+      <circle cx="7" cy="18" r="2" />
+      <circle cx="17" cy="18" r="2" />
+    </svg>
   );
 }
 
@@ -312,11 +309,9 @@ function BackToShopLink() {
   return (
     <Link
       to="/shop"
-      className="inline-flex items-center gap-1 rounded-sm border border-sage/70 bg-white px-2.5 py-1 text-xs font-medium text-primary transition hover:border-primary/40 hover:bg-cream-dark"
+      className="inline-flex items-center gap-1 rounded-md border border-sage/70 bg-white px-2.5 py-1 text-xs font-medium text-primary transition hover:border-primary/40 hover:bg-cream-dark"
     >
-      <span className="text-[0.7rem] leading-none" aria-hidden="true">
-        ←
-      </span>
+      <span className="text-[0.7rem] leading-none" aria-hidden="true">←</span>
       Back to shop
     </Link>
   );

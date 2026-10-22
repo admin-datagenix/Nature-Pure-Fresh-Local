@@ -4,11 +4,7 @@ import { cachedFetch, categoriesCacheKey } from '../api/apiCache';
 
 const CATEGORY_EMOJI = {
   'fruit-snacks': '🍓',
-  'tropical-mix': '🥭',
-  'berry-boost': '🫐',
-  combos: '🎁',
   'baking-essentials': '🫙',
-  'kids-snacks': '🍌',
 };
 
 export function categoryEmoji(slug) {

@@ -27,7 +27,6 @@ export default function HomePage() {
         <Reveal variant="up" delay={0}>
           <ProductGrid
             title={section.title}
-            subtitle={section.subtitle}
             limit={section.limit}
             shopLink={section.shopLink}
             shopLinkLabel={section.shopLinkLabel}

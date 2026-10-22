@@ -1,6 +1,11 @@
 import { STORE_SETTINGS } from '../config/storeSettings.js';
 
+export function isOutOfStockUiEnabled() {
+  return STORE_SETTINGS.showOutOfStockUi !== false;
+}
+
 export function isOutOfStock(product) {
+  if (!isOutOfStockUiEnabled()) return false;
   return (product?.stock ?? 0) <= 0;
 }
 
@@ -30,6 +35,7 @@ export function pickLowStockProducts(products, limit = STORE_SETTINGS.lowStockSh
 }
 
 export function shouldShowLowStockBadge(product) {
+  if (STORE_SETTINGS.showLowStockBadges === false) return false;
   return isLowStock(product) && !isOutOfStock(product);
 }
 

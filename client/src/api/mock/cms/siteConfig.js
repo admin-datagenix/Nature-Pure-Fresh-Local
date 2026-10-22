@@ -46,13 +46,15 @@ export function buildSiteConfig() {
     navigation: {
       headerAfterShop: [
         { to: '/about', label: 'About Us' },
+        { to: '/process', label: 'Process' },
         { to: '/contact', label: 'Contact Us' },
       ],
       footer: {
-        Learn: [
+        Shop: [
+          { to: '/', label: 'Home' },
           { to: '/about', label: 'About Us' },
-          { to: '/about#process', label: 'Our Process' },
-          { to: '/about#recipes', label: 'Recipes' },
+          { to: '/process', label: 'Our Process' },
+          { to: '/shop', label: 'Shop' },
         ],
         Support: [
           { to: '/contact', label: 'Contact' },

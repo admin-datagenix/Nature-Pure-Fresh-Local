@@ -7,7 +7,7 @@ import BrandLogo from '../ui/BrandLogo';
 import { useSiteConfig } from '../../context/SiteConfigContext';
 import { CART_FLY_TARGET_ID, WISHLIST_FLY_TARGET_ID } from '../../utils/flyToCart';
 import ProfileMenu from './ProfileMenu';
-import useCategoryTree, { categoryEmoji } from '../../hooks/useCategoryTree';
+import useCategoryTree from '../../hooks/useCategoryTree';
 import { cn } from '../../lib/cn';
 
 
@@ -59,6 +59,14 @@ function ChevronIcon({ className }) {
   );
 }
 
+function MenuIcon({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 const navLinkClass = ({ isActive }) =>
   cn(
     'relative px-1 py-2 text-base font-medium transition-colors',
@@ -69,7 +77,7 @@ const navLinkClass = ({ isActive }) =>
 export default function Header() {
   const { cart } = useCart();
   const { count: wishlistCount } = useWishlist();
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const navigate = useNavigate();
   const shopRef = useRef(null);
@@ -143,12 +151,12 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full max-w-full overflow-visible border-b border-sage/50 bg-white shadow-[0_4px_20px_rgba(41,70,51,0.05)]">
-      <div className="site-container flex items-center gap-3 py-3 md:gap-5 lg:py-3.5">
+      <div className="site-container flex min-w-0 items-center gap-2 py-3 sm:gap-3 md:gap-5 lg:py-3.5">
         <BrandLogo
           bareLogo
           logoOnly
           src={assets?.logoNavbar}
-          className="navbar-brand-slot"
+          className="navbar-brand-slot min-w-0 max-w-[46vw] sm:max-w-none"
           imageClassName="navbar-brand-logo"
         />
 
@@ -202,15 +210,7 @@ export default function Header() {
                       onClick={() => setShopOpen(false)}
                       className="rounded-xl px-3 py-2.5 transition hover:bg-cream"
                     >
-                      <span className="flex items-center gap-2 text-sm font-semibold text-primary">
-                        <span aria-hidden="true">{categoryEmoji(cat.slug)}</span>
-                        {cat.name}
-                      </span>
-                      {cat.description ? (
-                        <span className="mt-0.5 line-clamp-2 block text-xs leading-snug text-muted">
-                          {cat.description}
-                        </span>
-                      ) : null}
+                      <span className="block text-sm font-semibold text-primary">{cat.name}</span>
                     </Link>
                   ))}
                 </div>
@@ -225,7 +225,7 @@ export default function Header() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+        <div className="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2">
           <form onSubmit={handleSearch} className="hidden md:block">
             <div className="flex w-[180px] items-center gap-2 rounded-full border border-sage/50 bg-cream px-4 py-2.5 lg:w-[240px] xl:w-[280px]">
               <SearchIcon className="h-4 w-4 shrink-0 text-muted" />
@@ -239,48 +239,54 @@ export default function Header() {
             </div>
           </form>
 
-          <Link
-            id={CART_FLY_TARGET_ID}
-            to="/cart"
-            data-cart-fly-target=""
-            className={cn(
-              'relative rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary',
-              cartBounce && 'cart-fly-target-bounce'
-            )}
-            aria-label="Shopping cart"
-          >
-            <CartIcon className="h-5 w-5" data-cart-fly-icon />
-            <span
+          {isAuthenticated && (
+            <Link
+              id={CART_FLY_TARGET_ID}
+              to="/cart"
+              data-cart-fly-target=""
               className={cn(
-                'absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white',
-                countPop && 'cart-count-pop'
+                'relative rounded-full p-2 text-primary/80 transition hover:bg-cream hover:text-primary sm:p-2.5',
+                cartBounce && 'cart-fly-target-bounce'
               )}
+              aria-label="Shopping cart"
             >
-              {cart.itemCount}
-            </span>
-          </Link>
+              <CartIcon className="h-5 w-5" data-cart-fly-icon />
+              {cart.items.length > 0 && (
+                <span
+                  className={cn(
+                    'absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white',
+                    countPop && 'cart-count-pop'
+                  )}
+                >
+                  {cart.items.length}
+                </span>
+              )}
+            </Link>
+          )}
 
-          <Link
-            id={WISHLIST_FLY_TARGET_ID}
-            to="/wishlist"
-            className={cn(
-              'relative rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary',
-              wishlistBounce && 'cart-fly-target-bounce'
-            )}
-            aria-label="Wishlist"
-          >
-            <HeartIcon className="h-5 w-5" data-wishlist-fly-icon />
-            {wishlistCount > 0 && (
-              <span
-                className={cn(
-                  'absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white',
-                  wishlistCountPop && 'cart-count-pop'
-                )}
-              >
-                {wishlistCount > 99 ? '99+' : wishlistCount}
-              </span>
-            )}
-          </Link>
+          {isAuthenticated && (
+            <Link
+              id={WISHLIST_FLY_TARGET_ID}
+              to="/wishlist"
+              className={cn(
+                'relative rounded-full p-2 text-primary/80 transition hover:bg-cream hover:text-primary sm:p-2.5',
+                wishlistBounce && 'cart-fly-target-bounce'
+              )}
+              aria-label="Wishlist"
+            >
+              <HeartIcon className="h-5 w-5" data-wishlist-fly-icon />
+              {wishlistCount > 0 && (
+                <span
+                  className={cn(
+                    'absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-secondary px-1 text-[0.62rem] font-bold text-white',
+                    wishlistCountPop && 'cart-count-pop'
+                  )}
+                >
+                  {wishlistCount > 99 ? '99+' : wishlistCount}
+                </span>
+              )}
+            </Link>
+          )}
 
           {isAuthenticated ? (
             <ProfileMenu
@@ -291,7 +297,7 @@ export default function Header() {
           ) : (
             <Link
               to={accountPath}
-              className="rounded-full p-2.5 text-primary/80 transition hover:bg-cream hover:text-primary"
+              className="rounded-full p-2 text-primary/80 transition hover:bg-cream hover:text-primary sm:p-2.5"
               aria-label={accountLabel}
             >
               <UserIcon className="h-5 w-5" />
@@ -301,11 +307,11 @@ export default function Header() {
           <button
             type="button"
             onClick={() => setMobileOpen((o) => !o)}
-            className="rounded-full p-2 text-xl text-primary lg:hidden"
-            aria-label="Open menu"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-sage/55 bg-cream text-primary lg:hidden"
+            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileOpen}
           >
-            ☰
+            <MenuIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -313,120 +319,37 @@ export default function Header() {
       <div
         className={cn(
           'overflow-hidden border-t border-sage/50 bg-white transition-all duration-300 lg:hidden',
-          mobileOpen ? 'max-h-[520px] opacity-100' : 'max-h-0 opacity-0'
+          mobileOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
         )}
       >
-        <div className="space-y-1 px-4 py-4">
-          <form onSubmit={handleSearch} className="mb-4">
-            <div className="flex items-center gap-2 rounded-full bg-cream px-4 py-2.5">
-              <SearchIcon className="h-4 w-4 text-muted" />
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products…"
-                className="w-full bg-transparent text-sm text-primary outline-none"
-              />
-            </div>
-          </form>
-
-          <NavLink
-            to="/"
-            end
-            onClick={() => setMobileOpen(false)}
-            className={({ isActive }) =>
-              cn(
-                'block rounded-xl px-3 py-2.5 text-base font-medium',
-                isActive ? 'bg-cream text-primary' : 'text-primary/75'
-              )
-            }
-          >
-            Home
-          </NavLink>
-
-          <Link
-            to="/shop"
-            onClick={() => setMobileOpen(false)}
-            className="block rounded-xl px-3 py-2.5 text-base font-medium text-primary/75 hover:bg-cream"
-          >
-            Shop
-          </Link>
-
-          {isAuthenticated ? (
-            <div className="mb-3 rounded-xl border border-sage/45 bg-cream/50 px-3 py-3">
-              <p className="text-sm font-bold text-primary">Hello {(user?.name || 'User').split(/\s+/)[0]}</p>
-              <Link
-                to="/account"
-                state={{ section: 'orders' }}
-                onClick={() => setMobileOpen(false)}
-                className="mt-2 block text-sm font-semibold text-secondary"
-              >
-                My Orders
-              </Link>
-              <button
-                type="button"
-                onClick={async () => {
-                  setMobileOpen(false);
-                  await logout();
-                  navigate('/');
-                }}
-                className="mt-2 block text-sm font-semibold text-primary/80"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <Link
-              to="/login"
-              onClick={() => setMobileOpen(false)}
-              className="mb-2 block rounded-xl px-3 py-2.5 text-base font-medium text-primary/75 hover:bg-cream"
-            >
-              Login
-            </Link>
-          )}
-
-          <Link
-            to="/wishlist"
-            onClick={() => setMobileOpen(false)}
-            className="flex items-center justify-between rounded-xl px-3 py-2.5 text-base font-medium text-primary/75 hover:bg-cream"
-          >
-            Wishlist
-            {wishlistCount > 0 && (
-              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-bold text-white">
-                {wishlistCount}
-              </span>
-            )}
-          </Link>
-
-          {navLinksAfterShop.map((link) => (
+        <nav className="space-y-1 px-4 py-4" aria-label="Mobile navigation">
+          {[
+            { to: '/', label: 'Home', end: true },
+            { to: '/shop', label: 'Shop' },
+            ...(navLinksAfterShop.length
+              ? navLinksAfterShop.map((link) => ({ to: link.to, label: link.label }))
+              : [
+                  { to: '/about', label: 'About Us' },
+                  { to: '/process', label: 'Process' },
+                  { to: '/contact', label: 'Contact Us' },
+                ]),
+          ].map((item) => (
             <NavLink
-              key={link.to}
-              to={link.to}
+              key={item.to}
+              to={item.to}
+              end={item.end}
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 cn(
                   'block rounded-xl px-3 py-2.5 text-base font-medium',
-                  isActive ? 'bg-cream text-primary' : 'text-primary/75'
+                  isActive ? 'bg-cream text-primary' : 'text-primary/75 hover:bg-cream/80'
                 )
               }
             >
-              {link.label}
+              {item.label}
             </NavLink>
           ))}
-
-          <p className="px-3 pt-2 text-xs font-semibold uppercase tracking-wider text-muted">Categories</p>
-          {categories.map((cat) => (
-            <Link
-              key={cat.slug}
-              to={`/shop/${cat.slug}`}
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-primary/75 hover:bg-cream"
-            >
-              <span aria-hidden="true">{categoryEmoji(cat.slug)}</span>
-              {cat.name}
-            </Link>
-          ))}
-        </div>
+        </nav>
       </div>
     </header>
   );

@@ -1,3 +1,5 @@
+import { STORE_SETTINGS } from '../config/storeSettings.js';
+
 export {
   BRAND_NAME,
   BRAND_TAGLINE,
@@ -18,6 +20,14 @@ export function getDiscountPercent(product) {
   const compare = Number(product?.compare_at_price);
   if (!price || !compare || compare <= price) return 0;
   return Math.round(((compare - price) / compare) * 100);
+}
+
+export function shouldShowSaleTags() {
+  return STORE_SETTINGS.showSaleTags !== false;
+}
+
+export function shouldShowProductRatings() {
+  return STORE_SETTINGS.showProductRatings !== false;
 }
 
 /** Compact promo badge — always `w-fit` so flex parents do not stretch it full width */
@@ -87,41 +97,23 @@ export const REASONS_TO_LOVE = [
 export const SHOP_GOALS = [
   {
     slug: 'fruit-snacks',
-    title: 'Daily Snacking',
-    description: 'Light, crunchy fruit for everyday guilt-free munching',
+    title: 'Fruit Slices',
+    description: 'Light, crunchy freeze-dried fruit for everyday guilt-free munching',
     emoji: '🍓',
     bg: '#DDE7DC',
   },
   {
-    slug: 'tropical-mix',
-    title: 'Tropical Energy',
-    description: 'Mango, pineapple & sun-kissed orchard flavours',
-    emoji: '🥭',
-    bg: '#F0E8DC',
-  },
-  {
-    slug: 'berry-boost',
-    title: 'Berry Boost',
-    description: 'Antioxidant-rich berries for a healthy pick-me-up',
-    emoji: '🫐',
-    bg: '#EDE6E2',
-  },
-  {
-    slug: 'combos',
-    title: 'Variety Packs',
-    description: 'Curated combos to try every flavour at great value',
-    emoji: '🎁',
+    slug: 'baking-essentials',
+    title: 'Fruit Powder',
+    description: '100% fruit powders for smoothies, baking and nutrition',
+    emoji: '🫙',
     bg: '#EEF2EA',
   },
 ];
 
 export const POPULAR_CATEGORIES = [
-  { slug: 'fruit-snacks', label: 'Fruit Snacks', emoji: '🍓' },
-  { slug: 'combos', label: 'Combos', emoji: '🎁' },
-  { slug: 'baking-essentials', label: 'Fruit Powders', emoji: '🫙' },
-  { slug: 'berry-boost', label: 'Berries', emoji: '🫐' },
-  { slug: 'tropical-mix', label: 'Tropical', emoji: '🥭' },
-  { slug: 'kids-snacks', label: 'Kids Snacks', emoji: '🍌' },
+  { slug: 'fruit-snacks', label: 'Fruit Slices', emoji: '🍓' },
+  { slug: 'baking-essentials', label: 'Fruit Powder', emoji: '🫙' },
 ];
 
 export const PROCESS_STEPS = [
@@ -184,11 +176,8 @@ export const RECIPES = [
 ];
 
 export const CATEGORY_TABS = [
-  { slug: 'fruit-snacks', label: 'Fruit Snacks' },
-  { slug: 'baking-essentials', label: 'Fruit Powders' },
-  { slug: 'combos', label: 'Combos' },
-  { slug: 'berry-boost', label: 'Berries' },
-  { slug: 'tropical-mix', label: 'Tropical' },
+  { slug: 'fruit-snacks', label: 'Fruit Slices' },
+  { slug: 'baking-essentials', label: 'Fruit Powder' },
 ];
 
 export const FLAVOUR_SLUGS = [

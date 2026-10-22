@@ -51,7 +51,7 @@ export default function Hero({ content }) {
               >
                 <Link
                   to={hero.primaryCta?.to || '/shop'}
-                  className="neo-btn group inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-base font-semibold"
+                  className="neo-btn group inline-flex items-center gap-2.5 px-7 py-3.5 text-base font-semibold"
                 >
                   {hero.primaryCta?.label || 'Shop Collection'}
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 transition group-hover:translate-x-0.5">
@@ -60,7 +60,7 @@ export default function Hero({ content }) {
                 </Link>
                 <Link
                   to={hero.secondaryCta?.to || '/contact'}
-                  className="neo-btn-ghost inline-flex items-center rounded-full px-7 py-3.5 text-base font-semibold"
+                  className="neo-btn-ghost inline-flex items-center px-7 py-3.5 text-base font-semibold"
                 >
                   {hero.secondaryCta?.label || 'Contact Us'}
                 </Link>
@@ -73,10 +73,10 @@ export default function Hero({ content }) {
             </div>
 
             <div
-              className="animate-fade-up flex min-h-[360px] min-w-0 items-center justify-center sm:min-h-[480px] lg:min-h-[560px] xl:min-h-[600px]"
+              className="animate-fade-up flex min-w-0 items-end justify-center lg:items-center lg:justify-end"
               style={{ animationDelay: '0.2s' }}
             >
-              <div className="hero-banner-column w-full max-w-full">
+              <div className="hero-banner-column w-full min-w-0">
                 <HeroBanner banner={hero.banner} />
               </div>
             </div>

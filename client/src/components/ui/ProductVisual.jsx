@@ -29,6 +29,7 @@ export default function ProductVisual({
   plain = false,
   hideBadge = false,
   hoverZoom = false,
+  
   compactMedia = false,
 }) {
   const type = getProductType(product);

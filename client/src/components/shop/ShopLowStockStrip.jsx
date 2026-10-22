@@ -1,11 +1,12 @@
 import { Link } from 'react-router-dom';
 import { getProductImage } from '../../data/productImages';
 import { getProductCardTone } from '../../utils/productLayout';
+import { STORE_SETTINGS } from '../../config/storeSettings';
 import { lowStockLabel } from '../../utils/stockDisplay';
 import { formatPrice } from '../../utils/helpers';
 
 export default function ShopLowStockStrip({ products }) {
-  if (!products?.length) return null;
+  if (STORE_SETTINGS.showLowStockBadges === false || !products?.length) return null;
 
   return (
     <section

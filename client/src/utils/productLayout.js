@@ -1,11 +1,11 @@
 /** Shared product grids and Fresh Nature card palettes */
 
 export const PRODUCT_GRID_CLASS =
-  'grid grid-cols-2 items-stretch gap-5 sm:gap-6 md:grid-cols-3 lg:grid-cols-4 [&>*]:min-w-0 [&>*]:h-full';
+  'grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 md:gap-6 lg:grid-cols-4 [&>*]:min-w-0 [&>*]:h-full';
 
-/** Shop listing: 3 equal columns (matches product card reference with filter sidebar) */
+/** Shop listing: 1 col mobile, 2 tablet, 3 desktop with filter sidebar */
 export const PRODUCT_GRID_SHOP_CLASS =
-  'grid grid-cols-2 items-stretch gap-5 sm:gap-6 md:grid-cols-3 [&>*]:min-w-0 [&>*]:h-full';
+  'grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 sm:gap-5 md:grid-cols-3 md:gap-6 [&>*]:min-w-0 [&>*]:h-full';
 
 export const PRODUCT_LIST_SHOP_CLASS = 'flex flex-col gap-4 sm:gap-5 [&>*]:min-w-0';
 

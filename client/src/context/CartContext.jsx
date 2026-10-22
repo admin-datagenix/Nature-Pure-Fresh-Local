@@ -6,7 +6,7 @@ import {
   saveStoredSelection,
   syncSelectionWithCart,
 } from '../utils/cartSelection';
-import { notifyError, notifySuccess } from '../utils/notify';
+import { notifyError, notifyInfo, notifySuccess } from '../utils/notify';
 import { startCartFly } from '../utils/flyToCart';
 
 const CartContext = createContext(null);
@@ -114,6 +114,11 @@ export function CartProvider({ children }) {
     }
   }, [cart.items]);
 
+  const removeItem = useCallback(
+    (productId) => updateItem(productId, 0),
+    [updateItem]
+  );
+
   const clear = useCallback(async () => {
     try {
       const res = await api.clearCart();
@@ -140,6 +145,7 @@ export function CartProvider({ children }) {
         loading,
         addItem,
         updateItem,
+        removeItem,
         clear,
         refreshCart,
       }}

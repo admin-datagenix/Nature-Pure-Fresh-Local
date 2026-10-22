@@ -1,8 +1,16 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { formatPrice, getDiscountPercent, getBadgeClass, PRODUCT_BADGE_CHIP } from '../../utils/helpers';
+import {
+  formatPrice,
+  getDiscountPercent,
+  getBadgeClass,
+  PRODUCT_BADGE_CHIP,
+  shouldShowProductRatings,
+  shouldShowSaleTags,
+} from '../../utils/helpers';
 import { getProductCardTone, PRODUCT_CARD_WIDTH } from '../../utils/productLayout';
 import { getProductImage } from '../../data/productImages';
+import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 import { cn } from '../../lib/cn';
 import StarRating from '../ui/StarRating';
@@ -16,7 +24,7 @@ import {
   shouldShowOutOfStockBadge,
 } from '../../utils/stockDisplay';
 import { buildFlyPayload } from '../../utils/flyToCart';
-
+import { isAuthRequiredError } from '../../utils/authErrors';
 export default function ProductCard({
   product,
   className,
@@ -25,7 +33,10 @@ export default function ProductCard({
   onSelect,
   layout = 'grid',
 }) {
-  const { addItem, loading } = useCart();
+  const { isAuthenticated } = useAuth();
+  const { cart, addItem, updateItem, loading } = useCart();
+  const cartLine = cart.items.find((i) => i.product_id === product.id);
+  const cartQty = cartLine?.quantity ?? 0;
   const [added, setAdded] = useState(false);
   const imageRef = useRef(null);
   const imageWrapRef = useRef(null);
@@ -40,13 +51,28 @@ export default function ProductCard({
       sourceElement: imageRef.current ?? imageWrapRef.current ?? e.currentTarget,
       event: e,
     });
-    await addItem(product.id, 1, fly ? { fly } : {});
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+    try {
+      await addItem(product.id, 1, fly ? { fly, slug: product.slug } : { slug: product.slug });
+      setAdded(true);
+      setTimeout(() => setAdded(false), 1200);
+    } catch (err) {
+      if (!isAuthRequiredError(err)) throw err;
+    }
+  };
+
+  const handleQtyChange = (e, nextQty) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (outOfStock || loading) return;
+    if (nextQty <= 0) updateItem(product.id, 0);
+    else if (cartQty > 0) updateItem(product.id, nextQty);
+    else addItem(product.id, nextQty, { slug: product.slug });
   };
 
   const shortName = product.name.replace(/^Freeze Dried /i, '');
-  const discount = getDiscountPercent(product);
+  const showSale = shouldShowSaleTags();
+  const showRatings = shouldShowProductRatings();
+  const discount = showSale ? getDiscountPercent(product) : 0;
   const imageSrc = getProductImage(product);
   const isList = layout === 'list';
 
@@ -106,8 +132,7 @@ export default function ProductCard({
                 {lowStockLabel(product)}
               </span>
             )}
-
-            <div className="relative flex h-full w-full items-center justify-center p-3 sm:p-4">
+            <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
               <img
                 ref={imageRef}
                 src={imageSrc}
@@ -115,8 +140,8 @@ export default function ProductCard({
                 loading="lazy"
                 decoding="async"
                 className={cn(
-                  'max-h-full max-w-full object-contain transition duration-500 ease-out',
-                  selected ? 'scale-[1.05]' : 'group-hover:scale-[1.05]',
+                  'max-h-full max-w-full object-contain transition duration-500 ease-out will-change-transform',
+                  selected ? 'scale-[1.32]' : 'scale-[1.28] group-hover:scale-[1.34]',
                   outOfStock && 'opacity-85 saturate-[0.65]'
                 )}
               />
@@ -135,19 +160,22 @@ export default function ProductCard({
           </div>
         </Link>
 
-        <div
-          className={cn(
-            'absolute z-20',
-            isList ? 'bottom-5 right-5' : 'bottom-5 right-5'
-          )}
-        >
-          <WishlistButton
-            productId={product.id}
-            productName={product.name}
-            imageSrc={imageSrc}
-            flySourceRef={imageRef}
-          />
-        </div>
+        {isAuthenticated && (
+          <div
+            className={cn(
+              'absolute z-20',
+              isList ? 'bottom-5 right-5' : 'bottom-5 right-5'
+            )}
+          >
+            <WishlistButton
+              productId={product.id}
+              productSlug={product.slug}
+              productName={product.name}
+              imageSrc={imageSrc}
+              flySourceRef={imageRef}
+            />
+          </div>
+        )}
       </div>
 
       <div
@@ -172,7 +200,7 @@ export default function ProductCard({
           )}
 
           <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1">
-            {product.rating > 0 && (
+            {showRatings && product.rating > 0 && (
               <p className="flex items-center gap-1 text-[0.7rem] text-muted">
                 <StarRating rating={product.rating} size="sm" />
                 <span className="font-medium text-primary/80">{product.rating}</span>
@@ -196,22 +224,52 @@ export default function ProductCard({
               )}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleAdd}
-            disabled={loading || outOfStock}
-            aria-label={`Add ${shortName} to cart`}
-            style={!added ? { backgroundColor: getProductCardTone(product) } : undefined}
-            className={cn(
-              'flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition duration-200 sm:h-10 sm:w-10',
-              added
-                ? 'bg-success text-white shadow-[0_6px_14px_rgba(74,124,89,0.22)]'
-                : 'border border-sage/55 text-primary shadow-[0_2px_8px_rgba(41,70,51,0.06)] hover:border-primary hover:bg-primary hover:text-white',
-              outOfStock && 'cursor-not-allowed opacity-40 hover:border-sage/55 hover:bg-transparent hover:text-primary'
-            )}
-          >
-            {added ? <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5" /> : <CartIcon className="h-4 w-4 sm:h-5 sm:w-5" />}
-          </button>
+          {isAuthenticated &&
+            (cartQty > 0 ? (
+              <div
+                className="neo-qty !h-9 shrink-0 !rounded-full sm:!h-10"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  onClick={(e) => handleQtyChange(e, cartQty - 1)}
+                  disabled={loading}
+                  className="flex h-9 w-8 items-center justify-center text-primary sm:h-10 sm:w-9"
+                  aria-label="Decrease quantity"
+                >
+                  −
+                </button>
+                <span className="flex w-7 items-center justify-center text-sm font-bold text-primary sm:w-8">
+                  {cartQty}
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => handleQtyChange(e, cartQty + 1)}
+                  disabled={loading}
+                  className="flex h-9 w-8 items-center justify-center text-primary sm:h-10 sm:w-9"
+                  aria-label="Increase quantity"
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleAdd}
+                disabled={loading || outOfStock}
+                aria-label={`Add ${shortName} to cart`}
+                style={!added ? { backgroundColor: getProductCardTone(product) } : undefined}
+                className={cn(
+                  'flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition duration-200 sm:h-10 sm:w-10',
+                  added
+                    ? 'bg-success text-white shadow-[0_6px_14px_rgba(74,124,89,0.22)]'
+                    : 'border border-sage/55 text-primary shadow-[0_2px_8px_rgba(41,70,51,0.06)] hover:border-primary hover:bg-primary hover:text-white',
+                  outOfStock && 'cursor-not-allowed opacity-40 hover:border-sage/55 hover:bg-transparent hover:text-primary'
+                )}
+              >
+                {added ? <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5" /> : <CartIcon className="h-4 w-4 sm:h-5 sm:w-5" />}
+              </button>
+            ))}
         </div>
       </div>
     </article>

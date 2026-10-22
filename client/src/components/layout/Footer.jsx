@@ -1,32 +1,54 @@
 import { Link } from 'react-router-dom';
 import BrandLogo from '../ui/BrandLogo';
-import useCategoryTree from '../../hooks/useCategoryTree';
+import { BRAND_LOGO_FOOTER, BRAND_LOGO_FOOTER_PIXELS } from '../../data/brand';
 import { useSiteConfig } from '../../context/SiteConfigContext';
 
-export default function Footer() {
-  const { categories } = useCategoryTree();
-  const { brand, contact, assets, catalogPdfs, navigation } = useSiteConfig();
-  const footerLinks = navigation?.footer || { Learn: [], Support: [] };
+const DEFAULT_FOOTER_SHOP = [
+  { to: '/', label: 'Home' },
+  { to: '/about', label: 'About Us' },
+  { to: '/shop', label: 'Shop' },
+];
 
-  const footerSections = {
-    Shop: [{ to: '/shop', label: 'All Products' }, ...categories.map((c) => ({ to: `/shop/${c.slug}`, label: c.name }))],
-    ...footerLinks,
-  };
+export default function Footer() {
+  const { brand, contact, catalogPdfs, navigation } = useSiteConfig();
+  const footerLinks = navigation?.footer || { Shop: DEFAULT_FOOTER_SHOP, Support: [] };
+
+  const shopLinks = footerLinks.Shop?.length ? footerLinks.Shop : DEFAULT_FOOTER_SHOP;
+  const supportLinks = footerLinks.Support || [];
+
+  const navSection = (title, links) => (
+    <div>
+      <h4 className="mb-3 font-heading text-base text-white">{title}</h4>
+      <ul className="flex flex-col gap-2">
+        {links.map((link) => (
+          <li key={link.to}>
+            <Link to={link.to} className="text-sm opacity-70 transition hover:opacity-100">
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 
   return (
     <footer className="mt-auto w-full max-w-full overflow-x-hidden bg-primary py-10 text-white/85 md:py-11">
       <div className="site-container">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.5fr_repeat(3,1fr)]">
+        <div className="grid gap-8 lg:grid-cols-[1.5fr_repeat(2,1fr)]">
           <div>
-            <div className="mb-3 inline-flex rounded-xl bg-white p-2.5 shadow-[0_4px_16px_rgba(0,0,0,0.12)]">
+            <div className="mb-4">
               <BrandLogo
                 logoOnly
-                src={assets?.logoNavbar}
-                className="mb-0"
-                imageClassName="h-10 w-auto max-w-[min(100%,15rem)] object-contain object-left sm:h-11 sm:max-w-[17rem]"
+                src={BRAND_LOGO_FOOTER}
+                imageWidth={BRAND_LOGO_FOOTER_PIXELS.width}
+                imageHeight={BRAND_LOGO_FOOTER_PIXELS.height}
+                className="mb-0 !items-start"
+                imageClassName="h-12 w-auto max-w-[min(100%,18rem)] bg-transparent object-contain object-left sm:h-14 sm:max-w-[21rem] md:h-16 md:max-w-[24rem]"
               />
             </div>
-            <p className="mb-4 max-w-xs text-xs leading-relaxed opacity-65">{contact?.addressFull}</p>
+            <p className="mb-4 max-w-md text-sm leading-relaxed opacity-80 sm:text-[0.9375rem] md:text-base">
+              {contact?.addressFull}
+            </p>
 
             <div className="mb-4 space-y-1 text-sm">
               <a href={`mailto:${contact?.email}`} className="block opacity-80 transition hover:opacity-100">
@@ -60,36 +82,28 @@ export default function Footer() {
             </div>
           </div>
 
-          {Object.entries(footerSections).map(([title, links]) => (
-            <div key={title}>
-              <h4 className="mb-3 font-heading text-base text-white">{title}</h4>
-              <ul className="flex flex-col gap-2">
-                {links.map((link) => (
-                  <li key={link.to}>
-                    <Link to={link.to} className="text-sm opacity-70 transition hover:opacity-100">
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          <div className="col-span-full grid grid-cols-2 gap-x-8 gap-y-6 text-left lg:col-span-2 lg:gap-8">
+            <div>{navSection('Shop', shopLinks)}</div>
+            <div className="self-start">{navSection('Support', supportLinks)}</div>
+          </div>
         </div>
 
         <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-white/15 pt-5 text-xs opacity-60">
           <p>
             © {new Date().getFullYear()} {brand?.companyName} ({brand?.name}). Made in India 🇮🇳
           </p>
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            <Link to="/return-policy" className="transition hover:opacity-100">
-              Return Policy
-            </Link>
-            <Link to="/refund-policy" className="transition hover:opacity-100">
-              Refund Policy
-            </Link>
-            <span>FSSAI Certified</span>
-            <span>Secure Payments</span>
-          </div>
+          <p className="mr-2 sm:mr-6 md:mr-10">
+            Designed and Developed by{' '}
+            <a
+              href="https://www.datagenix.in/"
+              target="_blank"
+              rel="noopener noreferrer"
+              color="white"
+              className="font-semibold text-white/90 underline-offset-2 transition hover:text-white hover:underline"
+            >
+              <b>DatagenixAi</b>
+            </a>
+          </p>
         </div>
       </div>
     </footer>
