@@ -164,6 +164,11 @@ collectFromSourceScan(used);
 addStorefrontProductViews(used);
 addCertificateAssets(used);
 
+// Homepage hero carousel (brand.js HERO_BANNER_SLIDES)
+for (let n = 1; n <= 5; n += 1) {
+  addUsed(used, `/hero/Banner-img-${n}.svg`);
+}
+
 // Always keep common static files if present
 addUsed(used, '/robots.txt');
 addUsed(used, '/catalog/naturepure-snacks.pdf');
