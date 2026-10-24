@@ -1,10 +1,5 @@
 /** NaturePure Fresh LLP — official brand & contact details */
 
-import {
-  MARKETING_CHUNKS_SHOP_BANNER,
-  MARKETING_POWDER_SHOP_BANNER,
-} from './marketingImages.js';
-
 export const COMPANY_NAME = 'NaturePure Fresh LLP';
 export const BRAND_NAME = 'NaturePure Fresh';
 export const BRAND_TAGLINE = 'Nourishing Life, Naturally!';
@@ -67,19 +62,15 @@ export const ALL_PRODUCTS_SHOP_BANNER = '/hero/all-products.svg';
 export const CHUNKS_SHOP_BANNER = '/products/snacks/chunks-banner.svg';
 export const CHUNKS_SHOP_BANNER_FALLBACK = '/products/snacks/chunks-banner-1.svg';
 
-/** Marketing posters from public/design/ (SVG kept as fallback on banner error). */
-export const POWDER_SHOP_BANNER = MARKETING_POWDER_SHOP_BANNER;
-export const CHUNKS_SHOP_BANNER_MARKETING = MARKETING_CHUNKS_SHOP_BANNER;
-export const POWDER_SHOP_BANNER_FALLBACK = '/products/powder/powder-banner.svg';
+export const POWDER_SHOP_BANNER = '/products/powder/powder-banner.svg';
 
 export const SHOP_CATEGORY_BANNERS = {
-  'fruit-snacks': MARKETING_CHUNKS_SHOP_BANNER,
-  'baking-essentials': MARKETING_POWDER_SHOP_BANNER,
+  'fruit-snacks': CHUNKS_SHOP_BANNER,
+  'baking-essentials': POWDER_SHOP_BANNER,
 };
 
 export const SHOP_CATEGORY_BANNER_FALLBACKS = {
   'fruit-snacks': CHUNKS_SHOP_BANNER_FALLBACK,
-  'baking-essentials': POWDER_SHOP_BANNER_FALLBACK,
 };
 
 /** Homepage “Shop by category” cards — prefer transparent PNG on card gradient */
