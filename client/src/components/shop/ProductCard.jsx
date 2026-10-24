@@ -10,8 +10,8 @@ import {
 } from '../../utils/helpers';
 import { getProductCardTone, PRODUCT_CARD_WIDTH } from '../../utils/productLayout';
 import { getProductImage } from '../../data/productImages';
-import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useAuthGate } from '../../hooks/useAuthGate';
 import { cn } from '../../lib/cn';
 import StarRating from '../ui/StarRating';
 import { CartIcon, CheckIcon } from '../ui/CommerceIcons';
@@ -24,7 +24,6 @@ import {
   shouldShowOutOfStockBadge,
 } from '../../utils/stockDisplay';
 import { buildFlyPayload } from '../../utils/flyToCart';
-import { isAuthRequiredError } from '../../utils/authErrors';
 export default function ProductCard({
   product,
   className,
@@ -33,7 +32,7 @@ export default function ProductCard({
   onSelect,
   layout = 'grid',
 }) {
-  const { isAuthenticated } = useAuth();
+  const { requireAuth } = useAuthGate();
   const { cart, addItem, updateItem, loading } = useCart();
   const cartLine = cart.items.find((i) => i.product_id === product.id);
   const cartQty = cartLine?.quantity ?? 0;
@@ -46,6 +45,7 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     if (outOfStock) return;
+    if (!requireAuth('cart')) return;
     const fly = buildFlyPayload({
       imageSrc: getProductImage(product),
       sourceElement: imageRef.current ?? imageWrapRef.current ?? e.currentTarget,
@@ -55,8 +55,8 @@ export default function ProductCard({
       await addItem(product.id, 1, fly ? { fly, slug: product.slug } : { slug: product.slug });
       setAdded(true);
       setTimeout(() => setAdded(false), 1200);
-    } catch (err) {
-      if (!isAuthRequiredError(err)) throw err;
+    } catch {
+      /* CartContext shows error toast */
     }
   };
 
@@ -64,6 +64,7 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     if (outOfStock || loading) return;
+    if (!requireAuth('cart')) return;
     if (nextQty <= 0) updateItem(product.id, 0);
     else if (cartQty > 0) updateItem(product.id, nextQty);
     else addItem(product.id, nextQty, { slug: product.slug });
@@ -79,9 +80,9 @@ export default function ProductCard({
   return (
     <article
       className={cn(
-        'group flex h-full min-w-0 overflow-hidden rounded-2xl border border-sage/55 bg-white',
+        'product-card-interactive group flex h-full min-w-0 overflow-hidden rounded-2xl border border-sage/55 bg-white',
         isList ? 'flex-row items-stretch' : 'flex-col',
-        'shadow-[0_6px_20px_rgba(41,70,51,0.05)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(41,70,51,0.08)]',
+        'shadow-[0_6px_20px_rgba(41,70,51,0.05)]',
         selected && 'border-primary/35 ring-1 ring-primary/15',
         outOfStockCardClass(product),
         compact && PRODUCT_CARD_WIDTH,
@@ -92,7 +93,7 @@ export default function ProductCard({
       <div
         className={cn(
           'relative shrink-0',
-          isList ? 'w-[34%] max-w-[148px] p-3 sm:max-w-[168px]' : 'p-3 pb-0'
+          isList ? 'w-[34%] max-w-[148px] p-2.5 sm:max-w-[168px]' : 'p-2.5 pb-0 sm:p-3 sm:pb-0'
         )}
       >
         <Link
@@ -103,13 +104,13 @@ export default function ProductCard({
           <div
             ref={imageWrapRef}
             className={cn(
-              'relative overflow-hidden rounded-xl border border-sage/40 transition duration-300',
+              'product-card__media relative overflow-hidden rounded-xl border border-sage/40',
               isList ? 'aspect-square h-full min-h-[112px]' : 'aspect-square w-full',
               selected ? 'border-primary/50' : 'group-hover:border-secondary/70'
             )}
             style={{ backgroundColor: getProductCardTone(product) }}
           >
-            <div className="pointer-events-none absolute inset-[18%] rounded-full bg-white/30 blur-2xl" />
+            <div className="pointer-events-none absolute inset-[26%] rounded-full bg-white/15 blur-lg opacity-70" />
 
             {product.badge && (
               <span
@@ -132,7 +133,7 @@ export default function ProductCard({
                 {lowStockLabel(product)}
               </span>
             )}
-            <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
               <img
                 ref={imageRef}
                 src={imageSrc}
@@ -140,8 +141,9 @@ export default function ProductCard({
                 loading="lazy"
                 decoding="async"
                 className={cn(
-                  'max-h-full max-w-full object-contain transition duration-500 ease-out will-change-transform',
-                  selected ? 'scale-[1.32]' : 'scale-[1.28] group-hover:scale-[1.34]',
+                  'product-card__image object-contain',
+                  isList && 'product-card__image--list',
+                  selected && 'product-card__image--selected',
                   outOfStock && 'opacity-85 saturate-[0.65]'
                 )}
               />
@@ -160,22 +162,20 @@ export default function ProductCard({
           </div>
         </Link>
 
-        {isAuthenticated && (
-          <div
-            className={cn(
-              'absolute z-20',
-              isList ? 'bottom-5 right-5' : 'bottom-5 right-5'
-            )}
-          >
-            <WishlistButton
-              productId={product.id}
-              productSlug={product.slug}
-              productName={product.name}
-              imageSrc={imageSrc}
-              flySourceRef={imageRef}
-            />
-          </div>
-        )}
+        <div
+          className={cn(
+            'absolute z-20',
+            isList ? 'bottom-5 right-5' : 'bottom-5 right-5'
+          )}
+        >
+          <WishlistButton
+            productId={product.id}
+            productSlug={product.slug}
+            productName={product.name}
+            imageSrc={imageSrc}
+            flySourceRef={imageRef}
+          />
+        </div>
       </div>
 
       <div
@@ -224,8 +224,7 @@ export default function ProductCard({
               )}
             </div>
           </div>
-          {isAuthenticated &&
-            (cartQty > 0 ? (
+          {cartQty > 0 ? (
               <div
                 className="neo-qty !h-9 shrink-0 !rounded-full sm:!h-10"
                 onClick={(e) => e.stopPropagation()}
@@ -269,7 +268,7 @@ export default function ProductCard({
               >
                 {added ? <CheckIcon className="h-4 w-4 sm:h-5 sm:w-5" /> : <CartIcon className="h-4 w-4 sm:h-5 sm:w-5" />}
               </button>
-            ))}
+            )}
         </div>
       </div>
     </article>

@@ -1,14 +1,5 @@
 import { useState } from 'react';
-import {
-  BRAND_EMAIL,
-  BRAND_MAP_EMBED_URL,
-  BRAND_MAP_OPEN_URL,
-  BRAND_PHONE,
-  BRAND_PHONE_RAW,
-  BRAND_WEBSITE,
-  BRAND_WEBSITE_URL,
-  CATALOG_PDF,
-} from '../data/brand';
+import { CATALOG_PDF } from '../data/brand';
 import Reveal from '../components/ui/Reveal';
 import NeoSelect from '../components/ui/NeoSelect';
 import { notifyError, notifySuccess } from '../utils/notify';
@@ -64,14 +55,13 @@ export default function ContactPage() {
           <h1 className="mt-2 font-heading text-3xl font-semibold text-primary md:text-4xl">Contact Us</h1>
         </Reveal>
 
-        <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10">
-          <Reveal variant="left">
+        <div className="mx-auto mt-10 max-w-2xl">
+          <Reveal variant="up">
             <form
               onSubmit={handleSubmit}
               className="rounded-[1.25rem] border border-sage/55 bg-white p-6 shadow-[0_8px_28px_rgba(41,70,51,0.06)] md:p-8"
             >
               <h2 className="font-heading text-xl font-semibold text-primary">Send a message</h2>
-              {/* <p className="mt-1 text-sm text-muted">Fields marked with * are required.</p> */}
 
               <div className="mt-6 space-y-4">
                 <label className="block">
@@ -84,7 +74,7 @@ export default function ContactPage() {
                     onChange={handleChange}
                     className="neo-input mt-1.5 w-full px-4 py-2.5 text-base"
                     autoComplete="name"
-                    placeholder="e.g. Rahul Patil"
+                    placeholder="Enter your name"
                   />
                 </label>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -98,7 +88,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       className="neo-input mt-1.5 w-full px-4 py-2.5 text-base"
                       autoComplete="email"
-                      placeholder="you@email.com"
+                      placeholder="Enter your email"
                     />
                   </label>
                   <label className="block">
@@ -110,7 +100,7 @@ export default function ContactPage() {
                       onChange={handleChange}
                       className="neo-input mt-1.5 w-full px-4 py-2.5 text-base"
                       autoComplete="tel"
-                      placeholder="+91 98765 43210"
+                      placeholder="Enter your phone number"
                     />
                   </label>
                 </div>
@@ -140,7 +130,7 @@ export default function ContactPage() {
                     value={form.message}
                     onChange={handleChange}
                     className="neo-input neo-textarea mt-1.5 w-full px-4 py-3 text-base"
-                    placeholder="Tell us how we can help…"
+                    placeholder="Enter your message"
                   />
                 </label>
               </div>
@@ -157,7 +147,7 @@ export default function ContactPage() {
               </button>
             </form>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
               <a
                 href={CATALOG_PDF.snacks}
                 target="_blank"
@@ -176,69 +166,8 @@ export default function ContactPage() {
               </a>
             </div>
           </Reveal>
-
-          <Reveal variant="right" delay={80} className="space-y-5">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <ContactCard label="Email" href={`mailto:${BRAND_EMAIL}`}>
-                {BRAND_EMAIL}
-              </ContactCard>
-              <ContactCard label="Phone / WhatsApp" href={`https://wa.me/91${BRAND_PHONE_RAW}`}>
-                {BRAND_PHONE}
-              </ContactCard>
-              <ContactCard label="Website" href={BRAND_WEBSITE_URL} external>
-                {BRAND_WEBSITE}
-              </ContactCard>
-              <ContactCard label="Hours">Mon–Sat, 10 AM – 6 PM IST</ContactCard>
-            </div>
-
-            <div className="overflow-hidden rounded-[1.25rem] border border-sage/55 bg-white shadow-[0_8px_28px_rgba(41,70,51,0.06)]">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-sage/45 px-4 py-3 md:px-5">
-                <h2 className="font-heading text-lg font-semibold text-primary">Our location</h2>
-                <a
-                  href={BRAND_MAP_OPEN_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-medium text-primary underline underline-offset-2"
-                >
-                  Get directions
-                </a>
-              </div>
-              <div className="relative aspect-[4/3] min-h-[220px] w-full bg-cream-dark sm:min-h-[260px]">
-                <iframe
-                  title="NaturePure Fresh office on Google Maps"
-                  src={BRAND_MAP_EMBED_URL}
-                  className="absolute inset-0 h-full w-full border-0"
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  allowFullScreen
-                />
-              </div>
-            </div>
-          </Reveal>
         </div>
       </div>
     </div>
-  );
-}
-
-function ContactCard({ label, href, external, children }) {
-  const inner = (
-    <div className="h-full rounded-[1rem] border border-sage/50 bg-white p-4 shadow-[0_4px_16px_rgba(41,70,51,0.04)]">
-      <strong className="block text-sm font-semibold text-primary">{label}</strong>
-      <span className="mt-1 block text-sm leading-relaxed text-muted">{children}</span>
-    </div>
-  );
-
-  if (!href) return inner;
-
-  return (
-    <a
-      href={href}
-      target={external || href.startsWith('http') ? '_blank' : undefined}
-      rel={external || href.startsWith('http') ? 'noopener noreferrer' : undefined}
-      className="block transition hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(41,70,51,0.08)]"
-    >
-      {inner}
-    </a>
   );
 }

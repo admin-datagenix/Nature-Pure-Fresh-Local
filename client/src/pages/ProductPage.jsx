@@ -13,7 +13,7 @@ import ProductInfoSection from '../components/product/detail/ProductInfoSection'
 import QuantitySelector from '../components/product/detail/QuantitySelector';
 import { findWeightOption, getProductWeightOptions } from '../utils/productVariants';
 import { notifySuccess } from '../utils/notify';
-import { isAuthRequiredError } from '../utils/authErrors';
+import { useAuthGate } from '../hooks/useAuthGate';
 import { CartIcon } from '../components/ui/CommerceIcons';
 import ComingSoonButton from '../components/product/ComingSoonButton';
 import WishlistButton from '../components/wishlist/WishlistButton';
@@ -32,6 +32,7 @@ const BTN_ICON =
 export default function ProductPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { requireAuth } = useAuthGate();
   const { addItem, loading: cartLoading } = useCart();
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(1);
@@ -79,6 +80,7 @@ export default function ProductPage() {
     findWeightOption(product, selectedGrams) || weightOptions[0] || null;
   const handleAddToCart = async (event) => {
     if (!selectedOption || !product) return;
+    if (!requireAuth('cart')) return;
     const sourceElement =
       galleryImageRef.current?.querySelector('img') ?? galleryImageRef.current;
     const fly = buildFlyPayload({
@@ -94,8 +96,8 @@ export default function ProductPage() {
         ...(fly ? { fly } : {}),
       });
       if (updated) navigate('/cart');
-    } catch (err) {
-      if (!isAuthRequiredError(err)) throw err;
+    } catch {
+      /* CartContext shows error toast */
     }
   };
 

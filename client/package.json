@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run sync:descriptions && vite build",
+    "sync:descriptions": "node scripts/sync-product-descriptions.mjs",
     "preview": "vite preview",
     "sync:images": "node scripts/sync-website-images.mjs",
     "prune:images": "node scripts/prune-public-images.mjs"

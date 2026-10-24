@@ -3,11 +3,19 @@ import { websiteProductGallery } from './websiteImages.js';
 
 function normalizeEntry(entry, fallbackLabel) {
   if (typeof entry === 'string') {
-    return { src: entry, label: fallbackLabel };
+    const isPdf = entry.toLowerCase().endsWith('.pdf');
+    return {
+      src: entry,
+      label: fallbackLabel,
+      mediaType: isPdf ? 'pdf' : 'image',
+    };
   }
+  const src = entry?.src || entry?.url;
+  const isPdf = entry?.mediaType === 'pdf' || String(src || '').toLowerCase().endsWith('.pdf');
   return {
-    src: entry?.src || entry?.url,
+    src,
     label: entry?.label || fallbackLabel,
+    mediaType: isPdf ? 'pdf' : entry?.mediaType || 'image',
   };
 }
 

@@ -1,14 +1,14 @@
 /** Short public paths — synced from `website data/` via scripts/sync-website-images.mjs */
 
 export const BRAND_LOGO = '/brand/logo-3.png';
-export const BRAND_FOOTER_LOGO = '/brand/footer-logo.png';
+export const BRAND_FOOTER_LOGO = '/logo/footer-logo.png';
 
 export const HERO_HOME = '/hero/home.png';
 export const HERO_CATEGORY_CHUNKS = '/hero/category-chunks.png';
 export const HERO_CATEGORY_POWDER = '/hero/category-powder.png';
 
-export const BANNER_CHUNKS = '/products/banners/chunks.png';
-export const BANNER_POWDER = '/products/banners/powder.png';
+export const BANNER_CHUNKS = HERO_CATEGORY_CHUNKS;
+export const BANNER_POWDER = HERO_CATEGORY_POWDER;
 
 export const ABOUT_CASCADE = '/about/fruit-cascade.png';
 
@@ -38,11 +38,25 @@ export const PRODUCT_VIEW_FOLDER_BY_KEY = {
 const CHUNK_FRUITS = Object.keys(PRODUCT_VIEW_FOLDER_BY_KEY);
 const PRODUCT_VIEW_ROOT = '/products/product view';
 const PNG_FORMAT_DIR = 'png format';
+/** Gallery slots: PNG product photos (1–4; -4 = info / nutrition sheet in png format). */
+export const PRODUCT_VIEW_GALLERY_INDICES = [1, 2, 3, 4];
+
+const VIEW_LABELS = { 1: 'Product', 2: 'Packaging', 3: 'Detail', 4: 'Product info' };
 
 export function productViewPngUrl(fruitKey, index) {
   const folder = PRODUCT_VIEW_FOLDER_BY_KEY[fruitKey];
-  if (!folder || !index || index < 1) return null;
+  if (!folder || !index || index < 1 || index > 4) return null;
   return encodeURI(`${PRODUCT_VIEW_ROOT}/${folder}/${PNG_FORMAT_DIR}/${fruitKey}-${index}.png`);
+}
+
+function productViewGalleryEntry(fruitKey, index) {
+  const src = productViewPngUrl(fruitKey, index);
+  if (!src) return null;
+  return {
+    src,
+    label: VIEW_LABELS[index] || `View ${index}`,
+    mediaType: 'image',
+  };
 }
 
 /** Main / card / homepage image — always packaging view (-2) when available. */
@@ -75,36 +89,32 @@ export function powderMainImage(fruit) {
   return productViewPngUrl(fruit, powderPrimaryImageIndex(fruit));
 }
 
-const VIEW_LABELS = { 1: 'Product', 2: 'Packaging', 3: 'Detail' };
-
-/** PDP + stored gallery: main (-2) first, then -1 and -3 only. */
+/** PDP + stored gallery: main (-2) first, then other PNG slots. */
 export function productViewGallery(fruit, primaryIdxOverride = null) {
   if (!fruit || !CHUNK_FRUITS.includes(fruit)) return [];
   const primaryIdx = primaryIdxOverride ?? productPrimaryImageIndex(fruit);
-  const galleryOnly = [1, 2, 3].filter((n) => n !== primaryIdx).sort((a, b) => a - b);
-  const mainSrc = productViewPngUrl(fruit, primaryIdx);
-  if (!mainSrc) return [];
+  const mainEntry = productViewGalleryEntry(fruit, primaryIdx);
+  if (!mainEntry?.src) return [];
+
+  const galleryOnly = PRODUCT_VIEW_GALLERY_INDICES.filter((n) => n !== primaryIdx).sort(
+    (a, b) => a - b
+  );
+
   return [
-    { src: mainSrc, label: VIEW_LABELS[primaryIdx] || 'Product' },
-    ...galleryOnly.map((n) => ({
-      src: productViewPngUrl(fruit, n),
-      label: VIEW_LABELS[n] || `View ${n}`,
-    })),
-  ].filter((v) => v.src);
+    mainEntry,
+    ...galleryOnly.map((n) => productViewGalleryEntry(fruit, n)).filter(Boolean),
+  ];
 }
 
 /** Extra views for product records (excludes main — use with product.image). */
 export function productViewGalleryExtras(fruit, primaryIdxOverride = null) {
   const primaryIdx = primaryIdxOverride ?? productPrimaryImageIndex(fruit);
   if (!fruit || !CHUNK_FRUITS.includes(fruit)) return [];
-  return [1, 2, 3]
+  return PRODUCT_VIEW_GALLERY_INDICES
     .filter((n) => n !== primaryIdx)
     .sort((a, b) => a - b)
-    .map((n) => ({
-      src: productViewPngUrl(fruit, n),
-      label: VIEW_LABELS[n] || `View ${n}`,
-    }))
-    .filter((v) => v.src);
+    .map((n) => productViewGalleryEntry(fruit, n))
+    .filter(Boolean);
 }
 
 export function chunkGallery(fruit) {

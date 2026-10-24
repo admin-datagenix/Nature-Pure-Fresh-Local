@@ -52,13 +52,13 @@ export default function ProductVisual({
             compact={compactMedia}
           />
         ) : (
-          <div className="relative z-[1] flex h-full w-full items-center justify-center p-3 sm:p-4">
+          <div className="relative z-[1] flex h-full w-full items-center justify-center p-1 sm:p-2">
             <img
               src={imageSrc}
               alt={product.name}
               loading="lazy"
               decoding="async"
-              className="max-h-full max-w-full object-contain transition duration-500 ease-out group-hover:scale-[1.06]"
+              className="max-h-full max-w-full object-contain transition duration-500 ease-out scale-[1.28] group-hover:scale-[1.34]"
             />
           </div>
         )}

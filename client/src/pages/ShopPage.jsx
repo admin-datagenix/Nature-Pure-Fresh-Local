@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api/client';
 import ProductCard, { ProductCardSkeleton } from '../components/shop/ProductCard';
+import Reveal from '../components/ui/Reveal';
 import ShopFilters from '../components/shop/ShopFilters';
 import { InsetCategoryBanner } from '../components/shop/CategoryBannerHero';
 import NeoSelect from '../components/ui/NeoSelect';
@@ -297,15 +298,16 @@ export default function ShopPage() {
             ) : (
               <>
                 <div className={listClass}>
-                  {products.map((p) => (
-                    <ProductCard
-                      key={`${p.id}-${p.slug}`}
-                      product={p}
-                      layout="grid"
-                      className="h-full"
-                      selected={selectedProductId === p.id}
-                      onSelect={toggleSelectProduct}
-                    />
+                  {products.map((p, i) => (
+                    <Reveal key={`${p.id}-${p.slug}`} variant="up" delay={(i % 12) * 55} className="h-full">
+                      <ProductCard
+                        product={p}
+                        layout="grid"
+                        className="h-full"
+                        selected={selectedProductId === p.id}
+                        onSelect={toggleSelectProduct}
+                      />
+                    </Reveal>
                   ))}
                 </div>
 

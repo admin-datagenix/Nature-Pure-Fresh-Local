@@ -101,12 +101,13 @@ function addStorefrontProductViews(set) {
   for (const key of STOREFRONT_FRUIT_KEYS) {
     const folder = PRODUCT_VIEW_FOLDER_BY_KEY[key];
     if (!folder) continue;
-    for (let i = 1; i <= 3; i += 1) {
+    for (let i = 1; i <= 4; i += 1) {
       addUsed(
         set,
         `/products/product view/${folder}/png format/${key}-${i}.png`
       );
     }
+    addUsed(set, `/products/product view/${folder}/pdf format/${key}-4.pdf`);
   }
 }
 
@@ -164,12 +165,34 @@ collectFromSourceScan(used);
 addStorefrontProductViews(used);
 addCertificateAssets(used);
 
+const designDir = path.join(PUBLIC, 'design');
+if (fs.existsSync(designDir)) {
+  for (const rel of listAllFiles(designDir, designDir)) {
+    addUsed(used, `/design/${rel.split(path.sep).join('/')}`);
+  }
+}
+
 // Homepage hero carousel (brand.js HERO_BANNER_SLIDES)
 for (let n = 1; n <= 5; n += 1) {
   addUsed(used, `/hero/Banner-img-${n}.svg`);
 }
 
+// Shop / category PNG banners (brand.js)
+for (const file of [
+  'chunks.png',
+  'chunks-transparent.png',
+  'chunks-1.png',
+  'powder.png',
+  'powder-transparent.png',
+  'powder-2.png',
+]) {
+  addUsed(used, `/products/banners/${file}`);
+}
+
 // Always keep common static files if present
+addUsed(used, '/logo/footer-logo.png');
+addUsed(used, '/brand/footer-logo.png');
+
 addUsed(used, '/robots.txt');
 addUsed(used, '/catalog/naturepure-snacks.pdf');
 addUsed(used, '/catalog/naturepure-powder.pdf');

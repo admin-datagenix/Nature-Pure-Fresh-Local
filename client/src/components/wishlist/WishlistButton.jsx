@@ -1,4 +1,5 @@
 import { cn } from '../../lib/cn';
+import { useAuthGate } from '../../hooks/useAuthGate';
 import { useWishlist } from '../../context/WishlistContext';
 import { HeartIcon } from '../ui/CommerceIcons';
 import { buildFlyPayload } from '../../utils/flyToCart';
@@ -12,6 +13,7 @@ export default function WishlistButton({
   imageSrc,
   flySourceRef,
 }) {
+  const { requireAuth } = useAuthGate();
   const { isWishlisted, toggle } = useWishlist();
   const active = isWishlisted(productId);
   const label = productName?.replace(/^Freeze Dried /i, '') || 'Product';
@@ -19,6 +21,8 @@ export default function WishlistButton({
   const handleClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!active && !requireAuth('wishlist')) return;
 
     if (active) {
       toggle(productId, label);

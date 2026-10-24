@@ -40,7 +40,7 @@ export default function ProductHoverZoom({
       <div
         className={cn(
           'flex h-full w-full items-center justify-center',
-          compact ? 'p-2.5 sm:p-3' : 'p-4 sm:p-6 md:p-8'
+          compact ? 'p-1 sm:p-1.5' : 'p-3 sm:p-5 md:p-6'
         )}
       >
         <img
@@ -49,9 +49,13 @@ export default function ProductHoverZoom({
           loading="lazy"
           decoding="async"
           draggable={false}
-          className={cn('max-h-full max-w-full select-none object-contain will-change-transform', imgClassName)}
+          className={cn(
+            'max-h-full max-w-full select-none object-contain will-change-transform',
+            !zoom.active && (compact ? 'scale-[1.3]' : 'scale-[1.22]'),
+            imgClassName
+          )}
           style={{
-            transform: zoom.active ? `scale(${scale})` : 'scale(1)',
+            transform: zoom.active ? `scale(${scale})` : undefined,
             transformOrigin: `${zoom.x}% ${zoom.y}%`,
             transition: zoom.active
               ? 'transform 0.12s ease-out'

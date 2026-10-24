@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useOtpCountdown } from '../hooks/useOtpCountdown';
 import { OTP_EXPIRY_SECONDS, OTP_RESEND_COOLDOWN_SECONDS } from '../utils/authConfig';
@@ -29,6 +29,8 @@ export default function RegisterPage() {
     isAuthenticated,
   } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo = location.state?.from?.pathname || '/account';
 
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
@@ -45,8 +47,8 @@ export default function RegisterPage() {
   const { otpExpiresIn, otpExpired } = useOtpCountdown({ expiresAt, resendIn, active: otpSent });
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/account', { replace: true });
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated) navigate(redirectTo, { replace: true });
+  }, [isAuthenticated, navigate, redirectTo]);
 
   useEffect(() => {
     if (resendIn <= 0) return undefined;
@@ -107,7 +109,7 @@ export default function RegisterPage() {
       const msg = res.message || 'Account created — mobile verified. You are signed in.';
       setSuccess(msg);
       notifySuccess('Welcome to NaturePure Fresh!');
-      setTimeout(() => navigate('/account', { replace: true }), 900);
+      setTimeout(() => navigate(redirectTo, { replace: true }), 900);
     } catch (err) {
       setError(err.message || 'Registration failed');
     }

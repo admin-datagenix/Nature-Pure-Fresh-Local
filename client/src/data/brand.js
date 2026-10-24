@@ -1,5 +1,10 @@
 /** NaturePure Fresh LLP — official brand & contact details */
 
+import {
+  MARKETING_CHUNKS_SHOP_BANNER,
+  MARKETING_POWDER_SHOP_BANNER,
+} from './marketingImages.js';
+
 export const COMPANY_NAME = 'NaturePure Fresh LLP';
 export const BRAND_NAME = 'NaturePure Fresh';
 export const BRAND_TAGLINE = 'Nourishing Life, Naturally!';
@@ -41,8 +46,8 @@ export const BRAND_LOGO_PIXELS = { width: 4000, height: 1028 };
 /** Default logo (navbar, footer, auth, inline lockups) */
 export const BRAND_LOGO = BRAND_LOGO_PUBLIC;
 export const BRAND_LOGO_NAVBAR = BRAND_LOGO_PUBLIC;
-/** Footer lockup — public/brand/footer-logo.png (on primary background, no card) */
-export const BRAND_LOGO_FOOTER = '/brand/footer-logo.png';
+/** Footer lockup — synced from website data/logo/footer-logo.png → public/logo/footer-logo.png */
+export const BRAND_LOGO_FOOTER = '/logo/footer-logo.png';
 export const BRAND_LOGO_FOOTER_PIXELS = { width: 5704, height: 2044 };
 
 /** About page lockup */
@@ -58,19 +63,32 @@ export const ABOUT_QUALITY_IMAGE = '/about/quality.svg';
 /** Shop category heading banners (1920×700 art) */
 export const ALL_PRODUCTS_SHOP_BANNER = '/hero/all-products.svg';
 
+/** Shop page inset headers (wide art) */
 export const CHUNKS_SHOP_BANNER = '/products/snacks/chunks-banner.svg';
 export const CHUNKS_SHOP_BANNER_FALLBACK = '/products/snacks/chunks-banner-1.svg';
 
-export const POWDER_SHOP_BANNER = '/products/powder/powder-banner.svg';
+/** Marketing posters from public/design/ (SVG kept as fallback on banner error). */
+export const POWDER_SHOP_BANNER = MARKETING_POWDER_SHOP_BANNER;
+export const CHUNKS_SHOP_BANNER_MARKETING = MARKETING_CHUNKS_SHOP_BANNER;
+export const POWDER_SHOP_BANNER_FALLBACK = '/products/powder/powder-banner.svg';
 
 export const SHOP_CATEGORY_BANNERS = {
-  'fruit-snacks': CHUNKS_SHOP_BANNER,
-  'baking-essentials': POWDER_SHOP_BANNER,
+  'fruit-snacks': MARKETING_CHUNKS_SHOP_BANNER,
+  'baking-essentials': MARKETING_POWDER_SHOP_BANNER,
 };
 
 export const SHOP_CATEGORY_BANNER_FALLBACKS = {
   'fruit-snacks': CHUNKS_SHOP_BANNER_FALLBACK,
+  'baking-essentials': POWDER_SHOP_BANNER_FALLBACK,
 };
+
+/** Homepage “Shop by category” cards — prefer transparent PNG on card gradient */
+export const CHUNKS_CATEGORY_BANNER = '/products/banners/chunks.png';
+export const CHUNKS_CATEGORY_BANNER_TRANSPARENT = '/products/banners/chunks-transparent.png';
+export const CHUNKS_CATEGORY_BANNER_FALLBACK = '/products/banners/chunks-1.png';
+export const POWDER_CATEGORY_BANNER = '/products/banners/powder.png';
+export const POWDER_CATEGORY_BANNER_TRANSPARENT = '/products/banners/powder-transparent.png';
+export const POWDER_CATEGORY_BANNER_FALLBACK = '/products/banners/powder-2.png';
 
 /** Homepage hero carousel — files in public/hero */
 /** Time each banner is shown before sliding to the next */
@@ -95,11 +113,6 @@ export const HERO_BANNER_SLIDES = [1, 2, 3, 4, 5].map((n, i) => ({
 
 export const HERO_BANNER_IMAGE = HERO_BANNER_SLIDES[0].src;
 export const HERO_BANNER_FALLBACKS = ['/hero/Banner-img-1.svg'];
-
-export const CHUNKS_CATEGORY_BANNER = '/hero/category-chunks.png';
-export const CHUNKS_CATEGORY_BANNER_FALLBACK = CHUNKS_CATEGORY_BANNER;
-export const POWDER_CATEGORY_BANNER = '/hero/category-powder.png';
-export const POWDER_CATEGORY_BANNER_FALLBACK = POWDER_CATEGORY_BANNER;
 
 export const CATALOG_PDF = {
   snacks: '/catalog/naturepure-snacks.pdf',

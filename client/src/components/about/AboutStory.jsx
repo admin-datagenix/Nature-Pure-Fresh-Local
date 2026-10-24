@@ -1,62 +1,72 @@
 import Reveal from '../ui/Reveal';
-import AboutBenefitsStrip from './AboutBenefitsStrip';
 import { buildAboutPage } from '../../api/mock/cms/aboutPage';
 
 const FALLBACK = buildAboutPage().story;
 
 export default function AboutStory({ story }) {
   const data = story || FALLBACK;
-  const paragraphs = data.paragraphs || [];
 
   return (
-    <section className="border-t border-sage/45 py-10 md:py-12" id="about-story">
-      <div className="site-container">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-8 xl:gap-12">
-          <div className="flex min-w-0 flex-col justify-center lg:pr-3">
-            <Reveal>
-              <h2 className="font-heading text-2xl font-semibold text-primary md:text-3xl">{data.heading}</h2>
-              <p className="mt-3 font-heading text-lg font-medium leading-snug text-secondary md:text-xl">
-                {data.subheading}
-              </p>
-            </Reveal>
+    <section className="about-why-section relative overflow-hidden border-t border-sage/40 pb-14 pt-8 md:pb-20 md:pt-10" id="about-story">
+      <div className="about-why-section__glow pointer-events-none absolute inset-0" aria-hidden="true" />
+      <div className="site-container relative z-[1]">
+        <Reveal variant="blur" className="mx-auto max-w-6xl text-center">
+          <h2 className="font-heading text-3xl font-semibold tracking-tight text-primary md:text-4xl">
+            {data.aboutUsHeading || 'About Us'}
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-base font-medium leading-relaxed text-primary/85 sm:max-w-none md:whitespace-nowrap md:text-[1.0625rem] lg:text-lg">
+            {data.closing}
+          </p>
+        </Reveal>
 
-            {paragraphs[0] && (
-              <Reveal delay={60}>
-                <p className="mt-6 text-base leading-[1.8] text-primary/85 md:text-[1.0625rem]">{paragraphs[0]}</p>
+        <div className="mt-10 grid gap-8 lg:grid-cols-12 lg:items-stretch lg:gap-10 xl:gap-12 md:mt-12">
+          <div className="flex flex-col gap-6 lg:col-span-7 lg:h-full lg:justify-center">
+            {(data.intro || []).map((paragraph, i) => (
+              <Reveal key={i} variant="up" delay={i * 60}>
+                <p className="text-base leading-[1.85] text-primary/85 md:text-[1.0625rem]">{paragraph}</p>
               </Reveal>
-            )}
+            ))}
 
-            <Reveal delay={100}>
-              <div className="mt-6 rounded-xl border border-sage/60 bg-white px-5 py-5 shadow-[0_8px_24px_rgba(41,70,51,0.06)]">
-                <p className="text-xs font-semibold uppercase tracking-[0.12em] text-secondary">{data.missionLabel}</p>
-                <p className="mt-2 font-heading text-lg font-semibold leading-snug text-primary md:text-[1.1675rem]">
-                  {data.missionLine}
+            <Reveal variant="left" delay={120}>
+              <blockquote className="about-why-quote rounded-2xl border border-sage/50 bg-cream-dark/80 px-5 py-6 md:px-7 md:py-7">
+                <p className="text-sm leading-relaxed text-primary/80 md:text-base">{data.foundersLeadIn}</p>
+                <p className="mt-4 font-heading text-lg font-semibold leading-snug text-primary md:text-xl">
+                  “{data.founderQuestion}”
                 </p>
-              </div>
+                <footer className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-secondary">
+                  Rahul Ganeshwade & Mahesh Dhayare
+                </footer>
+              </blockquote>
             </Reveal>
 
-            <div className="mt-6 space-y-5">
-              {paragraphs.slice(1).map((paragraph, i) => (
-                <Reveal key={paragraph.slice(0, 24)} delay={140 + i * 50}>
-                  <p className="text-justify text-base leading-[1.8] text-primary/80 md:text-[1.0625rem]">{paragraph}</p>
+            <div className="space-y-5">
+              {(data.body || []).map((paragraph, i) => (
+                <Reveal key={paragraph.slice(0, 28)} variant="up" delay={160 + i * 45}>
+                  <p className="text-base leading-[1.85] text-primary/80 md:text-[1.0625rem]">{paragraph}</p>
                 </Reveal>
               ))}
             </div>
           </div>
 
-          <Reveal delay={120} className="min-w-0 lg:pl-3">
-            <div className="mx-auto flex w-full max-w-[26rem] flex-col gap-3 sm:max-w-md lg:mx-0 lg:max-w-lg">
-              <div className="flex justify-center">
+          <div className="flex min-h-[18rem] flex-col justify-center lg:col-span-5 lg:h-full lg:min-h-0">
+            <Reveal
+              variant="right"
+              delay={80}
+              className="about-story-visual flex h-full min-h-[18rem] flex-1 flex-col lg:min-h-0"
+            >
+              <div className="about-story-visual__frame flex flex-1 items-center justify-center lg:py-2">
                 <img
                   src={data.storyImage}
                   alt=""
-                  className="mx-auto block h-auto w-full max-w-[24rem] max-h-[28rem] object-contain object-bottom sm:max-w-[26rem] sm:max-h-[30rem] lg:max-w-[32rem] lg:max-h-[36rem] xl:max-h-[38rem]"
+                  className="about-story-visual__img about-story-visual__img--theme mx-auto block h-auto w-full max-h-[34rem] object-contain object-center lg:max-h-full lg:min-h-[20rem]"
                   decoding="async"
                   loading="lazy"
                 />
               </div>
-              <AboutBenefitsStrip />
-              <div className="flex w-full flex-col gap-3 sm:flex-row lg:flex-col xl:flex-row">
+            </Reveal>
+
+            {(data.catalogDownloads || []).length > 0 ? (
+              <Reveal variant="up" delay={140} className="mt-4 flex w-full flex-col gap-3">
                 {(data.catalogDownloads || []).map((dl) => (
                   <a
                     key={dl.href}
@@ -65,16 +75,16 @@ export default function AboutStory({ story }) {
                     rel="noopener noreferrer"
                     className={
                       dl.variant === 'ghost'
-                        ? 'neo-btn-ghost flex-1 px-5 py-3 text-center text-sm font-semibold'
-                        : 'neo-btn flex-1 px-5 py-3 text-center text-sm font-semibold'
+                        ? 'neo-btn-ghost w-full px-5 py-3 text-center text-sm font-semibold'
+                        : 'neo-btn w-full px-5 py-3 text-center text-sm font-semibold'
                     }
                   >
                     {dl.label}
                   </a>
                 ))}
-              </div>
-            </div>
-          </Reveal>
+              </Reveal>
+            ) : null}
+          </div>
         </div>
       </div>
     </section>

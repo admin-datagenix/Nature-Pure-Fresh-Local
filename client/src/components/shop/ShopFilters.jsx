@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/cn';
-import StarRating from '../ui/StarRating';
 import PriceRangeSlider from './PriceRangeSlider';
-import { isOutOfStockUiEnabled } from '../../utils/stockDisplay';
 
 const PRICE_MIN = 99;
 const PRICE_MAX = 2200;
@@ -43,31 +41,7 @@ function FilterRadioIndicator({ checked }) {
   );
 }
 
-function FilterCheck({ checked, onChange, label, count }) {
-  return (
-    <label className="flex cursor-pointer items-center gap-2.5 py-1 text-sm text-primary/85 hover:text-primary">
-      <span
-        className={cn(
-          'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[2px] border transition',
-          checked ? 'border-primary bg-primary text-white' : 'border-sage bg-white'
-        )}
-      >
-        {checked && (
-          <svg viewBox="0 0 12 12" className="h-3 w-3" aria-hidden="true">
-            <path d="M2 6l2.5 2.5L10 3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-        )}
-      </span>
-      <input type="checkbox" className="sr-only" checked={checked} onChange={onChange} />
-      <span className="flex flex-1 items-center justify-between gap-2">
-        <span>{label}</span>
-        {count != null && <span className="text-xs text-muted">{count}</span>}
-      </span>
-    </label>
-  );
-}
-
-function FilterRadioOption({ checked, onSelect, label, count, stars }) {
+function FilterRadioOption({ checked, onSelect, label, count }) {
   return (
     <button
       type="button"
@@ -80,17 +54,10 @@ function FilterRadioOption({ checked, onSelect, label, count, stars }) {
       )}
     >
       <FilterRadioIndicator checked={checked} />
-      {stars != null ? (
-        <span className="flex flex-1 flex-wrap items-center gap-2">
-          <StarRating filledCount={stars} total={5} />
-          <span className="text-muted">&amp; up · {label}</span>
-        </span>
-      ) : (
-        <span className="flex flex-1 items-center justify-between gap-2">
-          <span>{label}</span>
-          {count != null && <span className="text-xs text-muted">{count}</span>}
-        </span>
-      )}
+      <span className="flex flex-1 items-center justify-between gap-2">
+        <span>{label}</span>
+        {count != null && <span className="text-xs text-muted">{count}</span>}
+      </span>
     </button>
   );
 }
@@ -98,15 +65,12 @@ function FilterRadioOption({ checked, onSelect, label, count, stars }) {
 function useFilterState(searchParams) {
   const minPrice = parseInt(searchParams.get('minPrice') || String(PRICE_MIN), 10);
   const maxPrice = parseInt(searchParams.get('maxPrice') || String(PRICE_MAX), 10);
-  const minRating = parseInt(searchParams.get('rating') || '0', 10);
-  const stock = searchParams.get('stock') || 'all';
   const formatSlug = (searchParams.get('format') || '').trim();
 
   const priceCustomized = minPrice > PRICE_MIN || maxPrice < PRICE_MAX;
-  const moreFiltersActive =
-    minRating > 0 || Boolean(formatSlug) || (stock && stock !== 'all');
+  const moreFiltersActive = Boolean(formatSlug);
 
-  return { minPrice, maxPrice, minRating, stock, formatSlug, priceCustomized, moreFiltersActive };
+  return { minPrice, maxPrice, formatSlug, priceCustomized, moreFiltersActive };
 }
 
 function CategoryFilterList({ categories, routeCategory }) {
@@ -183,30 +147,6 @@ function ProductFormatFilterList({ productFormats, formatSlug, onUpdateParams })
   );
 }
 
-function RatingFilterList({ minRating, onUpdateParams }) {
-  return (
-    <ul className="space-y-0.5" role="radiogroup" aria-label="Customer ratings">
-      <li>
-        <FilterRadioOption
-          label="Any rating"
-          checked={minRating <= 0}
-          onSelect={() => onUpdateParams('rating', '')}
-        />
-      </li>
-      {[5, 4, 3, 2, 1].map((stars) => (
-        <li key={stars}>
-          <FilterRadioOption
-            stars={stars}
-            label={`${stars} Star`}
-            checked={minRating === stars}
-            onSelect={() => onUpdateParams('rating', minRating === stars ? '' : String(stars))}
-          />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function PriceFilterPanel({ minPrice, maxPrice, onUpdateParams }) {
   return (
     <PriceRangeSlider
@@ -220,21 +160,10 @@ function PriceFilterPanel({ minPrice, maxPrice, onUpdateParams }) {
   );
 }
 
-function MoreFiltersPanel({
-  minRating,
-  stock,
-  formatSlug,
-  productFormats,
-  onUpdateParams,
-}) {
+function MoreFiltersPanel({ formatSlug, productFormats, onUpdateParams }) {
   return (
     <div className="space-y-4">
       <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Customer ratings</p>
-        <RatingFilterList minRating={minRating} onUpdateParams={onUpdateParams} />
-      </div>
-
-      <div className="border-t border-sage/35 pt-3">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Product format</p>
         <ProductFormatFilterList
           productFormats={productFormats}
@@ -242,22 +171,6 @@ function MoreFiltersPanel({
           onUpdateParams={onUpdateParams}
         />
       </div>
-
-      {isOutOfStockUiEnabled() && (
-        <div className="border-t border-sage/35 pt-3">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">Availability</p>
-          <FilterCheck
-            label="In stock"
-            checked={stock === 'in'}
-            onChange={() => onUpdateParams('stock', stock === 'in' ? '' : 'in')}
-          />
-          <FilterCheck
-            label="Out of stock"
-            checked={stock === 'out'}
-            onChange={() => onUpdateParams('stock', stock === 'out' ? '' : 'out')}
-          />
-        </div>
-      )}
 
       <button
         type="button"
@@ -338,8 +251,6 @@ function ShopMobileFilterTabs({
           )}
           {openTab === 'filter' && (
             <MoreFiltersPanel
-              minRating={state.minRating}
-              stock={state.stock}
               formatSlug={state.formatSlug}
               productFormats={productFormats}
               onUpdateParams={onUpdateParams}
@@ -394,10 +305,6 @@ export default function ShopFilters({
         />
       </CollapseSection>
 
-      <CollapseSection title="Customer ratings" defaultOpen={false}>
-        <RatingFilterList minRating={state.minRating} onUpdateParams={onUpdateParams} />
-      </CollapseSection>
-
       <CollapseSection title="Product format" defaultOpen={false}>
         <ProductFormatFilterList
           productFormats={productFormats}
@@ -405,21 +312,6 @@ export default function ShopFilters({
           onUpdateParams={onUpdateParams}
         />
       </CollapseSection>
-
-      {isOutOfStockUiEnabled() && (
-        <CollapseSection title="Availability" defaultOpen={false}>
-          <FilterCheck
-            label="In stock"
-            checked={state.stock === 'in'}
-            onChange={() => onUpdateParams('stock', state.stock === 'in' ? '' : 'in')}
-          />
-          <FilterCheck
-            label="Out of stock"
-            checked={state.stock === 'out'}
-            onChange={() => onUpdateParams('stock', state.stock === 'out' ? '' : 'out')}
-          />
-        </CollapseSection>
-      )}
 
       <button
         type="button"

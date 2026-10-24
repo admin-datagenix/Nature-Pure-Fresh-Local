@@ -38,12 +38,13 @@ export default function Footer() {
           <div>
             <div className="mb-4">
               <BrandLogo
+                bareLogo
                 logoOnly
                 src={BRAND_LOGO_FOOTER}
                 imageWidth={BRAND_LOGO_FOOTER_PIXELS.width}
                 imageHeight={BRAND_LOGO_FOOTER_PIXELS.height}
-                className="mb-0 !items-start"
-                imageClassName="h-12 w-auto max-w-[min(100%,18rem)] bg-transparent object-contain object-left sm:h-14 sm:max-w-[21rem] md:h-16 md:max-w-[24rem]"
+                className="footer-brand-slot mb-0 !items-start"
+                imageClassName="footer-brand-logo bg-transparent"
               />
             </div>
             <p className="mb-4 max-w-md text-sm leading-relaxed opacity-80 sm:text-[0.9375rem] md:text-base">

@@ -798,6 +798,40 @@
   }
 }
 
+/* Footer logo — wide lockup (5704×2044) from public/logo/footer-logo.png */
+.footer-brand-slot {
+  --footer-logo-h: 5rem;
+  --footer-logo-aspect: 5704 / 2044;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: var(--footer-logo-h);
+  width: calc(var(--footer-logo-h) * var(--footer-logo-aspect));
+  max-width: min(100%, calc(var(--footer-logo-h) * var(--footer-logo-aspect)));
+  line-height: 0;
+}
+
+.footer-brand-logo {
+  display: block;
+  height: 100%;
+  width: 100%;
+  aspect-ratio: 5704 / 2044;
+  object-fit: contain;
+  object-position: left center;
+}
+
+@media (min-width: 640px) {
+  .footer-brand-slot {
+    --footer-logo-h: 5.75rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .footer-brand-slot {
+    --footer-logo-h: 6.5rem;
+  }
+}
+
 /* Hero banner: knock out flat white from JPG/SVG exports on the light hero card */
 .hero-banner-img {
   mix-blend-mode: multiply;
@@ -1366,6 +1400,344 @@ body.product-detail-page .whatsapp-fab svg {
 .category-card-banner--powder,
 .category-card-banner--chunks {
   object-position: right center;
+  image-rendering: auto;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* —— Interactive cards (product, category, why choose us) —— */
+.product-card-interactive {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease;
+}
+
+.product-card-interactive:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(41, 70, 51, 0.12);
+}
+
+.product-card-interactive:focus-within {
+  border-color: rgba(61, 96, 73, 0.45);
+  box-shadow: 0 12px 32px rgba(41, 70, 51, 0.1);
+}
+
+.product-card__media {
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.product-card-interactive:hover .product-card__media {
+  border-color: rgba(196, 168, 130, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.65);
+}
+
+.product-card__image {
+  height: 100%;
+  width: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  transform: scale(1.34);
+  transform-origin: center center;
+  filter: drop-shadow(0 10px 18px rgba(41, 70, 51, 0.14));
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), filter 0.4s ease;
+}
+
+.product-card__image--list {
+  transform: scale(1.22);
+}
+
+.product-card__image--selected {
+  transform: scale(1.38);
+}
+
+.product-card-interactive:hover .product-card__image {
+  transform: scale(1.42);
+  filter: drop-shadow(0 14px 22px rgba(41, 70, 51, 0.18));
+}
+
+.product-card-interactive:hover .product-card__image--list {
+  transform: scale(1.28);
+}
+
+.category-promo-card {
+  position: relative;
+  background: linear-gradient(
+    128deg,
+    var(--color-cream-dark) 0%,
+    #f9f7f2 38%,
+    #ffffff 72%
+  );
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease;
+}
+
+.category-promo-card--chunks {
+  background: linear-gradient(
+    128deg,
+    #e8f0e6 0%,
+    var(--color-cream) 45%,
+    #ffffff 100%
+  );
+}
+
+.category-promo-card--powder {
+  background: linear-gradient(
+    128deg,
+    #f3ebe3 0%,
+    var(--color-cream) 48%,
+    #ffffff 100%
+  );
+}
+
+.category-promo-card__decor {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.9;
+  background-image:
+    radial-gradient(circle at 12% 22%, rgba(61, 96, 73, 0.14) 0%, transparent 42%),
+    radial-gradient(circle at 88% 78%, rgba(196, 168, 130, 0.2) 0%, transparent 38%),
+    radial-gradient(circle at 72% 18%, rgba(221, 231, 220, 0.55) 0%, transparent 32%);
+}
+
+.category-promo-card--powder .category-promo-card__decor {
+  background-image:
+    radial-gradient(circle at 10% 30%, rgba(196, 168, 130, 0.22) 0%, transparent 40%),
+    radial-gradient(circle at 90% 70%, rgba(61, 96, 73, 0.1) 0%, transparent 36%),
+    radial-gradient(circle at 65% 12%, rgba(247, 245, 239, 0.9) 0%, transparent 28%);
+}
+
+.category-promo-card__panel {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.category-promo-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 44px rgba(41, 70, 51, 0.14);
+  border-color: rgba(61, 96, 73, 0.35);
+}
+
+.category-promo-card:active {
+  transform: translateY(-2px);
+}
+
+.category-promo-card__panel {
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.category-promo-card:hover .category-promo-card__panel {
+  transform: scale(1.02);
+}
+
+.category-promo-card__img {
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  background: transparent !important;
+}
+
+/* Sit on card gradient — hide white matte on raster PNGs */
+.category-promo-card__img--theme {
+  mix-blend-mode: multiply;
+}
+
+.category-promo-card__img--theme[src*='-transparent'] {
+  mix-blend-mode: normal;
+}
+
+.category-promo-card:hover .category-promo-card__img {
+  transform: scale(1.06);
+}
+
+.category-promo-card__cta {
+  transition: gap 0.3s ease, background-color 0.3s ease, transform 0.3s ease;
+}
+
+.category-promo-card:hover .category-promo-card__cta {
+  gap: 0.65rem;
+  transform: translateX(2px);
+}
+
+.why-choose-benefit-card {
+  cursor: default;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    background-color 0.35s ease;
+  border: 1px solid transparent;
+}
+
+.why-choose-benefit-card:hover,
+.why-choose-benefit-card:focus-within {
+  transform: translateY(-4px);
+  border-color: rgba(196, 168, 130, 0.55);
+  background-color: #fffefb;
+  box-shadow: 0 16px 40px rgba(41, 70, 51, 0.11);
+}
+
+.why-choose-benefit-card__icon {
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.35s ease,
+    border-color 0.35s ease;
+}
+
+.why-choose-benefit-card:hover .why-choose-benefit-card__icon,
+.why-choose-benefit-card:focus-within .why-choose-benefit-card__icon {
+  transform: scale(1.08) rotate(-4deg);
+  background-color: rgba(196, 168, 130, 0.22);
+  border-color: rgba(61, 96, 73, 0.45);
+}
+
+.why-choose-lifestyle-card {
+  transition:
+    transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.5s ease;
+}
+
+.why-choose-lifestyle-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 48px rgba(41, 70, 51, 0.18);
+}
+
+.why-choose-lifestyle-card__img {
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.why-choose-lifestyle-card:hover .why-choose-lifestyle-card__img {
+  transform: scale(1.06);
+}
+
+.why-choose-lifestyle-card__caption {
+  transition: padding 0.4s ease, background 0.4s ease;
+}
+
+.why-choose-lifestyle-card:hover .why-choose-lifestyle-card__caption {
+  padding-bottom: 1.25rem;
+  background: linear-gradient(to top, rgba(41, 70, 51, 0.92) 0%, rgba(41, 70, 51, 0.35) 55%, transparent 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card-interactive,
+  .product-card-interactive:hover,
+  .category-promo-card,
+  .category-promo-card:hover,
+  .why-choose-benefit-card,
+  .why-choose-benefit-card:hover,
+  .why-choose-lifestyle-card,
+  .why-choose-lifestyle-card:hover {
+    transform: none;
+  }
+
+  .product-card__image,
+  .product-card-interactive:hover .product-card__image {
+    transform: none;
+  }
+
+  .category-promo-card__img,
+  .why-choose-lifestyle-card__img,
+  .why-choose-benefit-card__icon {
+    transition: none;
+  }
+}
+
+/* —— About page: Why we started + story —— */
+.about-why-section {
+  background: linear-gradient(
+    180deg,
+    var(--color-cream) 0%,
+    #f3f6ef 42%,
+    var(--color-cream) 100%
+  );
+}
+
+.about-why-section__glow {
+  background-image:
+    radial-gradient(circle at 8% 20%, rgba(61, 96, 73, 0.1) 0%, transparent 45%),
+    radial-gradient(circle at 92% 70%, rgba(196, 168, 130, 0.16) 0%, transparent 40%);
+}
+
+.about-why-quote {
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s ease;
+}
+
+.about-why-quote:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(41, 70, 51, 0.08);
+}
+
+.about-why-timeline__step--line::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 2rem;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--color-secondary), rgba(61, 96, 73, 0.15));
+}
+
+.about-why-timeline__badge {
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.35s ease;
+}
+
+.about-why-timeline:hover .about-why-timeline__badge {
+  transform: scale(1.06);
+}
+
+.about-why-closing {
+  box-shadow: 0 16px 40px rgba(41, 70, 51, 0.18);
+}
+
+.about-story-visual__frame {
+  background: transparent;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.about-story-visual:hover .about-story-visual__frame {
+  transform: translateY(-4px);
+}
+
+.about-story-visual__img {
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hide white matte on raster story art (use *-transparent.png for normal blend) */
+.about-story-visual__img--theme {
+  mix-blend-mode: multiply;
+}
+
+.about-story-visual__img--theme[src*='-transparent'] {
+  mix-blend-mode: normal;
+}
+
+.about-story-visual:hover .about-story-visual__img {
+  transform: scale(1.02);
+}
+
+@keyframes about-float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-why-quote:hover,
+  .about-story-visual:hover .about-story-visual__frame,
+  .about-story-visual:hover .about-story-visual__img {
+    transform: none;
+  }
 }
 
 .process-timeline__step {

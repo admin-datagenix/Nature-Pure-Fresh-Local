@@ -6,12 +6,13 @@ import { useWishlist } from '../context/WishlistContext';
 import ProductCard from '../components/shop/ProductCard';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 import { CartIcon } from '../components/ui/CommerceIcons';
-import { isAuthRequiredError } from '../utils/authErrors';
+import { useAuthGate } from '../hooks/useAuthGate';
 import { notifyError, notifySuccess } from '../utils/notify';
 import { PRODUCT_GRID_SHOP_CLASS } from '../utils/productLayout';
 import { isOutOfStock } from '../utils/stockDisplay';
 
 export default function WishlistPage() {
+  const { requireAuth } = useAuthGate();
   const { ids, count, clear, remove } = useWishlist();
   const { addItem, loading: cartLoading } = useCart();
   const [products, setProducts] = useState([]);
@@ -51,6 +52,7 @@ export default function WishlistPage() {
 
   const handleMoveToCart = async (product) => {
     if (isOutOfStock(product)) return;
+    if (!requireAuth('cart')) return;
     const label = product.name.replace(/^Freeze Dried /i, '');
     setMovingId(product.id);
     try {
@@ -61,9 +63,7 @@ export default function WishlistPage() {
       remove(product.id);
       notifySuccess(`${label} moved to cart`);
     } catch (err) {
-      if (!isAuthRequiredError(err)) {
-        notifyError(err.message || 'Could not move to cart');
-      }
+      notifyError(err.message || 'Could not move to cart');
     } finally {
       setMovingId(null);
     }
@@ -72,6 +72,7 @@ export default function WishlistPage() {
   const handleMoveAll = async () => {
     const inStock = products.filter((p) => !isOutOfStock(p));
     if (!inStock.length) return;
+    if (!requireAuth('cart')) return;
     setMovingAll(true);
     try {
       let moved = 0;
@@ -85,9 +86,7 @@ export default function WishlistPage() {
       }
       notifySuccess(moved ? `Moved ${moved} item(s) to cart` : 'Wishlist updated');
     } catch (err) {
-      if (!isAuthRequiredError(err)) {
-        notifyError(err.message || 'Could not move items to cart');
-      }
+      notifyError(err.message || 'Could not move items to cart');
     } finally {
       setMovingAll(false);
     }

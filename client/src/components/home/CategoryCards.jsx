@@ -9,7 +9,60 @@ import { cn } from '../../lib/cn';
 const FALLBACK_SECTION = buildHomePage().categorySection;
 
 const CARD_BASE =
-  'group isolate block overflow-hidden rounded-[1.25rem] border border-sage/40 bg-white transition hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(41,70,51,0.1)]';
+  'category-promo-card group block overflow-hidden rounded-[1.25rem] border border-sage/50 shadow-[0_8px_24px_rgba(41,70,51,0.08)]';
+
+function cardThemeClass(slug) {
+  if (slug === 'fruit-snacks') return 'category-promo-card--chunks';
+  if (slug === 'baking-essentials') return 'category-promo-card--powder';
+  return '';
+}
+
+function CategoryCardImage({ cat, layout }) {
+  if (!cat.hasImage || !cat.image) return null;
+
+  const panelClass = cn(
+    'category-promo-card__panel overflow-visible',
+    cat.imagePanelClass || 'bg-transparent',
+    layout === 'mobile'
+      ? 'relative flex aspect-[5/4] w-full items-center justify-center'
+      : 'pointer-events-none absolute bottom-0 right-0 top-0 w-[52%] sm:w-[50%] md:w-[48%]'
+  );
+
+  const imgClass = cn(
+    'category-promo-card__img category-promo-card__img--theme',
+    layout === 'mobile'
+      ? 'h-full w-full max-h-full max-w-full object-contain object-center'
+      : cat.imageClass
+  );
+
+  const handleImgError = (e) => {
+    const el = e.currentTarget;
+    const tried = el.dataset.fallbackStage || '0';
+    const src = el.src || '';
+    if (tried === '0' && cat.imageOpaque && !src.includes(cat.imageOpaque)) {
+      el.dataset.fallbackStage = '1';
+      el.src = cat.imageOpaque;
+      return;
+    }
+    if (tried === '1' && cat.imageFallback && !src.includes(cat.imageFallback)) {
+      el.dataset.fallbackStage = '2';
+      el.src = cat.imageFallback;
+    }
+  };
+
+  return (
+    <div className={panelClass} aria-hidden>
+      <img
+        src={cat.image}
+        alt=""
+        className={imgClass}
+        loading="lazy"
+        decoding="async"
+        onError={handleImgError}
+      />
+    </div>
+  );
+}
 
 function CategoryPromoCard({ cat, layout = 'desktop' }) {
   const hasImage = Boolean(cat.hasImage && cat.image);
@@ -19,28 +72,24 @@ function CategoryPromoCard({ cat, layout = 'desktop' }) {
     return (
       <Link
         to={`/shop/${cat.slug}`}
-        className={cn(CARD_BASE, 'flex min-w-0 flex-col p-4')}
+        className={cn(CARD_BASE, cardThemeClass(cat.slug), 'flex min-w-0 flex-col gap-3 p-4 sm:gap-4 sm:p-5')}
       >
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="min-w-0 font-heading text-base font-semibold leading-tight text-primary sm:text-lg">
-            {cat.label}
-          </h3>
-          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-white shadow-sm">
-            Shop Now
-            <span aria-hidden="true">→</span>
-          </span>
-        </div>
-        {hasImage ? (
-          <div className="mt-3 overflow-hidden rounded-xl border border-sage/30 bg-cream/40">
-            <img
-              src={cat.image}
-              alt=""
-              className="aspect-[2/1] w-full object-cover object-center"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
+        <span className="category-promo-card__decor" aria-hidden="true" />
+        {cat.eyebrow ? (
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-secondary sm:text-xs">
+            {cat.eyebrow}
+          </p>
         ) : null}
+        <h3 className="font-heading text-lg font-semibold leading-tight text-primary sm:text-xl">
+          {cat.label}
+        </h3>
+        {hasImage ? <CategoryCardImage cat={cat} layout="mobile" /> : null}
+        <span
+          className="category-promo-card__cta inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm sm:w-auto sm:self-start"
+        >
+          Shop Now
+          <span aria-hidden="true">→</span>
+        </span>
       </Link>
     );
   }
@@ -50,43 +99,43 @@ function CategoryPromoCard({ cat, layout = 'desktop' }) {
       to={`/shop/${cat.slug}`}
       className={cn(
         CARD_BASE,
+        cardThemeClass(cat.slug),
         'relative min-h-[200px] md:min-h-[220px]'
       )}
     >
+      <span className="category-promo-card__decor" aria-hidden="true" />
       <div
         className={cn(
-          'relative z-10 flex h-full min-h-[inherit] flex-col justify-center px-5 py-5 sm:px-6 sm:py-6 md:px-7',
-          hasImage ? 'max-w-[56%] sm:max-w-[54%]' : 'max-w-full'
+          'category-promo-card__content relative z-10 flex h-full min-h-[inherit] flex-col justify-center px-5 py-5 sm:px-6 sm:py-6 md:px-7',
+          hasImage && 'max-w-[56%] sm:max-w-[54%]',
+          !hasImage && 'max-w-full'
         )}
       >
-        <h3 className="font-heading text-[1.2rem] font-semibold leading-[1.15] text-primary sm:text-[1.65rem] md:text-[1.85rem]">
+        {cat.eyebrow ? (
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-secondary sm:text-xs">
+            {cat.eyebrow}
+          </p>
+        ) : null}
+        <h3
+          className={cn(
+            'font-heading text-[1.2rem] font-semibold leading-[1.15] text-primary sm:text-[1.65rem] md:text-[1.85rem]',
+            cat.eyebrow && 'mt-1'
+          )}
+        >
           {cat.label}
         </h3>
         {cat.subline ? (
-          <p className="mt-2 text-[0.7rem] leading-relaxed text-muted sm:text-xs md:text-sm line-clamp-4">
+          <p className="mt-2 text-[0.7rem] leading-snug text-muted sm:text-xs md:text-sm line-clamp-1">
             {cat.subline}
           </p>
         ) : null}
-        <span className="mt-4 inline-flex w-fit items-center gap-2 rounded-md bg-primary px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition group-hover:gap-2.5 sm:mt-5 sm:px-4 sm:py-2.5 sm:text-sm">
+        <span className="category-promo-card__cta mt-4 inline-flex w-fit items-center gap-2 rounded-md bg-primary px-3.5 py-2 text-xs font-semibold text-white shadow-sm sm:mt-5 sm:px-4 sm:py-2.5 sm:text-sm">
           Shop Now
           <span aria-hidden="true">→</span>
         </span>
       </div>
 
-      {hasImage ? (
-        <div
-          className="pointer-events-none absolute bottom-2.5 right-2.5 top-2.5 w-[50%] overflow-hidden rounded-2xl sm:w-[48%] md:w-[46%]"
-          aria-hidden
-        >
-          <img
-            src={cat.image}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover object-right transition duration-500 group-hover:scale-[1.03]"
-            loading="lazy"
-            decoding="async"
-          />
-        </div>
-      ) : null}
+      {hasImage ? <CategoryCardImage cat={cat} layout="desktop" /> : null}
     </Link>
   );
 }
@@ -132,7 +181,7 @@ export default function CategoryCards({ section }) {
           </Link>
         </Reveal>
 
-        {/* Mobile: stacked wide cards — title, then image below (no description) */}
+        {/* Mobile: vertical cards — title → image → Shop Now */}
         <div className="flex flex-col gap-4 md:hidden">
           {cards.map((cat, i) => (
             <Reveal key={cat.slug} variant="up" delay={i * 80}>

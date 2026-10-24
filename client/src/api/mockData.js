@@ -6,7 +6,8 @@ import { STOREFRONT_CATEGORIES } from '../data/storefrontCategories.js';
 
 export const MOCK_CATEGORIES = STOREFRONT_CATEGORIES;
 
-export const MOCK_PRODUCTS = [...CHUNK_PRODUCTS, ...POWDER_PRODUCTS];
+/** Chiku, banana & guava are sold as fruit snacks (chunks/slices), not duplicate powder SKUs. */
+export const MOCK_PRODUCTS = [...CHUNK_PRODUCTS];
 
 export const MOCK_REVIEWS = [
   { id: '1', product_id: 'snack-09', product_slug: 'freeze-dried-jamun-chunks', user_name: 'Kanti Patel', rating: 5, comment: 'I never knew that eating this healthy snack can make my sugar control so soon.', is_verified: true, product_name: 'Freeze Dried Jamun Cubes' },

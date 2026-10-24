@@ -6,6 +6,7 @@ import {
   productViewGalleryExtras,
   websiteProductImage,
 } from './websiteImages.js';
+import { applyProductViewCopy } from './applyProductViewCopy.js';
 
 export const CHUNK_STOREFRONT_SLUGS = [
   'freeze-dried-mango-chunks',
@@ -173,13 +174,14 @@ const CHUNK_PRODUCTS_RAW = [
 ];
 
 function enrichChunkProduct(product) {
-  const fruit = SNACK_FRUIT_BY_ID[product.id];
+  const withCopy = applyProductViewCopy(product);
+  const fruit = SNACK_FRUIT_BY_ID[withCopy.id];
   const gallery = fruit
     ? productViewGalleryExtras(fruit, productPrimaryImageIndex(fruit))
     : [];
   return {
-    ...product,
-    image: websiteProductImage({ ...product, id: product.id }),
+    ...withCopy,
+    image: websiteProductImage({ ...withCopy, id: withCopy.id }),
     gallery_images: gallery.length ? gallery : undefined,
     weight_options: [
       {
