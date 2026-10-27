@@ -6,14 +6,17 @@ import { STOREFRONT_CATEGORIES } from '../data/storefrontCategories.js';
 
 export const MOCK_CATEGORIES = STOREFRONT_CATEGORIES;
 
-/** Chiku, banana & guava are sold as fruit snacks (chunks/slices), not duplicate powder SKUs. */
-export const MOCK_PRODUCTS = [...CHUNK_PRODUCTS];
+export const MOCK_PRODUCTS = [...CHUNK_PRODUCTS, ...POWDER_PRODUCTS];
+
+/** Homepage “Our Happy Clients” carousel — fixed set of six; no extras. */
+export const HOME_TESTIMONIAL_LIMIT = 6;
 
 export const MOCK_REVIEWS = [
   { id: '1', product_id: 'snack-09', product_slug: 'freeze-dried-jamun-chunks', user_name: 'Kanti Patel', rating: 5, comment: 'I never knew that eating this healthy snack can make my sugar control so soon.', is_verified: true, product_name: 'Freeze Dried Jamun Cubes' },
   { id: '2', product_id: 'snack-08', product_slug: 'freeze-dried-jackfruit-chunks', user_name: 'Somalini Sahu', rating: 5, comment: 'Perfect match for my busy lifestyle. Travel-friendly packaging.', is_verified: true, product_name: 'Freeze Dried Jackfruit Slices' },
   { id: '3', product_id: 'snack-10', product_slug: 'freeze-dried-pineapple-chunks', user_name: 'Balkrishna Patro', rating: 5, comment: 'Takes me back to summer days with every bite!', is_verified: true, product_name: 'Freeze Dried Pineapple Slices' },
   { id: '4', product_id: 'snack-13', product_slug: 'freeze-dried-mango-chunks', user_name: 'Priya M.', rating: 5, comment: 'The mango cubes are incredible — real fruit taste.', is_verified: true, product_name: 'Freeze Dried Mango Cubes' },
+  { id: '5', product_id: 'snack-02', product_slug: 'freeze-dried-banana-chunks', user_name: 'Chitra V.', rating: 5, comment: 'My kids love it and I love that they\'re eating something healthy.', is_verified: true, product_name: 'Freeze Dried Banana Chunks' },
   { id: '6', product_id: 'snack-11', product_slug: 'freeze-dried-strawberry-chunks', user_name: 'Anjali Chandnani', rating: 5, comment: 'Awesome strawberries — can\'t stop eating them!', is_verified: true, product_name: 'Freeze Dried Strawberry Whole' },
 ];
 
@@ -26,6 +29,7 @@ export const PROMO_CODES = {
 const CATEGORY_GROUPS = {
   'fruit-snacks': ['fruit-snacks'],
   'baking-essentials': ['baking-essentials'],
+  'fruit-powders': ['baking-essentials'],
   all: ['fruit-snacks', 'baking-essentials'],
   chunks: ['fruit-snacks'],
   powder: ['baking-essentials'],

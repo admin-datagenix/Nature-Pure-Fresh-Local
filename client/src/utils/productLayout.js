@@ -35,7 +35,6 @@ const CARD_TONES = {
 
 export function getProductCardTone(product) {
   const name = `${product?.name || ''} ${product?.slug || ''}`.toLowerCase();
-  if (name.includes('powder')) return CARD_TONES.powder;
   if (name.includes('variety') || name.includes('combo') || name.includes('pack of')) return CARD_TONES.combo;
   if (name.includes('ice cream') || name.includes('ice-cream')) return CARD_TONES.combo;
   if (name.includes('straw') || name.includes('berry')) return CARD_TONES.strawberry;
@@ -52,5 +51,6 @@ export function getProductCardTone(product) {
   if (name.includes('guava')) return CARD_TONES.guava;
   if (name.includes('custard')) return CARD_TONES.custard;
   if (name.includes('mango')) return CARD_TONES.mango;
+  if (name.includes('powder')) return CARD_TONES.powder;
   return CARD_TONES.mango;
 }

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Navigate, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import LoadingSpinner from './components/ui/LoadingSpinner';
@@ -11,8 +11,6 @@ const WishlistPage = lazy(() => import('./pages/WishlistPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ProcessPage = lazy(() => import('./pages/ProcessPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
-const ReturnPolicyPage = lazy(() => import('./pages/ReturnPolicyPage'));
-const RefundPolicyPage = lazy(() => import('./pages/RefundPolicyPage'));
 const ClientSignOffPage = lazy(() => import('./pages/ClientSignOffPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
@@ -42,8 +40,9 @@ export default function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/process" element={<ProcessPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/return-policy" element={<ReturnPolicyPage />} />
-          <Route path="/refund-policy" element={<RefundPolicyPage />} />
+          <Route path="/return-policy" element={<Navigate to="/" replace />} />
+          <Route path="/refund-policy" element={<Navigate to="/" replace />} />
+          <Route path="/shipping-policy" element={<Navigate to="/" replace />} />
           <Route path="/client-signoff" element={<ClientSignOffPage />} />
           <Route path="/account" element={<AccountPage />} />
         </Route>

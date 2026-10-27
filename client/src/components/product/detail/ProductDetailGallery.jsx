@@ -55,6 +55,7 @@ export default function ProductDetailGallery({ product, imageRef, className }) {
           ) : null}
         </div>
 
+        {views.length > 1 ? (
         <div className="product-detail-gallery__thumbs">
           {views.map((view, i) => {
             const thumbIsPdf =
@@ -82,6 +83,7 @@ export default function ProductDetailGallery({ product, imageRef, className }) {
             );
           })}
         </div>
+        ) : null}
       </div>
     </div>
   );

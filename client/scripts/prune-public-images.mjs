@@ -197,6 +197,13 @@ addUsed(used, '/robots.txt');
 addUsed(used, '/catalog/naturepure-snacks.pdf');
 addUsed(used, '/catalog/naturepure-powder.pdf');
 
+for (const fruit of ['strawberry', 'pineapple']) {
+  addUsed(used, `/products/powder/${fruit}-powder.png`);
+  addUsed(used, `/products/powder/${fruit}-powder-card.png`);
+}
+addUsed(used, '/products/powder/powder-shop-banner.png');
+addUsed(used, '/products/powder/powder-banner.svg');
+
 const allPublic = listAllFiles(PUBLIC);
 let moved = 0;
 let kept = 0;

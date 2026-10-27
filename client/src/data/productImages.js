@@ -5,9 +5,25 @@ import {
   websiteProductImage,
   BANNER_CHUNKS,
   chunkMainImage,
+  powderMainImage,
   SNACK_FRUIT_BY_ID,
+  fruitKeyFromProduct,
   fruitKeyFromPowderSlug,
 } from './websiteImages.js';
+
+export function isPowderCardArtUrl(src) {
+  if (!src) return false;
+  return decodeURIComponent(String(src)).includes('-powder-card.png');
+}
+
+export function isPowderProduct(product) {
+  const id = String(product?.product_id || product?.id || '');
+  return (
+    id.startsWith('powder') ||
+    product?.category_slug === 'baking-essentials' ||
+    String(product?.slug || '').includes('powder')
+  );
+}
 
 export { getFruitKey, FRUIT_COMPONENTS };
 
@@ -20,6 +36,7 @@ function isWebsiteAsset(src) {
   const normalized = decodeURI(src);
   return (
     normalized.startsWith('/products/product view/') ||
+    normalized.startsWith('/products/powder/') ||
     src.startsWith('/products/chunks/') ||
     src.startsWith('/products/banners/') ||
     src.startsWith('/hero/') ||
@@ -38,7 +55,14 @@ export function getProductImage(product) {
   if (website) return website;
 
   const id = String(product?.product_id || product?.id || '');
-  const fruit = SNACK_FRUIT_BY_ID[id] || fruitKeyFromPowderSlug(product?.slug);
+  const fruit =
+    fruitKeyFromProduct(product) ||
+    SNACK_FRUIT_BY_ID[id] ||
+    fruitKeyFromPowderSlug(product?.slug);
+  if (isPowderProduct(product) && fruit) {
+    const powder = powderMainImage(fruit);
+    if (powder) return powder;
+  }
   const chunk = fruit ? chunkMainImage(fruit) : null;
   if (chunk) return chunk;
 

@@ -75,6 +75,7 @@ export default function ProductCard({
   const showRatings = shouldShowProductRatings();
   const discount = showSale ? getDiscountPercent(product) : 0;
   const imageSrc = getProductImage(product);
+  const powderCardArt = decodeURIComponent(imageSrc || '').includes('-powder-card.png');
   const isList = layout === 'list';
 
   return (
@@ -142,6 +143,7 @@ export default function ProductCard({
                 decoding="async"
                 className={cn(
                   'product-card__image object-contain',
+                  powderCardArt && 'product-card__image--powder-card-art',
                   isList && 'product-card__image--list',
                   selected && 'product-card__image--selected',
                   outOfStock && 'opacity-85 saturate-[0.65]'

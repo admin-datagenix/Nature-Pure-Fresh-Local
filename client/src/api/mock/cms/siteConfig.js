@@ -2,6 +2,7 @@ import {
   BRAND_ADDRESS,
   BRAND_ADDRESS_FULL,
   BRAND_EMAIL,
+  BRAND_LOGO_FOOTER,
   BRAND_LOGO_NAVBAR,
   BRAND_MAP_EMBED_URL,
   BRAND_MAP_OPEN_URL,
@@ -37,6 +38,7 @@ export function buildSiteConfig() {
     },
     assets: {
       logoNavbar: BRAND_LOGO_NAVBAR,
+      logoFooter: BRAND_LOGO_FOOTER,
     },
     catalogPdfs: CATALOG_PDF,
     map: {
@@ -58,9 +60,9 @@ export function buildSiteConfig() {
         ],
         Support: [
           { to: '/contact', label: 'Contact' },
-          { to: '/return-policy', label: 'Return Policy' },
-          { to: '/refund-policy', label: 'Refund Policy' },
-          { to: '/about#shipping', label: 'Shipping Policy' },
+          { to: '/', label: 'Return Policy' },
+          { to: '/', label: 'Refund Policy' },
+          { to: '/', label: 'Shipping Policy' },
         ],
       },
     },

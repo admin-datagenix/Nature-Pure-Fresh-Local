@@ -1,5 +1,6 @@
 import {
   MOCK_CATEGORIES,
+  HOME_TESTIMONIAL_LIMIT,
   MOCK_REVIEWS,
   MOCK_PRODUCTS,
   PROMO_CODES,
@@ -420,9 +421,10 @@ export const mockApi = {
     };
   },
 
-  async getReviews(limit = 6) {
+  async getReviews(limit = HOME_TESTIMONIAL_LIMIT) {
     await delay();
-    return { success: true, data: MOCK_REVIEWS.slice(0, limit) };
+    const cap = Math.min(Math.max(1, limit), HOME_TESTIMONIAL_LIMIT, MOCK_REVIEWS.length);
+    return { success: true, data: MOCK_REVIEWS.slice(0, cap) };
   },
 
   async subscribeNewsletter(email) {

@@ -1,4 +1,4 @@
-import { getProductImage } from './productImages';
+import { getProductImage, isPowderProduct } from './productImages';
 import { websiteProductGallery } from './websiteImages.js';
 
 function normalizeEntry(entry, fallbackLabel) {
@@ -22,6 +22,10 @@ function normalizeEntry(entry, fallbackLabel) {
 /** PDP gallery — main (-2) first, then -1 / -3 from gallery_images. */
 export function getProductGalleryViews(product) {
   const mainSrc = getProductImage(product);
+  if (isPowderProduct(product) && mainSrc) {
+    return [{ src: mainSrc, label: 'Packaging', mediaType: 'image' }];
+  }
+
   const mainView = mainSrc
     ? { src: mainSrc, label: 'Packaging' }
     : null;

@@ -38,11 +38,11 @@ export const BRAND_MAP_OPEN_URL =
 export const BRAND_LOGO_PUBLIC = '/brand/logo-3.png';
 /** Intrinsic pixel size of logo-3.png (wide lockup) */
 export const BRAND_LOGO_PIXELS = { width: 4000, height: 1028 };
-/** Default logo (navbar, footer, auth, inline lockups) */
+/** Default logo (navbar, auth, inline lockups) */
 export const BRAND_LOGO = BRAND_LOGO_PUBLIC;
 export const BRAND_LOGO_NAVBAR = BRAND_LOGO_PUBLIC;
-/** Footer lockup — synced from website data/logo/footer-logo.png → public/logo/footer-logo.png */
-export const BRAND_LOGO_FOOTER = '/logo/footer-logo.png';
+/** Footer lockup — public/brand/footer-logo.png (synced from website data/logo/footer-logo.png) */
+export const BRAND_LOGO_FOOTER = '/brand/footer-logo.png';
 export const BRAND_LOGO_FOOTER_PIXELS = { width: 5704, height: 2044 };
 
 /** About page lockup */

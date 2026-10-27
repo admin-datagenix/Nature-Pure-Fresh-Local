@@ -1,7 +1,7 @@
 /** Short public paths — synced from `website data/` via scripts/sync-website-images.mjs */
 
 export const BRAND_LOGO = '/brand/logo-3.png';
-export const BRAND_FOOTER_LOGO = '/logo/footer-logo.png';
+export const BRAND_FOOTER_LOGO = '/brand/footer-logo.png';
 
 export const HERO_HOME = '/hero/home.png';
 export const HERO_CATEGORY_CHUNKS = '/hero/category-chunks.png';
@@ -38,6 +38,21 @@ export const PRODUCT_VIEW_FOLDER_BY_KEY = {
 const CHUNK_FRUITS = Object.keys(PRODUCT_VIEW_FOLDER_BY_KEY);
 const PRODUCT_VIEW_ROOT = '/products/product view';
 const PNG_FORMAT_DIR = 'png format';
+
+/** Storefront powder SKUs — card PNGs match fruit-snack grid (square + fruit tone). */
+export const POWDER_PACK_FRUIT_KEYS = ['strawberry', 'pineapple'];
+
+/** Shop / PLP — square card art (same look as chunk `-2` packaging shots). */
+export function productViewPowderPackUrl(fruitKey) {
+  if (!POWDER_PACK_FRUIT_KEYS.includes(fruitKey)) return null;
+  return encodeURI(`/products/powder/${fruitKey}-powder-card.png`);
+}
+
+/** PDP / zoom — transparent pouch cutout. */
+export function productViewPowderPackTransparentUrl(fruitKey) {
+  if (!POWDER_PACK_FRUIT_KEYS.includes(fruitKey)) return null;
+  return encodeURI(`/products/powder/${fruitKey}-powder.png`);
+}
 /** Gallery slots: PNG product photos (1–4; -4 = info / nutrition sheet in png format). */
 export const PRODUCT_VIEW_GALLERY_INDICES = [1, 2, 3, 4];
 
@@ -86,7 +101,16 @@ export function chunkMainImage(fruit) {
 
 export function powderMainImage(fruit) {
   if (!fruit || !CHUNK_FRUITS.includes(fruit)) return null;
-  return productViewPngUrl(fruit, powderPrimaryImageIndex(fruit));
+  const card = productViewPowderPackUrl(fruit);
+  if (card) return card;
+  return chunkMainImage(fruit);
+}
+
+export function powderProductViewGallery(fruit) {
+  if (!fruit || !CHUNK_FRUITS.includes(fruit)) return [];
+  const card = productViewPowderPackUrl(fruit);
+  if (!card) return [];
+  return [{ src: card, label: 'Packaging', mediaType: 'image' }];
 }
 
 /** PDP + stored gallery: main (-2) first, then other PNG slots. */
@@ -139,13 +163,13 @@ export const SNACK_FRUIT_BY_ID = {
 };
 
 const POWDER_SLUG_FRUIT = [
+  ['freeze-dried-mango-powder', 'mango'],
   ['freeze-dried-apple-powder', 'apple'],
   ['freeze-dried-banana-powder', 'banana'],
   ['freeze-dried-chiku-powder', 'chiku'],
   ['freeze-dried-coconut-powder', 'coconut'],
   ['freeze-dried-green-grapes-powder', 'grapes'],
   ['freeze-dried-guava-powder', 'guava'],
-  ['freeze-dried-jackfruit-powder', 'jackfruit'],
   ['freeze-dried-jamun-powder', 'jamun'],
   ['freeze-dried-pineapple-powder', 'pineapple'],
   ['freeze-dried-strawberry-powder', 'strawberry'],
@@ -165,7 +189,8 @@ export function fruitKeyFromProduct(product) {
   const id = String(product?.product_id || product?.id || '');
   if (SNACK_FRUIT_BY_ID[id]) return SNACK_FRUIT_BY_ID[id];
   if (id.startsWith('powder-') || product?.category_slug === 'baking-essentials') {
-    return fruitKeyFromPowderSlug(product?.slug);
+    const fromPowderSlug = fruitKeyFromPowderSlug(product?.slug);
+    if (fromPowderSlug) return fromPowderSlug;
   }
   const slug = String(product?.slug || '').toLowerCase();
   if (slug.includes('ice-cream')) return 'ice-cream';
@@ -201,10 +226,13 @@ export function websiteProductGallery(product) {
     product?.category_slug === 'baking-essentials';
 
   if (fruit) {
-    const main = isPowder ? powderMainImage(fruit) : chunkMainImage(fruit);
+    if (isPowder) {
+      const powderGallery = powderProductViewGallery(fruit);
+      if (powderGallery.length) return powderGallery;
+    }
+    const main = chunkMainImage(fruit);
     if (main) {
-      const primaryIdx = isPowder ? powderPrimaryImageIndex(fruit) : productPrimaryImageIndex(fruit);
-      const gallery = productViewGallery(fruit, primaryIdx).filter((v) => v.src);
+      const gallery = productViewGallery(fruit, productPrimaryImageIndex(fruit)).filter((v) => v.src);
       if (gallery.length) return gallery;
     }
   }

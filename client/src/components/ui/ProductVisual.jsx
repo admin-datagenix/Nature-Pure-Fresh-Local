@@ -1,5 +1,5 @@
 import { cn } from '../../lib/cn';
-import { getProductImage, isProductImageUrl } from '../../data/productImages';
+import { getProductImage, isPowderCardArtUrl, isProductImageUrl } from '../../data/productImages';
 import { getProductCardTone } from '../../utils/productLayout';
 import { getFruitKey, getProductFruit } from './FruitArt';
 import ProductHoverZoom from './ProductHoverZoom';
@@ -35,21 +35,28 @@ export default function ProductVisual({
   const type = getProductType(product);
   const imageSrc = getProductImage(product);
   const usePhoto = isProductImageUrl(imageSrc);
+  const powderCardArt = isPowderCardArtUrl(imageSrc);
   const tone = getProductCardTone(product);
+  const plainMedia = plain || powderCardArt;
 
   if (usePhoto) {
     return (
       <div
-        className={cn('relative h-full w-full overflow-hidden', className)}
-        style={!plain ? { backgroundColor: tone } : undefined}
+        className={cn(
+          'relative h-full w-full overflow-hidden',
+          powderCardArt && 'product-visual--powder-card-art',
+          className
+        )}
+        style={!plainMedia ? { backgroundColor: tone } : undefined}
       >
-        {!plain && <ProductToneBackdrop />}
+        {!plainMedia && <ProductToneBackdrop />}
         {hoverZoom ? (
           <ProductHoverZoom
             src={imageSrc}
             alt={product.name}
             className="relative z-[1] h-full w-full"
             compact={compactMedia}
+            powderCardArt={powderCardArt}
           />
         ) : (
           <div className="relative z-[1] flex h-full w-full items-center justify-center p-1 sm:p-2">
@@ -58,7 +65,11 @@ export default function ProductVisual({
               alt={product.name}
               loading="lazy"
               decoding="async"
-              className="max-h-full max-w-full object-contain transition duration-500 ease-out scale-[1.28] group-hover:scale-[1.34]"
+              className={cn(
+                powderCardArt
+                  ? 'h-full w-full object-cover object-center'
+                  : 'max-h-full max-w-full object-contain transition duration-500 ease-out scale-[1.28] group-hover:scale-[1.34]'
+              )}
             />
           </div>
         )}

@@ -10,7 +10,8 @@ const DEFAULT_FOOTER_SHOP = [
 ];
 
 export default function Footer() {
-  const { brand, contact, catalogPdfs, navigation } = useSiteConfig();
+  const { brand, contact, catalogPdfs, navigation, assets } = useSiteConfig();
+  const footerLogoSrc = assets?.logoFooter || BRAND_LOGO_FOOTER;
   const footerLinks = navigation?.footer || { Shop: DEFAULT_FOOTER_SHOP, Support: [] };
 
   const shopLinks = footerLinks.Shop?.length ? footerLinks.Shop : DEFAULT_FOOTER_SHOP;
@@ -40,7 +41,7 @@ export default function Footer() {
               <BrandLogo
                 bareLogo
                 logoOnly
-                src={BRAND_LOGO_FOOTER}
+                src={footerLogoSrc}
                 imageWidth={BRAND_LOGO_FOOTER_PIXELS.width}
                 imageHeight={BRAND_LOGO_FOOTER_PIXELS.height}
                 className="footer-brand-slot mb-0 !items-start"

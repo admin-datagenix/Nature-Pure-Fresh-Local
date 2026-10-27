@@ -9,6 +9,7 @@
     "sync:descriptions": "node scripts/sync-product-descriptions.mjs",
     "preview": "vite preview",
     "sync:images": "node scripts/sync-website-images.mjs",
+    "process:powder-packs": "node scripts/process-powder-pack-png.mjs all",
     "prune:images": "node scripts/prune-public-images.mjs"
   },
   "dependencies": {
@@ -22,6 +23,7 @@
     "@tailwindcss/postcss": "^4.3.3",
     "@vitejs/plugin-react": "^4.5.2",
     "postcss": "^8.5.28",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
     "vite": "^6.3.5"
   }

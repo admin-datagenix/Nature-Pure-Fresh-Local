@@ -13,7 +13,9 @@ export default function ProductHoverZoom({
   imgClassName,
   scale = DEFAULT_SCALE,
   compact = false,
+  powderCardArt = false,
 }) {
+  const hoverScale = powderCardArt ? 1.04 : scale;
   const [zoom, setZoom] = useState({ active: false, x: 50, y: 50 });
 
   const onMove = useCallback(
@@ -40,7 +42,7 @@ export default function ProductHoverZoom({
       <div
         className={cn(
           'flex h-full w-full items-center justify-center',
-          compact ? 'p-1 sm:p-1.5' : 'p-3 sm:p-5 md:p-6'
+          powderCardArt ? 'p-0' : compact ? 'p-1 sm:p-1.5' : 'p-3 sm:p-5 md:p-6'
         )}
       >
         <img
@@ -50,12 +52,15 @@ export default function ProductHoverZoom({
           decoding="async"
           draggable={false}
           className={cn(
-            'max-h-full max-w-full select-none object-contain will-change-transform',
-            !zoom.active && (compact ? 'scale-[1.3]' : 'scale-[1.22]'),
+            'select-none will-change-transform',
+            powderCardArt
+              ? 'h-full w-full object-cover object-center'
+              : 'max-h-full max-w-full object-contain',
+            !zoom.active && !powderCardArt && (compact ? 'scale-[1.3]' : 'scale-[1.22]'),
             imgClassName
           )}
           style={{
-            transform: zoom.active ? `scale(${scale})` : undefined,
+            transform: zoom.active ? `scale(${hoverScale})` : undefined,
             transformOrigin: `${zoom.x}% ${zoom.y}%`,
             transition: zoom.active
               ? 'transform 0.12s ease-out'

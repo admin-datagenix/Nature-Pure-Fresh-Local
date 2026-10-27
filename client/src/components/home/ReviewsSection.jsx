@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../../api/client';
+import { HOME_TESTIMONIAL_LIMIT } from '../../api/mockData';
 import StarRating from '../ui/StarRating';
 import { shouldShowProductRatings } from '../../utils/helpers';
 import Reveal from '../ui/Reveal';
@@ -37,7 +38,7 @@ export default function ReviewsSection() {
   const visibleCount = useVisibleCount();
 
   useEffect(() => {
-    api.getReviews(6).then((res) => setReviews(res.data || [])).catch(() => {});
+    api.getReviews(HOME_TESTIMONIAL_LIMIT).then((res) => setReviews(res.data || [])).catch(() => {});
   }, []);
 
   if (!reviews.length) return null;
