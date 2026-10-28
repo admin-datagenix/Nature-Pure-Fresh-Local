@@ -19,6 +19,7 @@ const AccountPage = lazy(() => import('./pages/AccountPage'));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage'));
 const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage'));
 const TrackOrderPage = lazy(() => import('./pages/TrackOrderPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
           <Route path="/shipping-policy" element={<Navigate to="/" replace />} />
           <Route path="/client-signoff" element={<ClientSignOffPage />} />
           <Route path="/account" element={<AccountPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Routes>
     </Suspense>

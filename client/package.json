@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npm run sync:descriptions && npm run compress:images && vite build",
+    "build:deploy": "npm run sync:descriptions && vite build",
     "compress:images": "node scripts/compress-public-images.mjs --website-data",
     "sync:descriptions": "node scripts/sync-product-descriptions.mjs",
     "preview": "vite preview",
