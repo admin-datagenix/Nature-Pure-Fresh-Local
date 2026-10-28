@@ -27,7 +27,7 @@ function LogoTile({ logo, onOpen }) {
       className={cn(
         'pointer-events-none select-none object-contain',
         isMsme
-          ? 'h-auto w-full max-w-[14rem] max-h-[6.5rem] sm:max-h-[7.25rem] sm:max-w-[15rem]'
+          ? 'h-auto w-full max-w-[11rem] max-h-[5.5rem] object-contain object-center sm:max-h-[6.25rem] sm:max-w-[12rem]'
           : isStartupIndia
             ? 'max-h-[88px] w-auto max-w-full sm:max-h-[104px]'
             : 'max-h-[100px] w-auto max-w-full sm:max-h-[120px]'
