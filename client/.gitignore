@@ -9,8 +9,11 @@ lerna-debug.log*
 
 node_modules/
 **/.vite/
-dist
-dist-ssr
+dist/
+dist-ssr/
+dist.zip
+*.compress-tmp
+../unused-public-assets/
 *.local
 
 # Editor directories and files

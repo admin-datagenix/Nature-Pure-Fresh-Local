@@ -4,7 +4,7 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CLIENT_ROOT = path.resolve(__dirname, '..');
@@ -165,11 +165,11 @@ collectFromSourceScan(used);
 addStorefrontProductViews(used);
 addCertificateAssets(used);
 
-const designDir = path.join(PUBLIC, 'design');
-if (fs.existsSync(designDir)) {
-  for (const rel of listAllFiles(designDir, designDir)) {
-    addUsed(used, `/design/${rel.split(path.sep).join('/')}`);
-  }
+const { allReferencedMarketingPaths } = await import(
+  pathToFileURL(path.join(CLIENT_ROOT, 'src', 'data', 'marketingImages.js')).href
+);
+for (const urlPath of allReferencedMarketingPaths()) {
+  addUsed(used, urlPath);
 }
 
 // Homepage hero carousel (brand.js HERO_BANNER_SLIDES)

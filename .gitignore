@@ -8,6 +8,8 @@ dist-ssr/
 **/.vite/
 .vite/
 client/dist/
+client/dist.zip
+*.compress-tmp
 
 # --- Secrets (never commit) ---
 .env
@@ -43,3 +45,11 @@ docs/
 
 # --- Archived public assets (moved by scripts/prune-public-images.mjs) ---
 client/unused-public-assets/
+
+# --- Unreferenced duplicates under public/ (not used by the live storefront) ---
+client/public/products/product view/ad-posters-chunks/
+client/public/products/product view/**/catalog format/
+client/public/products/product view/apple/
+client/public/products/product view/coconut/
+client/public/products/product view/ice cream/
+client/public/products/powder/pomelli_*
